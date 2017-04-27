@@ -12,9 +12,6 @@ public:
 	SLATE_BEGIN_ARGS(SDialogOutputPin) {}
 	SLATE_END_ARGS()
 
-	FLinearColor HoveredColor;
-	FLinearColor DefaultColor;
-
 	void Construct(const FArguments& InArgs, UEdGraphPin* InPin);
 
 protected:
@@ -75,6 +72,8 @@ public:
 	SLATE_BEGIN_ARGS(SGraphNode_Phrase) { }
 	SLATE_END_ARGS()
 
+	UPhraseNode* PhraseNode = 0;
+
 	SGraphNode_Phrase();
 	virtual void Construct(const FArguments& InArgs, UPhraseNode* InNode);
 	virtual void CreateNodeWidget() override;
@@ -84,7 +83,6 @@ public:
 	// End of FPropertyObserver interface
 
 protected:
-	UPhraseNode* PhraseNode;
 	TSharedPtr<SWidget> IndexOverlay;
 	virtual FSlateColor GetBorderBackgroundColor() const override;
 };

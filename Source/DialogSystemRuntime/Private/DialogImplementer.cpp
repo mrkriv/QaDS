@@ -1,6 +1,7 @@
 #include "DialogSystemRuntime.h"
 #include "DialogPhrase.h"
 #include "DialogImplementer.h"
+#include "DialogScript.h"
 #include "StoryInformationManager.h"
 #include "Runtime/Engine/Public/TimerManager.h"
 #include "Runtime/Engine/Classes/Sound/SoundBase.h"
@@ -31,6 +32,15 @@ UDialogImplementer* UDialogImplementer::ImplementDialog(UDialogAsset* DialogAsse
 
 	if (impl->NextNodes.Num() == 0)
 		return NULL;
+
+	if (impl->Asset->DialogScriptClass != NULL)
+	{
+		impl->Asset->DialogScript = InInterlocutor->GetWorld()->SpawnActor<ADialogScript>(impl->Asset->DialogScriptClass, FTransform());
+		
+		FScriptDelegate dlg;
+		dlg.BindUFunction(impl->Asset->DialogScript, "Destroy");
+		impl->OnEndDialog.Add(dlg);
+	}
 
 	return impl;
 }
@@ -144,7 +154,7 @@ float UDialogImplementer::GetPhraseTime()
 	}
 }
 
-bool UDialogImplementer::GetValidPhrases(TArray<UDialogPhrase*>& result, TArray<UDialogPhrase*> Phrases, bool& IsPlayer)
+bool UDialogImplementer::GetValidPhrases(TArray<UDialogPhrase*>& result, TArray<UDialogNode*> Phrases, bool& IsPlayer)
 {
 	result.Reset();
 	bool found = false;
@@ -152,19 +162,20 @@ bool UDialogImplementer::GetValidPhrases(TArray<UDialogPhrase*>& result, TArray<
 
 	for (auto& node : Phrases)
 	{
-		if (node->Check(this))
+		auto phrase = Cast<UDialogPhrase>(node);
+		if (phrase && phrase->Check(this))
 		{
 			if (!found)
 			{
-				IsPlayer = node->IsPlayer;
+				IsPlayer = phrase->IsPlayer;
 			}
-			else if (IsPlayer != node->IsPlayer)
+			else if (IsPlayer != phrase->IsPlayer)
 			{
 				UE_LOG(DialogModuleLog, Error, TEXT("Invalid graph: Phrase cannot simultaneously refer to phrases of different types"));
 				return false;
 			}
 
-			result.Add(node);
+			result.Add(phrase);
 			found = true;
 		}
 	}

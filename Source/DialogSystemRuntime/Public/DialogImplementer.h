@@ -65,7 +65,7 @@ private:
 
 	void DelayNext();
 	float GetPhraseTime();
-	bool GetValidPhrases(TArray<UDialogPhrase*>& result, TArray<UDialogPhrase*> Phrases, bool& IsPlayer);
+	bool GetValidPhrases(TArray<UDialogPhrase*>& result, TArray<UDialogNode*> Phrases, bool& IsPlayer);
 
 public:
 	UPROPERTY(BlueprintReadOnly)

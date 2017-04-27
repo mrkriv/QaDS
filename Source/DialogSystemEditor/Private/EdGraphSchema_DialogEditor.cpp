@@ -133,15 +133,12 @@ const FPinConnectionResponse UEdGraphSchema_DialogEditor::CanCreateConnection(co
 	UDialogNodeEditorBase* ABase = Cast<UDialogNodeEditorBase>(A->GetOwningNode());
 	UDialogNodeEditorBase* BBase = Cast<UDialogNodeEditorBase>(B->GetOwningNode());
 
-	// Make sure the input is connecting to an output
 	if (A->Direction == B->Direction)
 		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Not allowed"));
 
-	// Make sure the data types match
 	if (A->PinType.PinCategory != B->PinType.PinCategory)
 		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Not allowed"));
 
-	//Make sure not same node
 	if (ABase->GetUniqueID() == BBase->GetUniqueID())
 		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Same node"));
 

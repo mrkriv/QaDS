@@ -9,13 +9,40 @@
 #include "DialogPhrase.h"
 
 
+void UDialogNode::Invoke(class UDialogImplementer* Implementer)
+{
+}
+
+bool UDialogNode::Check(UDialogImplementer* Implementer) const
+{
+	return false;
+}
+
+TArray<UDialogNode*> UDialogNode::GetChilds()
+{
+	return Childs;
+}
+
+void UDialogNode::AddEvent(TArray<FDialogPhraseEvent>* Array, const FDialogPhraseEvent& Event)
+{
+	auto ev = Event;
+	ev.OwnerNode = this;
+	Array->Add(ev);
+}
+
+void UDialogNode::AddCondition(TArray<FDialogPhraseCondition>* Array, const FDialogPhraseCondition& Event)
+{
+	auto cond = Event;
+	cond.OwnerNode = this;
+	Array->Add(cond);
+}
+
 bool FDialogPhraseEvent::Check(FString& ErrorMessage) const
 {
 #define ERROR(Message) ErrorMessage = TEXT(Message); return false
+
 	if (EventName.IsNone())
-	{
 		ERROR("Event name is empty");
-	}
 
 	switch (CallType)
 	{
@@ -23,13 +50,7 @@ bool FDialogPhraseEvent::Check(FString& ErrorMessage) const
 		break;
 	case EDialogPhraseEventCallType::Interlocutor:
 		break;
-
-	case EDialogPhraseEventCallType::LevelObject:
-		ERROR("Sorry, method 'LevelObject' is not implemented :(");
-		break;
-
-	case EDialogPhraseEventCallType::DialogBlueprint:
-		ERROR("Sorry, method 'DialogBlueprint' is not implemented :(");
+	case EDialogPhraseEventCallType::DialogScript:
 		break;
 		
 	case EDialogPhraseEventCallType::CreateNew:
@@ -75,16 +96,16 @@ UObject* FDialogPhraseEvent::GetObject(UDialogImplementer* Implementer) const
 
 	switch (CallType)
 	{
+	case EDialogPhraseEventCallType::DialogScript:
+		obj = Implementer->Asset->DialogScript;
+		break;
+
 	case EDialogPhraseEventCallType::Player:
 		obj = UGameplayStatics::GetPlayerCharacter(Implementer->Interlocutor->GetWorld(), 0);
 		break;
 
 	case EDialogPhraseEventCallType::Interlocutor:
 		obj = Implementer->Interlocutor;
-		break;
-
-	case EDialogPhraseEventCallType::LevelObject:
-		obj = LevelObject;
 		break;
 
 	case EDialogPhraseEventCallType::CreateNew:
@@ -114,9 +135,6 @@ UObject* FDialogPhraseEvent::GetObject(UDialogImplementer* Implementer) const
 				}
 			}
 		}
-		break;
-
-	case EDialogPhraseEventCallType::DialogBlueprint:
 		break;
 
 	default:
@@ -151,9 +169,20 @@ void UDialogPhrase::Invoke(UDialogImplementer* Implementer)
 		auto obj = Event.GetObject(Implementer);
 		if (obj != NULL)
 		{
-			FTimerDynamicDelegate Delegate;
-			Delegate.BindUFunction(obj, Event.EventName);
-			UKismetSystemLibrary::K2_SetTimerDelegate(Delegate, 0.1f, false);
+			auto func = obj->FindFunction(Event.EventName);
+			if (func != NULL)
+			{
+				if (func->NumParms != 0)
+				{
+					FTimerDynamicDelegate Delegate;
+					Delegate.BindUFunction(obj, Event.EventName);
+					Delegate.Execute();
+				}
+				else
+					UE_LOG(DialogModuleLog, Error, TEXT("Function %s.%s do not have input parameters and not return value"), *obj->GetName(), *Event.EventName.ToString())
+			}
+			else
+				UE_LOG(DialogModuleLog, Error, TEXT("Function %s.%s not found"), *obj->GetName(), *Event.EventName.ToString())
 		}
 	}
 }
@@ -197,9 +226,4 @@ bool UDialogPhrase::Check(UDialogImplementer* Implementer) const
 	}
 
 	return true;
-}
-
-TArray<UDialogPhrase*> UDialogPhrase::GetChilds()
-{
-	return Childs;
 }

@@ -4,6 +4,7 @@
 #include "AssetThumbnail.h"
 #include "AssetRegistryModule.h"
 #include "DialogSGraphNodes.h"
+#include "DialogSettings.h"
 #include "SNumericEntryBox.h"
 #include "GraphEditor.h"
 #include "BrushSet.h"
@@ -15,9 +16,6 @@ void SDialogOutputPin::Construct(const FArguments& InArgs, UEdGraphPin* InPin)
 	this->SetCursor(EMouseCursor::Default);
 
 	typedef SDialogOutputPin ThisClass;
-
-	HoveredColor = FLinearColor(0.9f, 0.9f, 0.9f);
-	DefaultColor = FLinearColor(0.02f, 0.02f, 0.02f);
 
 	bShowLabel = true;
 	IsEditable = true;
@@ -49,7 +47,19 @@ const FSlateBrush* SDialogOutputPin::GetPinBorder() const
 
 FSlateColor SDialogOutputPin::GetPinColor() const
 {
-	return IsHovered() ? HoveredColor : DefaultColor;
+	SGraphNode_Phrase* phraseNode = NULL;
+
+	if (OwnerNodePtr.IsValid())
+		phraseNode = StaticCast<SGraphNode_Phrase*>(OwnerNodePtr.Pin().Get());
+
+	FLinearColor defaultColor;
+
+	if (phraseNode && phraseNode->GetNodeObj())
+		defaultColor = Cast<UPhraseNode>(phraseNode->GetNodeObj())->GetNodeTitleColor();
+	else
+		GetDefault<UDialogSettings>()->NodeButtonDefault;
+
+	return IsHovered() ? GetDefault<UDialogSettings>()->NodeButtonHovered : defaultColor;
 }
 
 //DialogNodeBase............................................................................................................
@@ -157,7 +167,10 @@ void SGraphNode_DialogNodeBase::CreateNodeWidget()
 	NodeWiget->SetAutoWrapText(true);
 	NodeWiget->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
 	NodeWiget->SetText(NodeBace->GetNodeTitle(ENodeTitleType::FullTitle));
-	NodeWiget->SetFont(FSlateFontInfo(FPaths::GamePluginsDir() / TEXT("DialogSystem/Resources/MainFont.ttf"), 14));
+
+	NodeWiget->SetFont(FSlateFontInfo(
+		FPaths::GamePluginsDir() / TEXT("DialogSystem/Resources/MainFont.ttf"), 
+		GetDefault<UDialogSettings>()->FontSize));
 }
 
 void SGraphNode_DialogNodeBase::CreatePinWidgets()
@@ -168,7 +181,6 @@ void SGraphNode_DialogNodeBase::CreatePinWidgets()
 		{
 			UEdGraphPin* CurPin = NodeBace->Pins[i];
 			TSharedPtr<SDialogOutputPin> NewPin = SNew(SDialogOutputPin, CurPin);
-			NewPin->DefaultColor = NodeBace->GetNodeTitleColor();
 			NewPin->SetIsEditable(IsEditable);
 			this->AddPin(NewPin.ToSharedRef());
 			InputPins.Add(NewPin.ToSharedRef());
@@ -177,7 +189,6 @@ void SGraphNode_DialogNodeBase::CreatePinWidgets()
 		{
 			UEdGraphPin* CurPin = NodeBace->Pins[i];
 			TSharedPtr<SDialogOutputPin> NewPin = SNew(SDialogOutputPin, CurPin);
-			NewPin->DefaultColor = NodeBace->GetNodeTitleColor();
 			NewPin->SetIsEditable(IsEditable);
 			this->AddPin(NewPin.ToSharedRef());
 			OutputPins.Add(NewPin.ToSharedRef());
@@ -255,7 +266,7 @@ void SGraphNode_DialogNodeBase::AddTextToContent(FString Text, FColor Color)
 			SNew(STextBlock)
 			.Text(FText::FromString(Text))
 			.ColorAndOpacity(Color)
-			.Font(FSlateFontInfo(FPaths::GamePluginsDir() / TEXT("DialogSystem/Resources/MainFont.ttf"), 14))
+			.Font(FSlateFontInfo(FPaths::GamePluginsDir() / TEXT("DialogSystem/Resources/MainFont.ttf"), GetDefault<UDialogSettings>()->FontSize))
 		];
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -274,7 +285,7 @@ FSlateColor SGraphNode_DialogNodeBase::GetBorderBackgroundColor() const
 //RootNode............................................................................................................
 SGraphNode_Root::SGraphNode_Root()
 {
-	BackgroundColor = FLinearColor(0.0f, 0.4f, 1.0f);
+	BackgroundColor = GetDefault<UDialogSettings>()->NodeRoot;
 }
 
 //PhraseNode.......................................................................................................

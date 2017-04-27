@@ -2,6 +2,7 @@
 #include "DialogAssetFactory.h"
 #include "DialogEditorNodes.h"
 #include "DialogAsset.h"
+#include "DialogScript.h"
 
 UDialogAssetFactory::UDialogAssetFactory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

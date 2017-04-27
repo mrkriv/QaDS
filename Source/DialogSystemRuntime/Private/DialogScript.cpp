@@ -1,7 +1,7 @@
 #include "DialogSystemRuntime.h"
-#include "DialogAsset.h"
 #include "DialogScript.h"
+#include "DialogAsset.h"
 
-UDialogAsset::UDialogAsset()
+ADialogScript::ADialogScript()
 {
 }

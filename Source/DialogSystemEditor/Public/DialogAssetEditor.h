@@ -48,6 +48,7 @@ private:
 	TSharedPtr<SDockTab> CompilerResultsTab;
 	UDialogAsset* EditedAsset;
 	FDelegateHandle OnGraphChangedDelegateHandle;
+	FDelegateHandle OnPropertyChangedDelegateHandle;
 	FCompilerResultsLog CompileLogResults;
 	bool bGraphStateChanged;
 
@@ -57,6 +58,7 @@ private:
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& Args);
 	
 	void OnGraphChanged(const FEdGraphEditAction& Action);
+	void OnPropertyChanged(const FPropertyChangedEvent& Event);
 	void BuildToolbar(FToolBarBuilder &builder);
 	void SelectAllNodes();
 	bool CanSelectAllNodes() const;

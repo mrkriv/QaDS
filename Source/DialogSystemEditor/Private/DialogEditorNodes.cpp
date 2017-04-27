@@ -4,6 +4,7 @@
 #include "StoryInformationManager.h"
 #include "EdGraph/EdGraph.h"
 #include "DialogEditorNodes.h"
+#include "DialogSettings.h"
 #include "DialogAsset.h"
 
 const FString FPinDataTypes::PinType_Root = "root";
@@ -55,8 +56,7 @@ void UPhraseNode::AllocateDefaultPins()
 
 FLinearColor UPhraseNode::GetNodeTitleColor() const
 {
-	//return IsPlayer ? FLinearColor(1.0f, 0.4f, 0.0f) : FLinearColor(0.0f, 0.4f, 1.0f);
-	return IsPlayer ? FLinearColor(1.0f, 0.4f, 0.0f) : FLinearColor(0.08f, 0.08f, 0.08f);
+	return IsPlayer ? GetDefault<UDialogSettings>()->NodePlayer : GetDefault<UDialogSettings>()->NodeNPC;
 }
 
 FText UPhraseNode::GetTooltipText() const

@@ -10,6 +10,7 @@
 #include "SNodePanel.h"
 #include "BlueprintEditorModule.h"
 #include "PropertyEditorModule.h"
+#include "DialogSettings.h"
 #include "DialogEditorNodes.h"
 
 const FName DialogEditorAppName(TEXT("DialogEditorApp"));
@@ -109,7 +110,6 @@ void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, co
 	bGraphStateChanged = true;
 }
 
-
 void FDialogAssetEditor::BuildToolbar(FToolBarBuilder &builder)
 {
 	FSlateIcon IconBrushCompile = FSlateIcon(FEditorStyle::GetStyleSetName(), "AssetEditor.ReimportAsset", "AssetEditor.ReimportAsset.Small");
@@ -179,6 +179,7 @@ TSharedRef<SDockTab> FDialogAssetEditor::SpawnTab_Details(const FSpawnTabArgs& A
 	const FDetailsViewArgs DetailsViewArgs(false, false, true, FDetailsViewArgs::HideNameArea, true, this);
 	TSharedRef<IDetailsView> PropertyEditorRef = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
 	PropertyEditor = PropertyEditorRef;
+	PropertyEditor->OnFinishedChangingProperties().AddRaw(this, &FDialogAssetEditor::OnPropertyChanged);
 
 	return SNew(SDockTab)
 		.Label(FText::FromString("Details"))
@@ -464,12 +465,24 @@ void FDialogAssetEditor::DeleteSelectedDuplicatableNodes()
 void FDialogAssetEditor::OnGraphChanged(const FEdGraphEditAction& Action)
 {
 	bGraphStateChanged = true;
+
+	if (GetDefault<UDialogSettings>()->AutoCompile)
+		CompileExecute();
+}
+
+void FDialogAssetEditor::OnPropertyChanged(const FPropertyChangedEvent& Event)
+{
+	if (GetDefault<UDialogSettings>()->AutoCompile)
+		CompileExecute();
 }
 
 FDialogAssetEditor::~FDialogAssetEditor()
 {
 	if (GraphEditor->GetCurrentGraph())
+	{
 		GraphEditor->GetCurrentGraph()->RemoveOnGraphChangedHandler(OnGraphChangedDelegateHandle);
+		//OnPropertyChangedDelegateHandle
+	}
 }
 
 void FDialogAssetEditor::CompileExecute()
@@ -512,8 +525,6 @@ void FDialogAssetEditor::CompileExecute()
 
 	CompileLogResults.EndEvent();
 	CompilerResultsListing->AddMessages(CompileLogResults.Messages);
-
-	SaveAsset_Execute();
 }
 
 void FDialogAssetEditor::ResetCompilePhrase(UPhraseNode* Node)
@@ -539,6 +550,7 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 	auto phrase = NewObject<UDialogPhrase>((UObject*)EditedAsset);
 	Node->CompilePhrase = phrase;
 
+	phrase->OwnerDialog = Cast<UDialogAsset>(EditedAsset);
 	phrase->Text = Node->Text;
 	phrase->AutoTime = Node->AutoTime;
 	phrase->Important = Node->Important;
@@ -565,7 +577,7 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 	{
 		FString ErrorMessage;
 		if (Event.Check(ErrorMessage))
-			phrase->CustomEvents.Add(Event);
+			phrase->AddEvent(&phrase->CustomEvents, Event);
 		else
 			CompileLogResults.Error(*ErrorMessage);
 	}
@@ -574,7 +586,7 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 	{
 		FString ErrorMessage;
 		if (Condition.Check(ErrorMessage))
-			phrase->CustomConditions.Add(Condition);
+			phrase->AddCondition(&phrase->CustomConditions, Condition);
 		else
 			CompileLogResults.Error(*ErrorMessage);
 	}

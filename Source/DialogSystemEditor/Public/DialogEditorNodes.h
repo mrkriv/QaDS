@@ -1,7 +1,6 @@
 #pragma once
 
 #include "EdGraph/EdGraphNode.h"
-#include "RulesLogic.h"
 #include "DialogPhrase.h"
 #include "DialogEditorNodes.generated.h"
 

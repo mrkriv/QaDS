@@ -16,8 +16,16 @@ public:
 	UPROPERTY()
 	UDialogPhrase* RootNode;
 
+	UPROPERTY(BlueprintReadOnly)
+	class ADialogScript* DialogScript;
+
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "DialogScript"))
+	TSubclassOf<class ADialogScript> DialogScriptClass;
+
 #if WITH_EDITORONLY_DATA
 	UPROPERTY()
 	class UEdGraph* UpdateGraph;
 #endif	// WITH_EDITORONLY_DATA
+
+	UDialogAsset();
 };

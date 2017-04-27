@@ -6,6 +6,8 @@
 #include "PhraseNodeCustomization.h"
 #include "DialogAssetTypeActions.h"
 #include "DialogCommands.h"
+#include "ISettingsModule.h"
+#include "DialogSettings.h"
 #include "BrushSet.h"
 
 DEFINE_LOG_CATEGORY(DialogModuleLog)
@@ -18,13 +20,21 @@ void FDialogSystemEditorModule::StartupModule()
 	FDialogCommands::Register();
 
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	ISettingsModule& SettingsModule = FModuleManager::LoadModuleChecked<ISettingsModule>("Settings");
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
 	AssetCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Gameplay")), LOCTEXT("GameplayAssetCategory", "Gameplay"));
 	AssetTools.RegisterAssetTypeActions(MakeShareable(new FDialogAssetTypeActions(AssetCategory)));
 
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseCondition", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseEvent", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
 	PropertyModule.RegisterCustomClassLayout("PhraseNode", FOnGetDetailCustomizationInstance::CreateStatic(&FPhraseNodeDetails::MakeInstance));
+	
+	SettingsModule.RegisterSettings("Project", "Plugins", "Dialog",
+		LOCTEXT("RuntimeSettingsName", "Dialog Editor"),
+		LOCTEXT("RuntimeSettingsDescription", "Dialog editor settings"),
+		UDialogSettings::StaticClass()->GetDefaultObject()
+	);
 
 	TSharedPtr<FGraphPanelNodeFactory> GraphPanelNodeFactory = MakeShareable(new FGraphPanelNodeFactory_Dialog);
 	FEdGraphUtilities::RegisterVisualNodeFactory(GraphPanelNodeFactory);
@@ -36,11 +46,14 @@ void FDialogSystemEditorModule::ShutdownModule()
 	FBrushSet::Unregister();
 
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	ISettingsModule& SettingsModule = FModuleManager::LoadModuleChecked<ISettingsModule>("Settings");
+
+	SettingsModule.UnregisterSettings("Project", "Plugins", "Dialog");
+
 	PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseCondition");
 	PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseEvent");
 	PropertyModule.UnregisterCustomClassLayout("PhraseNode");
-
-	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
 	AssetTools.UnregisterAssetTypeActions(MakeShareable(new FDialogAssetTypeActions(AssetCategory)));
 }

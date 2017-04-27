@@ -73,6 +73,9 @@ void FPhraseNodeDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 	AutoTimeProperty->GetValue(isAutoTime);
 	AutoTimeProperty->SetOnPropertyValueChanged(FSimpleDelegate::CreateSP(this, &FPhraseNodeDetails::OnForceRefreshDetails));
 
+	//auto CustomConditionsProperty = PROPERTY(CustomConditions);
+	//auto CustomEventsProperty = PROPERTY(CustomEvents);
+	
 	if (isAutoTime)
 		Layout->HideProperty(PROPERTY(PhraseManualTime));
 }

@@ -24,8 +24,7 @@ public:
 private:
 	TSharedPtr<IPropertyHandle> PropertyHandle_ObjectClass;
 	TSharedPtr<IPropertyHandle> PropertyHandle_EventName;
-	TSharedPtr<IPropertyHandle> PropertyHandle_LevelObjectName;
-	TSharedPtr<IPropertyHandle> PropertyHandle_LevelObject;
 	TSharedPtr<IPropertyHandle> PropertyHandle_CallType;
 	TSharedPtr<IPropertyHandle> PropertyHandle_FindTag;
+	TSharedPtr<IPropertyHandle> PropertyHandle_OwnerNode;
 };
