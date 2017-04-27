@@ -4,51 +4,8 @@
 #include "Engine/EngineTypes.h"
 #include "UObject/NoExportTypes.h"
 #include "Runtime/Engine/Classes/Sound/SoundBase.h"
+#include "DialogPhraseEvent.h"
 #include "DialogPhrase.generated.h"
-
-DECLARE_DELEGATE_RetVal(bool, FDialogConditionDelegate);
-
-UENUM(BlueprintType)
-enum class EDialogPhraseEventCallType : uint8
-{
-	DialogScript,
-	Player,
-	Interlocutor,
-	FindByTag,
-	CreateNew,
-};
-
-USTRUCT()
-struct DIALOGSYSTEMRUNTIME_API FDialogPhraseEvent
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UObject> ObjectClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EDialogPhraseEventCallType CallType;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName EventName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString FindTag;
-
-	UPROPERTY()
-	class UDialogNode* OwnerNode;
-
-	virtual bool Check(FString& ErrorMessage) const;
-	virtual UObject* GetObject(class UDialogImplementer* Implementer) const;
-};
-
-USTRUCT()
-struct DIALOGSYSTEMRUNTIME_API FDialogPhraseCondition : public FDialogPhraseEvent
-{
-	GENERATED_BODY()
-
-	virtual bool Check(FString& ErrorMessage) const override;
-};
 
 UCLASS()
 class DIALOGSYSTEMRUNTIME_API UDialogNode : public UObject
@@ -140,14 +97,5 @@ public:
 	TArray<FName> WaitRemoveKeys;
 
 	UPROPERTY(BlueprintReadOnly)
-	TArray<FName> EndGiveKeys;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FName> EndRemoveKeys;
-
-	UPROPERTY(BlueprintReadOnly)
 	TArray<FDialogPhraseCondition> WaitConditions;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FDialogPhraseEvent> EndEvents;
 };

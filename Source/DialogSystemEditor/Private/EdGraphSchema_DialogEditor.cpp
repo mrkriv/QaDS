@@ -121,8 +121,9 @@ void UEdGraphSchema_DialogEditor::GetGraphContextActions(FGraphContextMenuBuilde
 	if (!rootFound)
 		DialogSchemaUtils::AddAction<URootNode>(TEXT("Create Root Node"), TEXT(""), Actions, ContextMenuBuilder.OwnerOfTemporaries);
 
-	DialogSchemaUtils::AddAction<UPhraseNode>(TEXT("Add Player Phrase"), TEXT("Add dialog phrase node"), Actions, ContextMenuBuilder.OwnerOfTemporaries);
+	DialogSchemaUtils::AddAction<UPhrasePlayerNode>(TEXT("Add Player Phrase"), TEXT("Add dialog phrase node"), Actions, ContextMenuBuilder.OwnerOfTemporaries);
 	DialogSchemaUtils::AddAction<UPhraseNode>(TEXT("Add NPC Phrase"), TEXT("Add dialog phrase node"), Actions, ContextMenuBuilder.OwnerOfTemporaries);
+	DialogSchemaUtils::AddAction<UWaitNode>(TEXT("Wait"), TEXT("Add wait node"), Actions, ContextMenuBuilder.OwnerOfTemporaries);
 
 	for (TSharedPtr<FEdGraphSchemaAction> Action : Actions)
 		ContextMenuBuilder.AddAction(Action);

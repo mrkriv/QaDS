@@ -54,7 +54,7 @@ FSlateColor SDialogOutputPin::GetPinColor() const
 
 	FLinearColor defaultColor;
 
-	if (phraseNode && phraseNode->GetNodeObj())
+	if (phraseNode && phraseNode->GetNodeObj() && phraseNode->GetNodeObj()->IsA(UPhraseNode::StaticClass()))
 		defaultColor = Cast<UPhraseNode>(phraseNode->GetNodeObj())->GetNodeTitleColor();
 	else
 		GetDefault<UDialogSettings>()->NodeButtonDefault;
@@ -284,6 +284,12 @@ FSlateColor SGraphNode_DialogNodeBase::GetBorderBackgroundColor() const
 
 //RootNode............................................................................................................
 SGraphNode_Root::SGraphNode_Root()
+{
+	BackgroundColor = GetDefault<UDialogSettings>()->NodeRoot;
+}
+
+//WaitNode............................................................................................................
+SGraphNode_Wait::SGraphNode_Wait()
 {
 	BackgroundColor = GetDefault<UDialogSettings>()->NodeRoot;
 }

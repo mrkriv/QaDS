@@ -9,17 +9,23 @@ FGraphPanelNodeFactory_Dialog::FGraphPanelNodeFactory_Dialog()
 
 TSharedPtr<class SGraphNode> FGraphPanelNodeFactory_Dialog::CreateNode(UEdGraphNode* Node) const
 {
-	if (URootNode* RootNode = Cast<URootNode>(Node))
+	TSharedPtr<SGraphNode_DialogNodeBase> SNode;
+
+	if (Node->IsA(UPhraseNode::StaticClass()))
 	{
-		TSharedPtr<SGraphNode_Root> SNode = SNew(SGraphNode_Root, RootNode);
-		RootNode->PropertyObserver = SNode;
-		return SNode;
+		SNode = SNew(SGraphNode_Phrase, Cast<UPhraseNode>(Node));
 	}
-	else if (UPhraseNode* PhraseNode = Cast<UPhraseNode>(Node))
+	else if (Node->IsA(UWaitNode::StaticClass()))
 	{
-		TSharedPtr<SGraphNode_Phrase> SNode = SNew(SGraphNode_Phrase, PhraseNode);
-		PhraseNode->PropertyObserver = SNode;
-		return SNode;
+		SNode = SNew(SGraphNode_Wait, Cast<UWaitNode>(Node));
 	}
-	return NULL;
+	else if (Node->IsA(URootNode::StaticClass()))
+	{
+		SNode = SNew(SGraphNode_Root, Cast<URootNode>(Node));
+	}
+
+	if (Node != NULL && Node->IsA(UDialogNodeEditorBase::StaticClass()))
+		Cast<UDialogNodeEditorBase>(Node)->PropertyObserver = SNode;
+
+	return SNode;
 }

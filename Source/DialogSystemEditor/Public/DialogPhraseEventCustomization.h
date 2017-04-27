@@ -17,6 +17,7 @@ public:
 	FText GetTitleText() const;
 	EVisibility GetFingTagVisibility() const;
 	EVisibility GetLevelNameVisibility() const;
+	EVisibility GetParametersVisibility() const;
 	EVisibility GetObjectClassVisibility() const;
 
 	FReply OnTitleClick();
@@ -27,4 +28,6 @@ private:
 	TSharedPtr<IPropertyHandle> PropertyHandle_CallType;
 	TSharedPtr<IPropertyHandle> PropertyHandle_FindTag;
 	TSharedPtr<IPropertyHandle> PropertyHandle_OwnerNode;
+	TSharedPtr<IPropertyHandle> PropertyHandle_Parameters;
+	TSharedPtr<IPropertyHandle> PropertyHandle_Invert;
 };

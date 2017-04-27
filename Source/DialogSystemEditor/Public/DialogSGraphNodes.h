@@ -65,6 +65,13 @@ public:
 	SGraphNode_Root();
 };
 
+//WaitNode.............................................................................................................
+class SGraphNode_Wait : public SGraphNode_DialogNodeBase
+{
+public:
+	SGraphNode_Wait();
+};
+
 //PhraseNode..................................................................................................................
 class SGraphNode_Phrase : public SGraphNode_DialogNodeBase
 {

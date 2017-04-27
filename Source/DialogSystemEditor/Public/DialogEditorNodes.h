@@ -88,10 +88,50 @@ public:
 };
 
 UCLASS()
+class DIALOGSYSTEMEDITOR_API UPhrasePlayerNode : public UPhraseNode
+{
+	GENERATED_UCLASS_BODY()
+};
+
+UCLASS()
 class DIALOGSYSTEMEDITOR_API URootNode : public UPhraseNode
 {
 	GENERATED_UCLASS_BODY()
 public:
+
+	virtual void AllocateDefaultPins() override;
+	virtual FLinearColor GetNodeTitleColor() const override;
+	virtual FText GetTooltipText() const override;
+	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
+};
+
+UCLASS()
+class DIALOGSYSTEMEDITOR_API UWaitNode : public UDialogNodeEditorBase
+{
+	GENERATED_UCLASS_BODY()
+public:
+
+	UPROPERTY()
+	UDialogWait* CompileNode;
+
+	
+	UPROPERTY(BlueprintReadOnly)
+	FText Description;
+
+	UPROPERTY(BlueprintReadOnly)
+	float MinTime;
+
+	UPROPERTY(BlueprintReadOnly)
+	float MaxTime;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FName> WaitGiveKeys;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FName> WaitRemoveKeys;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FDialogPhraseCondition> WaitConditions;
 
 	virtual void AllocateDefaultPins() override;
 	virtual FLinearColor GetNodeTitleColor() const override;

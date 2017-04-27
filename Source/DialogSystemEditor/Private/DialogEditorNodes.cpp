@@ -77,6 +77,12 @@ void UPhraseNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 	UDialogNodeEditorBase::PostEditChangeProperty(e);
 }
 
+UPhrasePlayerNode::UPhrasePlayerNode(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	IsPlayer = true;
+}
+
 //URootNode...........................................................................................
 
 URootNode::URootNode(const FObjectInitializer& ObjectInitializer)
@@ -102,4 +108,31 @@ FText URootNode::GetTooltipText() const
 FText URootNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
 	return FText::FromString(TEXT("Start ") + Cast<UDialogAsset>(GetGraph()->GetOuter())->Name.ToString());
+}
+
+//UWaitNode...........................................................................................
+UWaitNode::UWaitNode(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+}
+
+void UWaitNode::AllocateDefaultPins()
+{
+	UEdGraphPin* Inputs = CreatePin(EGPD_Input, FPinDataTypes::PinType_Root, TEXT(""), NULL, false, false, TEXT(""));
+	UEdGraphPin* Outputs = CreatePin(EGPD_Output, FPinDataTypes::PinType_Root, TEXT(""), NULL, false, false, TEXT(""));
+}
+
+FLinearColor UWaitNode::GetNodeTitleColor() const
+{
+	return FLinearColor(0.08f, 0.08f, 0.08f);
+}
+
+FText UWaitNode::GetTooltipText() const
+{
+	return FText::FromString("Wait node");
+}
+
+FText UWaitNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
+{
+	return FText::FromString(TEXT("Wait"));
 }

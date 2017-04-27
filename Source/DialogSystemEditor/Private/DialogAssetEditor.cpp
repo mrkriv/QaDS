@@ -73,7 +73,7 @@ void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, co
 			(
 				FTabManager::NewSplitter()
 				->SetOrientation(Orient_Horizontal)
-				->SetSizeCoefficient(0.7f)
+				->SetSizeCoefficient(0.8f)
 				->Split
 				(
 					FTabManager::NewStack()
@@ -92,7 +92,7 @@ void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, co
 			->Split
 			(
 				FTabManager::NewStack()
-				->SetSizeCoefficient(0.2f)
+				->SetSizeCoefficient(0.1f)
 				->AddTab(FDialogAssetEditorTabs::CompilerResultsID, ETabState::ClosedTab)
 			)
 		);
@@ -576,6 +576,8 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 	for (auto& Event : Node->CustomEvents)
 	{
 		FString ErrorMessage;
+
+		Event.OwnerNode = phrase;
 		if (Event.Check(ErrorMessage))
 			phrase->AddEvent(&phrase->CustomEvents, Event);
 		else
@@ -585,6 +587,8 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 	for (auto& Condition : Node->CustomConditions)
 	{
 		FString ErrorMessage;
+
+		Condition.OwnerNode = phrase;
 		if (Condition.Check(ErrorMessage))
 			phrase->AddCondition(&phrase->CustomConditions, Condition);
 		else
