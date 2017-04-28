@@ -1,4 +1,6 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #pragma once
+
 #include "SlateBasics.h"
 #include "Commands.h"
 #include "EditorStyle.h"

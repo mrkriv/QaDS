@@ -1,6 +1,8 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #pragma once
+
 #include "EdGraph/EdGraphSchema.h"
-#include "EdGraphSchema_DialogEditor.generated.h"
+#include "DialogGraphSchema.generated.h"
 
 USTRUCT()
 struct FDialogSchemaAction_NewNode : public FEdGraphSchemaAction
@@ -59,7 +61,7 @@ public:
 
 
 UCLASS()
-class UEdGraphSchema_DialogEditor : public UEdGraphSchema
+class UDialogGraphSchema : public UEdGraphSchema
 {
 	GENERATED_UCLASS_BODY()
 	// Begin EdGraphSchema interface

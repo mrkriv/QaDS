@@ -1,7 +1,8 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "DialogAssetEditor.h"
 #include "DialogCommands.h"
-#include "EdGraphSchema_DialogEditor.h"
+#include "DialogGraphSchema.h"
 #include "SDockTab.h"
 #include "GenericCommands.h"
 #include "BlueprintEditorUtils.h"
@@ -48,7 +49,7 @@ void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, co
 	if (!EditedAsset->UpdateGraph)
 	{
 		UEdGraph* CustGraph = NewObject<UEdGraph>(EditedAsset, UEdGraph::StaticClass(), NAME_None, RF_Transactional);
-		CustGraph->Schema = UEdGraphSchema_DialogEditor::StaticClass();
+		CustGraph->Schema = UDialogGraphSchema::StaticClass();
 
 		FDialogSchemaAction_NewNode::SpawnNodeFromTemplate<URootNode>(CustGraph, NewObject<URootNode>(), FVector2D::ZeroVector, false);
 
@@ -578,7 +579,7 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 		FString ErrorMessage;
 
 		Event.OwnerNode = phrase;
-		if (Event.Check(ErrorMessage))
+		if (Event.Compile(ErrorMessage))
 			phrase->AddEvent(&phrase->CustomEvents, Event);
 		else
 			CompileLogResults.Error(*ErrorMessage);
@@ -589,7 +590,7 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 		FString ErrorMessage;
 
 		Condition.OwnerNode = phrase;
-		if (Condition.Check(ErrorMessage))
+		if (Condition.Compile(ErrorMessage))
 			phrase->AddCondition(&phrase->CustomConditions, Condition);
 		else
 			CompileLogResults.Error(*ErrorMessage);

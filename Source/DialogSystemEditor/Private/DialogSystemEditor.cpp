@@ -1,8 +1,10 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "Developer/AssetTools/Public/AssetTypeCategories.h"
 #include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
-#include "GraphPanelNodeFactory_Dialog.h"
+#include "DialogNodeFactory.h"
 #include "DialogPhraseEventCustomization.h"
+#include "DialogPhraseEventParamCustomization.h"
 #include "PhraseNodeCustomization.h"
 #include "DialogAssetTypeActions.h"
 #include "DialogCommands.h"
@@ -28,6 +30,7 @@ void FDialogSystemEditorModule::StartupModule()
 
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseCondition", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseEvent", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
+	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseEventParam", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventParamCustomization::MakeInstance));
 	PropertyModule.RegisterCustomClassLayout("PhraseNode", FOnGetDetailCustomizationInstance::CreateStatic(&FPhraseNodeDetails::MakeInstance));
 	
 	SettingsModule.RegisterSettings("Project", "Plugins", "Dialog",
@@ -36,9 +39,10 @@ void FDialogSystemEditorModule::StartupModule()
 		UDialogSettings::StaticClass()->GetDefaultObject()
 	);
 
-	TSharedPtr<FGraphPanelNodeFactory> GraphPanelNodeFactory = MakeShareable(new FGraphPanelNodeFactory_Dialog);
+	TSharedPtr<FGraphPanelNodeFactory> GraphPanelNodeFactory = MakeShareable(new FDialogNodeFactory);
 	FEdGraphUtilities::RegisterVisualNodeFactory(GraphPanelNodeFactory);
 }
+
 
 void FDialogSystemEditorModule::ShutdownModule()
 {

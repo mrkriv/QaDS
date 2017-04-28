@@ -1,3 +1,4 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "DialogAsset.h"
 #include "DialogScript.h"
@@ -21,8 +22,6 @@
 #include "Slate/SlateTextureAtlasInterface.h"
 #include "DialogPhraseEventCustomization.h"
 #include "Editor/UnrealEd/Public/Toolkits/AssetEditorManager.h"
-
-#define LOCTEXT_NAMESPACE "DialogPhraseEventCustomization"
 
 TSharedRef<IPropertyTypeCustomization> FDialogPhraseEventCustomization::MakeInstance()
 {
@@ -192,5 +191,3 @@ EVisibility FDialogPhraseEventCustomization::GetParametersVisibility() const
 
 	return Property_CallType == EDialogPhraseEventCallType::DialogScript ? EVisibility::Visible : EVisibility::Collapsed;
 }
-
-#undef LOCTEXT_NAMESPACE

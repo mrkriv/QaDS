@@ -1,3 +1,4 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "BrushSet.h"
 #include "Runtime/Core/Public/Misc/Paths.h"

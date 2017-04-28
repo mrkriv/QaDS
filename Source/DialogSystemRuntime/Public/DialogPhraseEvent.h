@@ -1,3 +1,4 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #pragma once
 
 #include "Engine.h"
@@ -7,6 +8,9 @@
 
 DECLARE_DELEGATE_RetVal(bool, FDialogConditionDelegate);
 
+/*
+	Method of selecting an object for calling functions
+*/
 UENUM(BlueprintType)
 enum class EDialogPhraseEventCallType : uint8
 {
@@ -17,6 +21,9 @@ enum class EDialogPhraseEventCallType : uint8
 	CreateNew,
 };
 
+/*
+	Information about function argument
+*/
 USTRUCT()
 struct DIALOGSYSTEMRUNTIME_API FDialogPhraseEventParam
 {
@@ -28,9 +35,15 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseEventParam
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Value;
 
+	/*
+		Compile argument data 
+	*/
 	bool Compile(const UProperty* Property, TArray<uint8>& ParameterData, FString& ErrorMessage) const;
 };
 
+/*
+	Information about the function called from the dialog
+*/
 USTRUCT()
 struct DIALOGSYSTEMRUNTIME_API FDialogPhraseEvent
 {
@@ -62,10 +75,22 @@ public:
 	UPROPERTY()
 	TArray<uint8> ParameterData;
 
-	virtual bool Check(FString& ErrorMessage);
+	/*
+		Check and compile function call information
+	*/
+	virtual bool Compile(FString& ErrorMessage);
+
+	/*
+		Returns an object to call a function
+	*/
 	virtual UObject* GetObject(class UDialogImplementer* Implementer) const;
+
+	/*
+		Calls the function of the object
+	*/
 	virtual void Invoke(class UDialogImplementer* Implementer) const;
 };
+
 
 USTRUCT()
 struct DIALOGSYSTEMRUNTIME_API FDialogPhraseCondition : public FDialogPhraseEvent
@@ -75,6 +100,6 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseCondition : public FDialogPhraseEven
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool InvertCondition;
 
-	virtual bool Check(FString& ErrorMessage) override;
+	virtual bool Compile(FString& ErrorMessage) override;
 	virtual bool InvokeCheck(class UDialogImplementer* Implementer) const;
 };

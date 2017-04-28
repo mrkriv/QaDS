@@ -1,3 +1,4 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemRuntime.h"
 #include "EdGraph/EdGraphPin.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
@@ -11,7 +12,7 @@
 //#define ERROR(Message) ErrorMessage = TEXT(Message); return false
 #define ERROR(Message, ...) ErrorMessage =  FString::Printf(TEXT(Message), ##__VA_ARGS__); return false
 
-bool FDialogPhraseEvent::Check(FString& ErrorMessage)
+bool FDialogPhraseEvent::Compile(FString& ErrorMessage)
 {
 	if (EventName.IsNone())
 	{
@@ -108,14 +109,33 @@ bool FDialogPhraseEvent::CompileParametrs(UObject* Object, FString& ErrorMessage
 
 	if (params.Num() != func->NumParms || Parameters.Num() != func->NumParms)
 	{
-		ERROR("Invalid function signature %s in %s", *EventName.ToString(), *Object->GetName());
+		Parameters.Reset();
+		params.Reset();
+
+		auto prop = func->PropertyLink;
+		while (prop != NULL)
+		{
+			FDialogPhraseEventParam param;
+			param.Name = prop->GetName();
+
+			Parameters.Add(param);
+			params.Add(prop, param);
+
+			prop = prop->PropertyLinkNext;
+		}
 	}
 
 	auto prop = func->PropertyLink;
 	while (prop != NULL)
 	{
-		if (!params[prop].Compile(prop, ParameterData, ErrorMessage))
+		if (params.Contains(prop) && !params[prop].Compile(prop, ParameterData, ErrorMessage))
+		{
+			if (ErrorMessage.IsEmpty())
+			{
+				ERROR("Argument type not supported. (%s.%s in %s)", *EventName.ToString(), *prop->GetName(), *Object->GetName());
+			}
 			return false;
+		}
 
 		prop = prop->PropertyLinkNext;
 	}
@@ -125,11 +145,41 @@ bool FDialogPhraseEvent::CompileParametrs(UObject* Object, FString& ErrorMessage
 
 bool FDialogPhraseEventParam::Compile(const UProperty* Property, TArray<uint8>& ParameterData, FString& ErrorMessage) const
 {
-	return true;
+	ParameterData.AddDefaulted(Property->GetSize());
+	void* ptr = (void*)(&ParameterData[0] + ParameterData.Num() - Property->GetSize());
+
+	if (Property->IsA(UIntProperty::StaticClass()))
+	{
+		Cast<UIntProperty>(Property)->SetPropertyValue(ptr, FCString::Atoi(*Value));
+		return true;
+	}
+	else if (Property->IsA(UFloatProperty::StaticClass()))
+	{
+		Cast<UFloatProperty>(Property)->SetPropertyValue(ptr, FCString::Atof(*Value));
+		return true;
+	}
+	//else if (Property->IsA(UStrProperty::StaticClass()))
+	//{
+	//	Cast<UStrProperty>(Property)->SetPropertyValue(ptr, Value);
+	//	return true;
+	//}
+	else if (Property->IsA(UBoolProperty::StaticClass()))
+	{
+		bool value = Value.ToLower() == "true" | Value == "1";
+		Cast<UBoolProperty>(Property)->SetPropertyValue(ptr, value);
+
+		return true;
+	}
+	else if (Property->IsA(UByteProperty::StaticClass()))
+	{
+		Cast<UByteProperty>(Property)->SetPropertyValue(ptr, (uint8)FCString::Atoi(*Value));
+		return true;
+	}
+
+	return false;
 }
 
 #undef ERROR
-
 
 
 UObject* FDialogPhraseEvent::GetObject(UDialogImplementer* Implementer) const
@@ -226,9 +276,9 @@ void FDialogPhraseEvent::Invoke(UDialogImplementer* Implementer) const
 }
 
 
-bool FDialogPhraseCondition::Check(FString& ErrorMessage)
+bool FDialogPhraseCondition::Compile(FString& ErrorMessage)
 {
-	return Super::Check(ErrorMessage);
+	return Super::Compile(ErrorMessage);
 }
 
 bool FDialogPhraseCondition::InvokeCheck(class UDialogImplementer* Implementer) const

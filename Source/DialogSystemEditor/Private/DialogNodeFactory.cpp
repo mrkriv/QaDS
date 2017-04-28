@@ -1,13 +1,14 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
-#include "GraphPanelNodeFactory_Dialog.h"
+#include "DialogNodeFactory.h"
 #include "DialogSGraphNodes.h"
 #include "DialogEditorNodes.h"
 
-FGraphPanelNodeFactory_Dialog::FGraphPanelNodeFactory_Dialog()
+FDialogNodeFactory::FDialogNodeFactory()
 {
 }
 
-TSharedPtr<class SGraphNode> FGraphPanelNodeFactory_Dialog::CreateNode(UEdGraphNode* Node) const
+TSharedPtr<class SGraphNode> FDialogNodeFactory::CreateNode(UEdGraphNode* Node) const
 {
 	TSharedPtr<SGraphNode_DialogNodeBase> SNode;
 

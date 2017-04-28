@@ -1,3 +1,4 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemRuntime.h"
 #include "DialogPhrase.h"
 #include "DialogImplementer.h"

@@ -1,5 +1,8 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #pragma once
 
+#include "EngineUtils.h"
+#include "Runtime/Core/Public/Templates/SharedPointer.h"
 #include "Components/ActorComponent.h"
 #include "StoryInformationManager.generated.h"
 
@@ -10,8 +13,8 @@ enum class EStoryKeyTypes : uint8
 	DialogPhrases,
 };
 
-UCLASS(ClassGroup=(Gameplay), meta=(BlueprintSpawnableComponent))
-class DIALOGSYSTEMRUNTIME_API UStoryKeyManager : public UActorComponent
+UCLASS()
+class DIALOGSYSTEMRUNTIME_API UStoryKeyManager : public UObject
 {
 	GENERATED_BODY()
 
@@ -23,8 +26,7 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FName> DialogPhrasesKeys;
 
-	UStoryKeyManager();
-
+	UFUNCTION(BlueprintPure, Category = "Gameplay|StoryKey")
 	static UStoryKeyManager* GetInstance();
 
 	UFUNCTION(BlueprintPure, Category = "Gameplay|StoryKey")
@@ -47,6 +49,4 @@ public:
 
 protected:
 	TArray<FName>* GetSetByType(EStoryKeyTypes Type);
-
-	virtual void BeginPlay() override;
 };

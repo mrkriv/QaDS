@@ -1,3 +1,4 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "DialogEditorNodes.h"
 #include "EdGraph/EdGraph.h"
@@ -6,7 +7,7 @@
 #include "GenericCommands.h"
 #include "GraphEditorActions.h"
 #include "DialogConnectionDrawingPolicy.h"
-#include "EdGraphSchema_DialogEditor.h"
+#include "DialogGraphSchema.h"
 #include "Runtime/Slate/Public/Framework/MultiBox/MultiBoxBuilder.h"
 #include "DialogEditorNodes.h"
 
@@ -92,12 +93,12 @@ FString Combine(const TArray<FString> Array, FString Separator)
 	return Result;
 }
 
-UEdGraphSchema_DialogEditor::UEdGraphSchema_DialogEditor(const FObjectInitializer& ObjectInitializer)
+UDialogGraphSchema::UDialogGraphSchema(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 }
 
-void UEdGraphSchema_DialogEditor::GetGraphContextActions(FGraphContextMenuBuilder& ContextMenuBuilder) const
+void UDialogGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& ContextMenuBuilder) const
 {
 	FFormatNamedArguments Args;
 	const FName AttrName("Attributes");
@@ -129,7 +130,7 @@ void UEdGraphSchema_DialogEditor::GetGraphContextActions(FGraphContextMenuBuilde
 		ContextMenuBuilder.AddAction(Action);
 }
 
-const FPinConnectionResponse UEdGraphSchema_DialogEditor::CanCreateConnection(const UEdGraphPin* A, const UEdGraphPin* B) const
+const FPinConnectionResponse UDialogGraphSchema::CanCreateConnection(const UEdGraphPin* A, const UEdGraphPin* B) const
 {
 	UDialogNodeEditorBase* ABase = Cast<UDialogNodeEditorBase>(A->GetOwningNode());
 	UDialogNodeEditorBase* BBase = Cast<UDialogNodeEditorBase>(B->GetOwningNode());
@@ -146,22 +147,22 @@ const FPinConnectionResponse UEdGraphSchema_DialogEditor::CanCreateConnection(co
 	return FPinConnectionResponse(CONNECT_RESPONSE_MAKE, TEXT(""));
 }
 
-class FConnectionDrawingPolicy* UEdGraphSchema_DialogEditor::CreateConnectionDrawingPolicy(int32 InBackLayerID, int32 InFrontLayerID, float InZoomFactor, const FSlateRect& InClippingRect, class FSlateWindowElementList& InDrawElements, class UEdGraph* InGraphObj) const
+class FConnectionDrawingPolicy* UDialogGraphSchema::CreateConnectionDrawingPolicy(int32 InBackLayerID, int32 InFrontLayerID, float InZoomFactor, const FSlateRect& InClippingRect, class FSlateWindowElementList& InDrawElements, class UEdGraph* InGraphObj) const
 {
 	return new FDialogConnectionDrawingPolicy(InBackLayerID, InFrontLayerID, InZoomFactor, InClippingRect, InDrawElements, InGraphObj);
 }
 
-FLinearColor UEdGraphSchema_DialogEditor::GetPinTypeColor(const FEdGraphPinType& PinType) const
+FLinearColor UDialogGraphSchema::GetPinTypeColor(const FEdGraphPinType& PinType) const
 {
 	return FColor::Yellow;
 }
 
-bool UEdGraphSchema_DialogEditor::ShouldHidePinDefaultValue(UEdGraphPin* Pin) const
+bool UDialogGraphSchema::ShouldHidePinDefaultValue(UEdGraphPin* Pin) const
 {
 	return false;
 }
 
-void UEdGraphSchema_DialogEditor::GetContextMenuActions(const UEdGraph* CurrentGraph, const UEdGraphNode* InGraphNode, const UEdGraphPin* InGraphPin, FMenuBuilder* MenuBuilder, bool bIsDebugging) const
+void UDialogGraphSchema::GetContextMenuActions(const UEdGraph* CurrentGraph, const UEdGraphNode* InGraphNode, const UEdGraphPin* InGraphPin, FMenuBuilder* MenuBuilder, bool bIsDebugging) const
 {
 	MenuBuilder->AddMenuEntry(FGenericCommands::Get().Delete);
 	MenuBuilder->AddMenuEntry(FGenericCommands::Get().Cut);

@@ -1,4 +1,6 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #pragma once
+
 #include "ConnectionDrawingPolicy.h"
 
 // This class draws the connections for an UEdGraph with a behavior tree schema

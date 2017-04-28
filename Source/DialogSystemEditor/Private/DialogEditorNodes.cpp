@@ -1,3 +1,4 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "EdGraph/EdGraphPin.h"
 #include "Runtime/Engine/Classes/Engine/World.h"

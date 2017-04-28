@@ -1,10 +1,12 @@
+// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #pragma once
+
 #include "EdGraphUtilities.h"
 
-class  FGraphPanelNodeFactory_Dialog : public FGraphPanelNodeFactory
+class  FDialogNodeFactory : public FGraphPanelNodeFactory
 {
 public:
-	FGraphPanelNodeFactory_Dialog();
+	FDialogNodeFactory();
 
 private:
 	virtual TSharedPtr<class SGraphNode> CreateNode(UEdGraphNode* Node) const override;
