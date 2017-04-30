@@ -16,7 +16,9 @@ public:
 	virtual void CustomizeHeader(TSharedRef<IPropertyHandle> StructPropertyHandle, class FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils) override;
 	virtual void CustomizeChildren(TSharedRef<IPropertyHandle> StructPropertyHandle, class IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils) override;
 
+	void OnTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 private:
 	TSharedPtr<IPropertyHandle> PropertyHandle_Name;
+	TSharedPtr<IPropertyHandle> PropertyHandle_Type;
 	TSharedPtr<IPropertyHandle> PropertyHandle_Value;
 };

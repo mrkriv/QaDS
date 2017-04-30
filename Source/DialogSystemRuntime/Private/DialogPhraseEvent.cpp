@@ -9,10 +9,9 @@
 #include "DialogImplementer.h"
 #include "DialogPhraseEvent.h"
 
-//#define ERROR(Message) ErrorMessage = TEXT(Message); return false
 #define ERROR(Message, ...) ErrorMessage =  FString::Printf(TEXT(Message), ##__VA_ARGS__); return false
 
-bool FDialogPhraseEvent::Compile(FString& ErrorMessage)
+bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& isNeedUpdateProp)
 {
 	if (EventName.IsNone())
 	{
@@ -35,7 +34,7 @@ bool FDialogPhraseEvent::Compile(FString& ErrorMessage)
 			ERROR("DialogScript not found, pleass select dialog script class in root node");
 		}
 		
-		return CompileParametrs(OwnerNode->OwnerDialog->DialogScriptClass->GetDefaultObject(), ErrorMessage);
+		return CompileParametrs(OwnerNode->OwnerDialog->DialogScriptClass->GetDefaultObject(), ErrorMessage, isNeedUpdateProp);
 		
 	case EDialogPhraseEventCallType::CreateNew:
 		if (ObjectClass == NULL)
@@ -73,7 +72,7 @@ bool FDialogPhraseEvent::Compile(FString& ErrorMessage)
 	return true;
 }
 
-bool FDialogPhraseEvent::CompileParametrs(UObject* Object, FString& ErrorMessage)
+bool FDialogPhraseEvent::CompileParametrs(UObject* Object, FString& ErrorMessage, bool& isNeedUpdateProp)
 {
 	ParameterData.Reset();
 
@@ -109,20 +108,33 @@ bool FDialogPhraseEvent::CompileParametrs(UObject* Object, FString& ErrorMessage
 
 	if (params.Num() != func->NumParms || Parameters.Num() != func->NumParms)
 	{
-		Parameters.Reset();
+		TArray<FDialogPhraseEventParam> newParameters;
+		isNeedUpdateProp = true; 
 		params.Reset();
 
 		auto prop = func->PropertyLink;
-		while (prop != NULL)
+		while (prop != NULL && params.Num() < func->NumParms)
 		{
 			FDialogPhraseEventParam param;
 			param.Name = prop->GetName();
+			param.Type = prop->GetClass()->GetName().Replace(TEXT("Property"), TEXT(""));
 
-			Parameters.Add(param);
+			for (auto p : Parameters)
+			{
+				if (p.Name == param.Name)
+				{
+					param.Value = p.Value;
+					break;
+				}
+			}
+
+			newParameters.Add(param);
 			params.Add(prop, param);
 
 			prop = prop->PropertyLinkNext;
 		}
+
+		Parameters = newParameters;
 	}
 
 	auto prop = func->PropertyLink;
@@ -189,7 +201,7 @@ UObject* FDialogPhraseEvent::GetObject(UDialogImplementer* Implementer) const
 	switch (CallType)
 	{
 	case EDialogPhraseEventCallType::DialogScript:
-		obj = Implementer->Asset->DialogScript;
+		obj = Implementer->DialogScript;
 		break;
 
 	case EDialogPhraseEventCallType::Player:
@@ -250,7 +262,7 @@ void FDialogPhraseEvent::Invoke(UDialogImplementer* Implementer) const
 		{
 			if (func->ParmsSize == ParameterData.Num())
 			{
-				Implementer->ProcessEvent(func, const_cast<uint8*>(ParameterData.GetData()));
+				obj->ProcessEvent(func, const_cast<uint8*>(ParameterData.GetData()));
 
 				//FTimerDynamicDelegate Delegate;
 				//Delegate.BindUFunction(obj, EventName);
@@ -273,12 +285,14 @@ void FDialogPhraseEvent::Invoke(UDialogImplementer* Implementer) const
 		else
 			UE_LOG(DialogModuleLog, Error, TEXT("Function %s.%s not found"), *obj->GetName(), *EventName.ToString())
 	}
+	else
+		UE_LOG(DialogModuleLog, Error, TEXT("Object for function call not found"))
 }
 
 
-bool FDialogPhraseCondition::Compile(FString& ErrorMessage)
+bool FDialogPhraseCondition::Compile(FString& ErrorMessage, bool& isNeedUpdateProp)
 {
-	return Super::Compile(ErrorMessage);
+	return Super::Compile(ErrorMessage, isNeedUpdateProp);
 }
 
 bool FDialogPhraseCondition::InvokeCheck(class UDialogImplementer* Implementer) const

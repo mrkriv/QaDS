@@ -29,10 +29,13 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseEventParam
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	FString Name;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
+	FString Type;
+
+	UPROPERTY(EditAnywhere)
 	FString Value;
 
 	/*
@@ -50,7 +53,7 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseEvent
 	GENERATED_BODY()
 
 private:
-	bool CompileParametrs(UObject* Object, FString& ErrorMessage);
+	bool CompileParametrs(UObject* Object, FString& ErrorMessage, bool& isNeedUpdateProp);
 
 public:
 
@@ -78,7 +81,7 @@ public:
 	/*
 		Check and compile function call information
 	*/
-	virtual bool Compile(FString& ErrorMessage);
+	virtual bool Compile(FString& ErrorMessage, bool& isNeedUpdateProp);
 
 	/*
 		Returns an object to call a function
@@ -100,6 +103,6 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseCondition : public FDialogPhraseEven
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool InvertCondition;
 
-	virtual bool Compile(FString& ErrorMessage) override;
+	virtual bool Compile(FString& ErrorMessage, bool& isNeedUpdateProp) override;
 	virtual bool InvokeCheck(class UDialogImplementer* Implementer) const;
 };

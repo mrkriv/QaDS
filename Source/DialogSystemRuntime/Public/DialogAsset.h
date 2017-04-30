@@ -18,9 +18,6 @@ public:
 	UPROPERTY()
 	UDialogPhrase* RootNode;
 
-	UPROPERTY(BlueprintReadOnly)
-	class ADialogScript* DialogScript;
-
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "DialogScript"))
 	TSubclassOf<class ADialogScript> DialogScriptClass;
 

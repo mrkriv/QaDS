@@ -89,11 +89,20 @@ void FDialogPhraseEventCustomization::CustomizeChildren(TSharedRef<IPropertyHand
 	StructBuilder.AddChildProperty(PropertyHandle_FindTag.ToSharedRef())
 		.Visibility(TAttribute<EVisibility>(this, &FDialogPhraseEventCustomization::GetFingTagVisibility));
 
-	StructBuilder.AddChildProperty(PropertyHandle_Parameters.ToSharedRef())
-		.Visibility(TAttribute<EVisibility>(this, &FDialogPhraseEventCustomization::GetParametersVisibility));
-
 	if (PropertyHandle_Invert.IsValid())
 		StructBuilder.AddChildProperty(PropertyHandle_Invert.ToSharedRef());
+
+	TArray<FDialogPhraseEventParam> params;
+	auto array = PropertyHandle_Parameters->AsArray();
+
+	uint32 count;
+	array->GetNumElements(count);
+	for (uint32 i = 0; i < count; i++)
+	{
+		auto param = array->GetElement(i);
+		StructBuilder.AddChildProperty(param)
+			.Visibility(TAttribute<EVisibility>(this, &FDialogPhraseEventCustomization::GetParametersVisibility));
+	}
 }
 
 FReply FDialogPhraseEventCustomization::OnTitleClick()

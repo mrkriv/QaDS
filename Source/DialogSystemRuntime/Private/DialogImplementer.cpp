@@ -17,33 +17,43 @@ UDialogImplementer* UDialogImplementer::ImplementDialog(UDialogAsset* DialogAsse
 		return NULL;
 	}
 
-	UDialogImplementer* impl = NewObject<UDialogImplementer>();
-	impl->Interlocutor = InInterlocutor;
-	impl->Asset = DialogAsset;
-	impl->isInit = false;
-
 	if (DialogAsset->RootNode == NULL)
 	{
 		UE_LOG(DialogModuleLog, Error, TEXT("Dialog asset '%s' not have root node"), *DialogAsset->GetPathName());
 		return NULL;
 	}
 
-	bool isPlayerNext;
-	impl->GetValidPhrases(impl->NextNodes, DialogAsset->RootNode->GetChilds(), isPlayerNext);
+	UDialogImplementer* impl = NewObject<UDialogImplementer>(InInterlocutor->GetWorld());
+	impl->Init(DialogAsset, InInterlocutor);
 
 	if (impl->NextNodes.Num() == 0)
 		return NULL;
 
-	if (impl->Asset->DialogScriptClass != NULL)
-	{
-		impl->Asset->DialogScript = InInterlocutor->GetWorld()->SpawnActor<ADialogScript>(impl->Asset->DialogScriptClass, FTransform());
-		
-		FScriptDelegate dlg;
-		dlg.BindUFunction(impl->Asset->DialogScript, "Destroy");
-		impl->OnEndDialog.Add(dlg);
-	}
-
 	return impl;
+}
+
+void UDialogImplementer::Init(UDialogAsset* DialogAsset, AActor* InInterlocutor)
+{
+	Interlocutor = InInterlocutor;
+	Asset = DialogAsset;
+	isInit = false;
+
+	bool isPlayerNext;
+	GetValidPhrases(NextNodes, DialogAsset->RootNode->GetChilds(), isPlayerNext);
+
+	if (Asset->DialogScriptClass != NULL)
+	{
+		DialogScript = InInterlocutor->GetWorld()->SpawnActor<ADialogScript>(Asset->DialogScriptClass, FTransform());
+		DialogScript->Implementer = this;
+	}
+}
+
+void UDialogImplementer::CallEndDialog()
+{
+	if (DialogScript != NULL)
+		DialogScript->Destroy();
+
+	OnEndDialog.Broadcast();
 }
 
 void UDialogImplementer::Next(int PhraseIndex)
@@ -58,7 +68,7 @@ void UDialogImplementer::Next(int PhraseIndex)
 
 		if (NextNodes.Num() == 0)
 		{
-			OnEndDialog.Broadcast();
+			CallEndDialog();
 			CurrentNode = NULL;
 			return;
 		}
@@ -66,7 +76,7 @@ void UDialogImplementer::Next(int PhraseIndex)
 		if (PhraseIndex < 0 || PhraseIndex >= NextNodes.Num())
 		{
 			UE_LOG(DialogModuleLog, Error, TEXT("Invalid phrase index"));
-			OnEndDialog.Broadcast();
+			CallEndDialog();
 			return;
 		}
 	}
@@ -88,12 +98,14 @@ void UDialogImplementer::Next(int PhraseIndex)
 		if (isPlayerNext)
 		{
 			UE_LOG(DialogModuleLog, Error, TEXT("Invalid graph: Phrase of the player can not point to another player phrase"));
-			OnEndDialog.Broadcast();
+			CallEndDialog();
 			return;
 		}
 
 		phraseInfo.Source = EDialogPhraseSource::Player;
 		OnActivatePhrase.Broadcast(phraseInfo);
+		if (DialogScript != NULL)
+			DialogScript->ActivatePhrase();
 
 		DelayNext();
 	}
@@ -120,6 +132,10 @@ void UDialogImplementer::Next(int PhraseIndex)
 
 		phraseInfo.Source = EDialogPhraseSource::Interlocutor;
 		OnActivatePhrase.Broadcast(phraseInfo);
+		
+		if (DialogScript != NULL)
+			DialogScript->ActivatePhrase();
+
 		OnUpdateAnswer.Broadcast(playerPhrases);
 	}
 }
@@ -151,7 +167,7 @@ float UDialogImplementer::GetPhraseTime()
 			return 0.0f;
 
 		int len = CurrentNode->Text.ToString().Len();
-		return .2f * len + len * 0.05f;
+		return .2f + len * 0.05f;
 	}
 }
 

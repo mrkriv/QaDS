@@ -2,7 +2,6 @@
 #pragma once
 
 #include "EngineUtils.h"
-#include "Runtime/Core/Public/Templates/SharedPointer.h"
 #include "Components/ActorComponent.h"
 #include "StoryInformationManager.generated.h"
 

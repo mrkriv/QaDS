@@ -68,6 +68,8 @@ private:
 	void DelayNext();
 	float GetPhraseTime();
 	bool GetValidPhrases(TArray<UDialogPhrase*>& result, TArray<UDialogNode*> Phrases, bool& IsPlayer);
+	void Init(UDialogAsset* DialogAsset, AActor* InInterlocutor);
+	void CallEndDialog();
 
 public:
 	UPROPERTY(BlueprintReadOnly)
@@ -78,6 +80,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	AActor* Interlocutor;
+
+	UPROPERTY(BlueprintReadOnly)
+	class ADialogScript* DialogScript;
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FDialogAnswersSignature OnUpdateAnswer;

@@ -35,20 +35,24 @@ FDialogPhraseEventParamCustomization::FDialogPhraseEventParamCustomization()
 void FDialogPhraseEventParamCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> StructPropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
 	static const FName PropertyName_Name = GET_MEMBER_NAME_CHECKED(FDialogPhraseEventParam, Name);
+	static const FName PropertyName_Type = GET_MEMBER_NAME_CHECKED(FDialogPhraseEventParam, Type);
 	static const FName PropertyName_Value = GET_MEMBER_NAME_CHECKED(FDialogPhraseEventParam, Value);
 
-
 	PropertyHandle_Name = StructPropertyHandle->GetChildHandle(PropertyName_Name);
+	PropertyHandle_Type = StructPropertyHandle->GetChildHandle(PropertyName_Type);
 	PropertyHandle_Value = StructPropertyHandle->GetChildHandle(PropertyName_Value);
 
 	check(PropertyHandle_Name.IsValid());
 	check(PropertyHandle_Value.IsValid());
 
 	FString Name;
+	FString Type;
 	FString Value;
 
 	PropertyHandle_Name->GetValue(Name);
 	PropertyHandle_Value->GetValue(Value);
+	PropertyHandle_Type->GetValue(Type);
+
 
 	HeaderRow.NameContent()
 		[
@@ -57,13 +61,22 @@ void FDialogPhraseEventParamCustomization::CustomizeHeader(TSharedRef<IPropertyH
 		.ValueContent()
 		.MinDesiredWidth(250)
 		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
 			.VAlign(VAlign_Fill)
 			.HAlign(HAlign_Fill)
 			[
 				SNew(SEditableTextBox)
 				.Text(FText::FromString(Value))
+				.OnTextCommitted(this, &FDialogPhraseEventParamCustomization::OnTextCommitted)
+				.Font(IDetailLayoutBuilder::GetDetailFont())
+			]
+			+ SHorizontalBox::Slot()
+			.VAlign(VAlign_Fill)
+			.HAlign(HAlign_Right)
+			[
+				SNew(STextBlock)
+				.Text(FText::FromString("(" + Type + ")"))
 				.Font(IDetailLayoutBuilder::GetDetailFont())
 			]
 		];
@@ -71,4 +84,9 @@ void FDialogPhraseEventParamCustomization::CustomizeHeader(TSharedRef<IPropertyH
 
 void FDialogPhraseEventParamCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> StructPropertyHandle, IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
+}
+
+void FDialogPhraseEventParamCustomization::OnTextCommitted(const FText& Text, ETextCommit::Type CommitMethod)
+{
+	PropertyHandle_Value->SetValue(Text.ToString());
 }

@@ -477,15 +477,6 @@ void FDialogAssetEditor::OnPropertyChanged(const FPropertyChangedEvent& Event)
 		CompileExecute();
 }
 
-FDialogAssetEditor::~FDialogAssetEditor()
-{
-	if (GraphEditor->GetCurrentGraph())
-	{
-		GraphEditor->GetCurrentGraph()->RemoveOnGraphChangedHandler(OnGraphChangedDelegateHandle);
-		//OnPropertyChangedDelegateHandle
-	}
-}
-
 void FDialogAssetEditor::CompileExecute()
 {
 	UE_LOG(DialogModuleLog, Log, TEXT("Compile dialog %s"), *EditedAsset->GetPathName());
@@ -574,12 +565,14 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 
 	phrase->UID = Node->UID;
 
+	bool needUpdateProp = false;
 	for (auto& Event : Node->CustomEvents)
 	{
 		FString ErrorMessage;
 
 		Event.OwnerNode = phrase;
-		if (Event.Compile(ErrorMessage))
+
+		if (Event.Compile(ErrorMessage, needUpdateProp))
 			phrase->AddEvent(&phrase->CustomEvents, Event);
 		else
 			CompileLogResults.Error(*ErrorMessage);
@@ -590,7 +583,7 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 		FString ErrorMessage;
 
 		Condition.OwnerNode = phrase;
-		if (Condition.Compile(ErrorMessage))
+		if (Condition.Compile(ErrorMessage, needUpdateProp))
 			phrase->AddCondition(&phrase->CustomConditions, Condition);
 		else
 			CompileLogResults.Error(*ErrorMessage);
@@ -618,5 +611,24 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 			phrase->Childs.Add(Compile(childPhrase));
 		}
 	}
+
+	if (needUpdateProp)
+	{
+		for (auto& obj : PropertyEditor->GetSelectedObjects())
+		{
+			if (obj == Node)
+			{
+				PropertyEditor->SetObjects(PropertyEditor->GetSelectedObjects(), true, true);
+				break;
+			}
+		}
+	}
+
 	return phrase;
+}
+
+FDialogAssetEditor::~FDialogAssetEditor()
+{
+	if (GraphEditor->GetCurrentGraph())
+		GraphEditor->GetCurrentGraph()->RemoveOnGraphChangedHandler(OnGraphChangedDelegateHandle);
 }
