@@ -592,7 +592,13 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 	bool first = true;
 	bool isPlayer = false;
 
-	for (auto& child : Node->GetChildNodes())
+	auto childs = Node->GetChildNodes();
+	childs.Sort([](UDialogNodeEditorBase& a, UDialogNodeEditorBase& b)
+	{
+		return a.NodePosX < b.NodePosX;
+	});
+
+	for (auto& child : childs)
 	{
 		auto childPhrase = Cast<UPhraseNode>(child);
 
@@ -618,7 +624,10 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 		{
 			if (obj == Node)
 			{
-				PropertyEditor->SetObjects(PropertyEditor->GetSelectedObjects(), true, true);
+				auto selected = GraphEditor->GetSelectedNodes();
+				GraphEditor->ClearSelectionSet();
+				GraphEditor->SetNodeSelection(Node, true);
+				//PropertyEditor->SetObjects(PropertyEditor->GetSelectedObjects(), true, true);
 				break;
 			}
 		}

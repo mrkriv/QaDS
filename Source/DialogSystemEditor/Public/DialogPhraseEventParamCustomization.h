@@ -21,4 +21,5 @@ private:
 	TSharedPtr<IPropertyHandle> PropertyHandle_Name;
 	TSharedPtr<IPropertyHandle> PropertyHandle_Type;
 	TSharedPtr<IPropertyHandle> PropertyHandle_Value;
+	TSharedPtr<IPropertyHandle> PropertyHandle_IsOut;
 };

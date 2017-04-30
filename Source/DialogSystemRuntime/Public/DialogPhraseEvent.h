@@ -38,6 +38,21 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseEventParam
 	UPROPERTY(EditAnywhere)
 	FString Value;
 
+	UPROPERTY(EditAnywhere)
+	bool IsOut;
+
+	/*
+		Property size
+	*/
+	UPROPERTY(EditAnywhere)
+	int Size;
+
+	/*
+		Property offest in argument data
+	*/
+	UPROPERTY(EditAnywhere)
+	int Offest;
+
 	/*
 		Compile argument data 
 	*/

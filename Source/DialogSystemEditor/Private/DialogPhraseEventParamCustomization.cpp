@@ -37,22 +37,27 @@ void FDialogPhraseEventParamCustomization::CustomizeHeader(TSharedRef<IPropertyH
 	static const FName PropertyName_Name = GET_MEMBER_NAME_CHECKED(FDialogPhraseEventParam, Name);
 	static const FName PropertyName_Type = GET_MEMBER_NAME_CHECKED(FDialogPhraseEventParam, Type);
 	static const FName PropertyName_Value = GET_MEMBER_NAME_CHECKED(FDialogPhraseEventParam, Value);
+	static const FName PropertyName_IsOut = GET_MEMBER_NAME_CHECKED(FDialogPhraseEventParam, IsOut);
 
 	PropertyHandle_Name = StructPropertyHandle->GetChildHandle(PropertyName_Name);
 	PropertyHandle_Type = StructPropertyHandle->GetChildHandle(PropertyName_Type);
 	PropertyHandle_Value = StructPropertyHandle->GetChildHandle(PropertyName_Value);
+	PropertyHandle_IsOut = StructPropertyHandle->GetChildHandle(PropertyName_IsOut);
 
 	check(PropertyHandle_Name.IsValid());
 	check(PropertyHandle_Value.IsValid());
+	check(PropertyHandle_Type.IsValid());
+	check(PropertyHandle_IsOut.IsValid());
 
 	FString Name;
 	FString Type;
 	FString Value;
+	bool IsOut;
 
 	PropertyHandle_Name->GetValue(Name);
 	PropertyHandle_Value->GetValue(Value);
 	PropertyHandle_Type->GetValue(Type);
-
+	PropertyHandle_IsOut->GetValue(IsOut);
 
 	HeaderRow.NameContent()
 		[
@@ -65,15 +70,18 @@ void FDialogPhraseEventParamCustomization::CustomizeHeader(TSharedRef<IPropertyH
 			+ SHorizontalBox::Slot()
 			.VAlign(VAlign_Fill)
 			.HAlign(HAlign_Fill)
+			.FillWidth(3)
 			[
 				SNew(SEditableTextBox)
 				.Text(FText::FromString(Value))
 				.OnTextCommitted(this, &FDialogPhraseEventParamCustomization::OnTextCommitted)
 				.Font(IDetailLayoutBuilder::GetDetailFont())
+				.IsEnabled(!IsOut)
 			]
 			+ SHorizontalBox::Slot()
 			.VAlign(VAlign_Fill)
 			.HAlign(HAlign_Right)
+			.FillWidth(1)
 			[
 				SNew(STextBlock)
 				.Text(FText::FromString("(" + Type + ")"))

@@ -9,7 +9,9 @@
 #include "DialogAssetTypeActions.h"
 #include "DialogCommands.h"
 #include "ISettingsModule.h"
+#include "ThumbnailRendering/ThumbnailManager.h"
 #include "DialogSettings.h"
+#include "DialogScript.h"
 #include "BrushSet.h"
 
 DEFINE_LOG_CATEGORY(DialogModuleLog)
@@ -32,7 +34,10 @@ void FDialogSystemEditorModule::StartupModule()
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseEvent", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseEventParam", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventParamCustomization::MakeInstance));
 	PropertyModule.RegisterCustomClassLayout("PhraseNode", FOnGetDetailCustomizationInstance::CreateStatic(&FPhraseNodeDetails::MakeInstance));
-	
+
+	//UThumbnailManager::Get().RegisterCustomRenderer(UDialogAsset::StaticClass(), UDialogAssetThumbnailRenderer::StaticClass());
+	//UThumbnailManager::Get().RegisterCustomRenderer(ADialogScript::StaticClass(), UDialogScriptThumbnailRenderer::StaticClass());
+
 	SettingsModule.RegisterSettings("Project", "Plugins", "Dialog",
 		LOCTEXT("RuntimeSettingsName", "Dialog Editor"),
 		LOCTEXT("RuntimeSettingsDescription", "Dialog editor settings"),

@@ -111,6 +111,7 @@ bool FDialogPhraseEvent::CompileParametrs(UObject* Object, FString& ErrorMessage
 		TArray<FDialogPhraseEventParam> newParameters;
 		isNeedUpdateProp = true; 
 		params.Reset();
+		int offest = 0;
 
 		auto prop = func->PropertyLink;
 		while (prop != NULL && params.Num() < func->NumParms)
@@ -118,6 +119,11 @@ bool FDialogPhraseEvent::CompileParametrs(UObject* Object, FString& ErrorMessage
 			FDialogPhraseEventParam param;
 			param.Name = prop->GetName();
 			param.Type = prop->GetClass()->GetName().Replace(TEXT("Property"), TEXT(""));
+			param.IsOut = (prop->GetPropertyFlags() & CPF_OutParm) != 0;
+			param.Size = prop->GetSize();
+			param.Offest = offest;
+
+			offest += param.Size;
 
 			for (auto p : Parameters)
 			{

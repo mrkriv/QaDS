@@ -124,7 +124,7 @@ void UDialogGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Contex
 
 	DialogSchemaUtils::AddAction<UPhrasePlayerNode>(TEXT("Add Player Phrase"), TEXT("Add dialog phrase node"), Actions, ContextMenuBuilder.OwnerOfTemporaries);
 	DialogSchemaUtils::AddAction<UPhraseNode>(TEXT("Add NPC Phrase"), TEXT("Add dialog phrase node"), Actions, ContextMenuBuilder.OwnerOfTemporaries);
-	DialogSchemaUtils::AddAction<UWaitNode>(TEXT("Wait"), TEXT("Add wait node"), Actions, ContextMenuBuilder.OwnerOfTemporaries);
+	//DialogSchemaUtils::AddAction<UWaitNode>(TEXT("Wait"), TEXT("Add wait node"), Actions, ContextMenuBuilder.OwnerOfTemporaries);
 
 	for (TSharedPtr<FEdGraphSchemaAction> Action : Actions)
 		ContextMenuBuilder.AddAction(Action);
