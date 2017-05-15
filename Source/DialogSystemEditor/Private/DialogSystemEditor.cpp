@@ -4,7 +4,6 @@
 #include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
 #include "DialogNodeFactory.h"
 #include "DialogPhraseEventCustomization.h"
-#include "DialogPhraseEventParamCustomization.h"
 #include "PhraseNodeCustomization.h"
 #include "DialogAssetTypeActions.h"
 #include "DialogCommands.h"
@@ -29,14 +28,10 @@ void FDialogSystemEditorModule::StartupModule()
 
 	AssetCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Gameplay")), LOCTEXT("GameplayAssetCategory", "Gameplay"));
 	AssetTools.RegisterAssetTypeActions(MakeShareable(new FDialogAssetTypeActions(AssetCategory)));
-
+	
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseCondition", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseEvent", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
-	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseEventParam", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventParamCustomization::MakeInstance));
 	PropertyModule.RegisterCustomClassLayout("PhraseNode", FOnGetDetailCustomizationInstance::CreateStatic(&FPhraseNodeDetails::MakeInstance));
-
-	//UThumbnailManager::Get().RegisterCustomRenderer(UDialogAsset::StaticClass(), UDialogAssetThumbnailRenderer::StaticClass());
-	//UThumbnailManager::Get().RegisterCustomRenderer(ADialogScript::StaticClass(), UDialogScriptThumbnailRenderer::StaticClass());
 
 	SettingsModule.RegisterSettings("Project", "Plugins", "Dialog",
 		LOCTEXT("RuntimeSettingsName", "Dialog Editor"),

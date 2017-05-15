@@ -29,7 +29,6 @@ public:
 	TSharedPtr<FNodePropertyObserver> PropertyObserver;
 };
 
-
 UCLASS()
 class DIALOGSYSTEMEDITOR_API UPhraseNode : public UDialogNodeEditorBase
 {
@@ -40,47 +39,11 @@ public:
 	UPROPERTY()
 	UDialogPhrase* CompilePhrase;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText Text;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool AutoTime = true;
-
 	UPROPERTY(BlueprintReadOnly)
 	FGuid UID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float PhraseManualTime;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Important = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool MemorizeReading = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USoundBase* Sound;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (DisplayName = "Player Phrase?"))
-	bool IsPlayer;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Conditions", meta = (DisplayName = "Conditions"))
-	TArray<FDialogPhraseCondition> CustomConditions;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Conditions", meta = (DisplayName = "Has Keys"))
-	TArray<FName> CheckHasKeys;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Conditions", meta = (DisplayName = "Dont Has Keys"))
-	TArray<FName> CheckDontHasKeys;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Activate", meta = (DisplayName = "Give Keys"))
-	TArray<FName> GiveKeys;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Activate", meta = (DisplayName = "Remove Keys"))
-	TArray<FName> RemoveKeys;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Activate", meta = (DisplayName = "Events"))
-	TArray<FDialogPhraseEvent> CustomEvents;
+	FDialogPhraseInfo Data;
 
 	virtual void AllocateDefaultPins() override;
 	virtual FLinearColor GetNodeTitleColor() const override;

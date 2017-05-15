@@ -14,11 +14,10 @@
 #include "DialogEditorNodes.h"
 #include "PhraseNodeCustomization.h"
 #include "DetailLayoutBuilder.h"
+#include "Kismet2/BlueprintEditorUtils.h"
 #include "Editor/UnrealEd/Public/Toolkits/AssetEditorManager.h"
 
 #define LOCTEXT_NAMESPACE "DialogPhraseEventCustomization"
-
-#define PROPERTY(NAME) Layout->GetProperty(GET_MEMBER_NAME_CHECKED(UPhraseNode, NAME))
 
 TSharedRef<IDetailCustomization> FPhraseNodeDetails::MakeInstance()
 {
@@ -28,74 +27,75 @@ TSharedRef<IDetailCustomization> FPhraseNodeDetails::MakeInstance()
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void FPhraseNodeDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 {
-	Layout = &DetailLayout;
+	auto DataProperty = DetailLayout.GetProperty(GET_MEMBER_NAME_CHECKED(UPhraseNode, Data));
 
-	TextProperty = TSharedPtr<IPropertyHandle>(PROPERTY(Text));
-	Layout->HideProperty(TextProperty);
+	uint32 DataPropertyCount;
+	DataProperty->GetNumChildren(DataPropertyCount);
 
-	FText Text;
-	TextProperty->GetValue(Text);
+	DetailLayout.HideProperty(DataProperty);
 
-	IDetailCategoryBuilder& mainCategoty = Layout->EditCategory("PhraseNode");
-
-	mainCategoty.AddCustomRow(TextProperty->GetPropertyDisplayName()).NameContent()
-	[
-		TextProperty->CreatePropertyNameWidget()
-	]
-	.ValueContent()
-	.HAlign(HAlign_Fill)
-	.VAlign(VAlign_Fill)
-	[
-		SNew(SBox)
-		.HAlign(HAlign_Fill)
-		.VAlign(VAlign_Fill)
-		.MinDesiredHeight(150)
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.FillWidth(1.0f)
-			[
-				SNew(SMultiLineEditableTextBox)
-				.Text(Text)
-				//.Font(InArgs._Font)
-				.SelectAllTextWhenFocused(false)
-				.ClearKeyboardFocusOnCommit(true)
-				.OnTextCommitted(this, &FPhraseNodeDetails::OnTextCommitted)
-				//.OnTextChanged(this, &FPhraseNodeDetails::OnTextChanged)
-				.SelectAllTextOnCommit(false)
-				.AutoWrapText(true)
-				.ModiferKeyForNewLine(EModifierKey::Shift)
-			]
-		]
-	];
-
-	auto AutoTimeProperty = PROPERTY(AutoTime);
+	auto AutoTimeProperty = DataProperty->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDialogPhraseInfo, AutoTime));
 	bool isAutoTime;
 	AutoTimeProperty->GetValue(isAutoTime);
-	AutoTimeProperty->SetOnPropertyValueChanged(FSimpleDelegate::CreateSP(this, &FPhraseNodeDetails::OnForceRefreshDetails));
-
-	//auto CustomConditionsProperty = PROPERTY(CustomConditions);
-	//auto CustomEventsProperty = PROPERTY(CustomEvents);
+	AutoTimeProperty->SetOnPropertyValueChanged(FSimpleDelegate::CreateLambda([&DetailLayout]()
+	{
+		DetailLayout.ForceRefreshDetails();
+	}));
 	
-	if (isAutoTime)
-		Layout->HideProperty(PROPERTY(PhraseManualTime));
+	for (uint32 i = 0; i < DataPropertyCount; i++)
+	{
+		auto prop = DataProperty->GetChildHandle(i);
+		auto name = prop->GetProperty()->GetName();
+
+		auto& categoty = DetailLayout.EditCategory(FName(*prop->GetMetaData("Category")));
+
+		if (name == "Text")
+		{
+			FText Text;
+			prop->GetValue(Text);
+
+			categoty.AddCustomRow(prop->GetPropertyDisplayName()).NameContent()
+			[
+				prop->CreatePropertyNameWidget()
+			]
+			.ValueContent()
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Fill)
+			[
+				SNew(SBox)
+				.HAlign(HAlign_Fill)
+				.VAlign(VAlign_Fill)
+				.MinDesiredHeight(150)
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					.FillWidth(1.0f)
+					[
+						SNew(SMultiLineEditableTextBox)
+						.Text(Text)
+						.SelectAllTextWhenFocused(false)
+						.ClearKeyboardFocusOnCommit(true)
+						.OnTextCommitted_Lambda([prop](const FText& NewText, ETextCommit::Type Type) 
+						{
+							prop->SetValue(NewText);
+						})
+						.SelectAllTextOnCommit(false)
+						.AutoWrapText(true)
+						.ModiferKeyForNewLine(EModifierKey::Shift)
+					]
+				]
+			];
+		}
+		else if (name == "PhraseManualTime" && isAutoTime)
+		{
+			continue;
+		}
+		else
+		{
+			categoty.AddProperty(prop);
+		}
+	}
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
-
-void FPhraseNodeDetails::OnTextCommitted(const FText& NewText, ETextCommit::Type Type)
-{
-	TextProperty->SetValue(NewText);
-}
-
-void FPhraseNodeDetails::OnTextChanged(const FText& NewText)
-{
-	TextProperty->SetValue(NewText);
-}
-
-void FPhraseNodeDetails::OnForceRefreshDetails()
-{
-	if (Layout != NULL)
-		Layout->ForceRefreshDetails();
-}
 
 #undef LOCTEXT_NAMESPACE

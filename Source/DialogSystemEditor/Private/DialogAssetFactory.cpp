@@ -4,6 +4,8 @@
 #include "DialogEditorNodes.h"
 #include "DialogAsset.h"
 #include "DialogScript.h"
+#include "Kismet2/BlueprintEditorUtils.h"
+#include "Kismet2/KismetEditorUtilities.h"
 
 UDialogAssetFactory::UDialogAssetFactory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -17,6 +19,7 @@ UObject* UDialogAssetFactory::FactoryCreateNew(UClass* Class, UObject* InParent,
 {
 	UDialogAsset* asset = NewObject<UDialogAsset>(InParent, Class, Name, Flags | RF_Transactional);
 	asset->Name = Name;
+
 	return asset;
 }
 

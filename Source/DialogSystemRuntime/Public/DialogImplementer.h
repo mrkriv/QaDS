@@ -11,13 +11,6 @@ class URootNode;
 class UPhraseNode;
 class UDialogNodeEditorBase;
 
-UENUM(BlueprintType)
-enum class EDialogPhraseSource : uint8
-{
-	Player,
-	Interlocutor,
-};
-
 USTRUCT(BlueprintType)
 struct DIALOGSYSTEMRUNTIME_API FDialogAnswerInfo
 {
@@ -31,21 +24,6 @@ struct DIALOGSYSTEMRUNTIME_API FDialogAnswerInfo
 
 	UPROPERTY(BlueprintReadOnly)
 	bool Read;
-};
-
-USTRUCT(BlueprintType)
-struct DIALOGSYSTEMRUNTIME_API FDialogPhraseInfo
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadOnly)
-	EDialogPhraseSource Source;
-
-	UPROPERTY(BlueprintReadOnly)
-	FText Text;
-
-	UPROPERTY(BlueprintReadOnly)
-	USoundBase* Sound;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDialogEndSignature);

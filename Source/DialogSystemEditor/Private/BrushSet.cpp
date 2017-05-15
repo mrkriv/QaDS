@@ -5,8 +5,6 @@
 #include "CanvasTypes.h"
 #include "Runtime/Core/Public/Misc/Paths.h"
 #include "SlateGameResources.h" 
-#include "Runtime/ImageWrapper/Public/Interfaces/IImageWrapper.h"
-#include "Runtime/ImageWrapper/Public/Interfaces/IImageWrapperModule.h"
 
 TSharedPtr<FSlateStyleSet> FBrushSet::NodeStyleInstance = NULL;
 
@@ -56,61 +54,4 @@ void FBrushSet::ReloadTextures()
 const ISlateStyle& FBrushSet::Get()
 {
 	return *NodeStyleInstance;
-}
-
-void UDefaultAssetThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget*, FCanvas* Canvas)
-{
-	UTexture2D* GridTexture = NULL;
-
-	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
-
-	IImageWrapperPtr ImageWrapper = ImageWrapperModule.CreateImageWrapper(EImageFormat::PNG);
-
-	TArray<uint8> RawFileData;
-	if (!FFileHelper::LoadFileToArray(RawFileData, *GetIconPath()))
-		return;
-
-	if (ImageWrapper.IsValid() && ImageWrapper->SetCompressed(RawFileData.GetData(), RawFileData.Num()))
-	{
-		const TArray<uint8>* UncompressedBGRA = NULL;
-		if (ImageWrapper->GetRaw(ERGBFormat::BGRA, 8, UncompressedBGRA))
-		{
-			GridTexture = UTexture2D::CreateTransient(ImageWrapper->GetWidth(), ImageWrapper->GetHeight(), PF_B8G8R8A8);
-			if (GridTexture)
-			{
-				Width = ImageWrapper->GetWidth();
-				Height = ImageWrapper->GetHeight();
-
-				void* TextureData = GridTexture->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
-				FMemory::Memcpy(TextureData, UncompressedBGRA->GetData(), UncompressedBGRA->Num());
-				GridTexture->PlatformData->Mips[0].BulkData.Unlock();
-
-				GridTexture->UpdateResource();
-			}
-		}
-	}
-
-	if (GridTexture == NULL)
-		return;
-
-	Canvas->DrawTile(
-		(float)X, (float)Y,
-		(float)Width, (float)Height,
-		0.0f, 0.0f,
-		4.0f, 4.0f,
-		FLinearColor::White,
-		GridTexture->Resource,
-		false);
-}
-
-FString UDialogAssetThumbnailRenderer::GetIconPath()
-{
-	auto brus = FBrushSet::Get().GetBrush("DialogSystem.DialogAsset");
-	return brus->GetResourceName().ToString();
-}
-
-FString UDialogScriptThumbnailRenderer::GetIconPath()
-{
-	auto brus = FBrushSet::Get().GetBrush("DialogSystem.DialogScript");
-	return brus->GetResourceName().ToString();
 }

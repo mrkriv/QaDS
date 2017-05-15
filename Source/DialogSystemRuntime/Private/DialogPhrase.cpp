@@ -13,7 +13,7 @@ void UDialogNode::Invoke(class UDialogImplementer* Implementer)
 {
 }
 
-bool UDialogNode::Check(UDialogImplementer* Implementer) const
+bool UDialogNode::Check(UDialogImplementer* Implementer)
 {
 	return false;
 }
@@ -23,50 +23,36 @@ TArray<UDialogNode*> UDialogNode::GetChilds()
 	return Childs;
 }
 
-void UDialogNode::AddEvent(TArray<FDialogPhraseEvent>* Array, const FDialogPhraseEvent& Event)
-{
-	auto ev = Event;
-	ev.OwnerNode = this;
-	Array->Add(ev);
-}
-
-void UDialogNode::AddCondition(TArray<FDialogPhraseCondition>* Array, const FDialogPhraseCondition& Event)
-{
-	auto cond = Event;
-	cond.OwnerNode = this;
-	Array->Add(cond);
-}
-
 void UDialogPhrase::Invoke(UDialogImplementer* Implementer)
 {
-	for (auto key : GiveKeys)
+	for (auto key : Data.GiveKeys)
 		UStoryKeyManager::AddKey(key);
 
-	for (auto key : RemoveKeys)
+	for (auto key : Data.RemoveKeys)
 		UStoryKeyManager::RemoveKey(key);
 	
 	if (UID.IsValid())
 		UStoryKeyManager::AddKey(*(Implementer->Asset->Name.ToString() + UID.ToString()), EStoryKeyTypes::DialogPhrases);
 
-	for (auto& Event : CustomEvents)
+	for (auto& Event : Data.CustomEvents)
 		Event.Invoke(Implementer);
 }
 
-bool UDialogPhrase::Check(UDialogImplementer* Implementer) const
+bool UDialogPhrase::Check(UDialogImplementer* Implementer)
 {
-	for (auto key : CheckHasKeys)
+	for (auto key : Data.CheckHasKeys)
 	{
 		if (UStoryKeyManager::DontHasKey(key))
 			return false;
 	}
 
-	for (auto key : CheckDontHasKeys)
+	for (auto key : Data.CheckDontHasKeys)
 	{
 		if (UStoryKeyManager::HasKey(key))
 			return false;
 	}
 
-	for (auto& Conditions : CustomConditions)
+	for (auto& Conditions : Data.CustomConditions)
 	{
 		if (!Conditions.InvokeCheck(Implementer))
 			return false;

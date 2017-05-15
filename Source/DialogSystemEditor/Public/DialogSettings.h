@@ -12,23 +12,26 @@ class DIALOGSYSTEMEDITOR_API UDialogSettings : public UObject
 	GENERATED_UCLASS_BODY()
 
 	UPROPERTY(config, EditAnywhere, Category = Settings)
-	bool AutoCompile = true;
+	bool AutoCompile;
+
+	UPROPERTY(config, EditAnywhere, Category = Settings)
+	bool MemorizeReadingPhrase;
 
 	UPROPERTY(config, EditAnywhere, Category = "Settings|Editor Style")
-	FLinearColor NodeButtonDefault = FLinearColor(0.9f, 0.9f, 0.9f);
+	FLinearColor NodeButtonDefault;
 
 	UPROPERTY(config, EditAnywhere, Category = "Settings|Editor Style")
-	FLinearColor NodeButtonHovered = FLinearColor(0.02f, 0.02f, 0.02f);
+	FLinearColor NodeButtonHovered;
 
 	UPROPERTY(config, EditAnywhere, Category = "Settings|Editor Style")
-	FLinearColor NodeRoot = FLinearColor(0.0f, 0.4f, 1.0f);
+	FLinearColor NodeRoot;
 
 	UPROPERTY(config, EditAnywhere, Category = "Settings|Editor Style")
-	FLinearColor NodePlayer = FLinearColor(1.0f, 0.4f, 0.0f);
+	FLinearColor NodePlayer;
 
 	UPROPERTY(config, EditAnywhere, Category = "Settings|Editor Style")
-	FLinearColor NodeNPC = FLinearColor(0.08f, 0.08f, 0.08f);
+	FLinearColor NodeNPC;
 
 	UPROPERTY(config, EditAnywhere, Category = "Settings|Editor Style")
-	int FontSize = 14;
+	int FontSize;
 };

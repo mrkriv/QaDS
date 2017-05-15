@@ -1,7 +1,6 @@
 // Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #pragma once
 
-
 #include "Engine/DataAsset.h"
 #include "DialogPhrase.h"
 #include "DialogAsset.generated.h"

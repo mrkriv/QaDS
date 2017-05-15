@@ -4,6 +4,9 @@
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "StoryInformationManager.h"
 #include "EdGraph/EdGraph.h"
+#include "EdGraphSchema_K2.h"
+#include "EdGraphUtilities.h"
+#include "Kismet2/BlueprintEditorUtils.h"
 #include "DialogEditorNodes.h"
 #include "DialogSettings.h"
 #include "DialogAsset.h"
@@ -46,7 +49,8 @@ void UDialogNodeEditorBase::PostEditChangeProperty(struct FPropertyChangedEvent&
 
 UPhraseNode::UPhraseNode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
-{	
+{
+	Data.Source = EDialogPhraseSource::Interlocutor;
 }
 
 void UPhraseNode::AllocateDefaultPins()
@@ -57,7 +61,14 @@ void UPhraseNode::AllocateDefaultPins()
 
 FLinearColor UPhraseNode::GetNodeTitleColor() const
 {
-	return IsPlayer ? GetDefault<UDialogSettings>()->NodePlayer : GetDefault<UDialogSettings>()->NodeNPC;
+	if (Data.Source == EDialogPhraseSource::Player)
+	{
+		return GetDefault<UDialogSettings>()->NodePlayer;
+	}
+	else
+	{
+		return GetDefault<UDialogSettings>()->NodeNPC;
+	}
 }
 
 FText UPhraseNode::GetTooltipText() const
@@ -67,10 +78,10 @@ FText UPhraseNode::GetTooltipText() const
 
 FText UPhraseNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
-	if (Text.IsEmpty())
+	if (Data.Text.IsEmpty())
 		return FText::FromString("Phrase");
 
-	return Text;
+	return Data.Text;
 }
 
 void UPhraseNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
@@ -81,7 +92,7 @@ void UPhraseNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 UPhrasePlayerNode::UPhrasePlayerNode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	IsPlayer = true;
+	Data.Source = EDialogPhraseSource::Player;
 }
 
 //URootNode...........................................................................................

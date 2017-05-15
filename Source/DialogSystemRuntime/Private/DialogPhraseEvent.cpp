@@ -11,20 +11,20 @@
 
 #define ERROR(Message, ...) ErrorMessage =  FString::Printf(TEXT(Message), ##__VA_ARGS__); return false
 
-bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& isNeedUpdateProp)
+bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 {
 	if (EventName.IsNone())
 	{
 		ERROR("Event name is empty");
 	}
 
+	if (ObjectClass == NULL && CallType != EDialogPhraseEventCallType::DialogScript)
+	{
+		ERROR("Object class	is empty");
+	}
+
 	switch (CallType)
 	{
-	case EDialogPhraseEventCallType::Player:
-		break;
-	case EDialogPhraseEventCallType::Interlocutor:
-		break;
-
 	case EDialogPhraseEventCallType::DialogScript:
 		if (!OwnerNode || !OwnerNode->OwnerDialog)
 			break;
@@ -33,27 +33,15 @@ bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& isNeedUpdateProp)
 		{
 			ERROR("DialogScript not found, pleass select dialog script class in root node");
 		}
+
+		ObjectClass = OwnerNode->OwnerDialog->DialogScriptClass;
+		break;
 		
-		return CompileParametrs(OwnerNode->OwnerDialog->DialogScriptClass->GetDefaultObject(), ErrorMessage, isNeedUpdateProp);
-		
-	case EDialogPhraseEventCallType::CreateNew:
-		if (ObjectClass == NULL)
-		{
-			ERROR("Object class	is empty");
-		}
-		if (ObjectClass->IsChildOf(AActor::StaticClass()))
-		{
-			ERROR("Object class can not be an actor");
-		}
+	case EDialogPhraseEventCallType::Player:
+	case EDialogPhraseEventCallType::Interlocutor:
 		break;
 
 	case EDialogPhraseEventCallType::FindByTag:
-
-		if (ObjectClass == NULL)
-		{
-			ERROR("Object class	is empty");
-		}
-
 		if (FindTag.IsEmpty())
 		{
 			ERROR("Find tag is empty");
@@ -69,134 +57,66 @@ bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& isNeedUpdateProp)
 		ERROR("Unknown call type");
 	}
 
-	return true;
-}
-
-bool FDialogPhraseEvent::CompileParametrs(UObject* Object, FString& ErrorMessage, bool& isNeedUpdateProp)
-{
-	ParameterData.Reset();
-
-	if (Object == NULL)
-	{
-		ERROR("Target object not found");
-	}
-
-	auto func = Object->FindFunction(EventName);
+	auto func = ObjectClass->ClassDefaultObject->FindFunction(EventName);
 	if (func == NULL)
 	{
-		ERROR("%s have not function %s", *Object->GetName(), *EventName.ToString());
+		ERROR("Function %s not found", *EventName.ToString());
 	}
 
-	TMap<UProperty*, FDialogPhraseEventParam> params;
-
-	for (auto& param : Parameters)
+	TArray<UProperty*> params;
+	for (TFieldIterator<UProperty> PropIt(func); PropIt && (PropIt->PropertyFlags & CPF_Parm); ++PropIt)
 	{
-		auto prop = func->PropertyLink;
-		while (prop != NULL)
-		{
-			if (prop->ArrayDim != 1)
-			{
-				ERROR("Array argument not supported. (%s.%s in %s)", *EventName.ToString(), *prop->GetName(), *Object->GetName());
-			}
-
-			if (param.Name == prop->GetName())
-				params.Add(prop, param);
-
-			prop = prop->PropertyLinkNext;
-		}
+		params.Add(*PropIt);
 	}
 
-	if (params.Num() != func->NumParms || Parameters.Num() != func->NumParms)
+	if(params.Num() != Parameters.Num())
+		needUpdate = true;
+
+	while (params.Num() < Parameters.Num())
 	{
-		TArray<FDialogPhraseEventParam> newParameters;
-		isNeedUpdateProp = true; 
-		params.Reset();
-		int offest = 0;
-
-		auto prop = func->PropertyLink;
-		while (prop != NULL && params.Num() < func->NumParms)
-		{
-			FDialogPhraseEventParam param;
-			param.Name = prop->GetName();
-			param.Type = prop->GetClass()->GetName().Replace(TEXT("Property"), TEXT(""));
-			param.IsOut = (prop->GetPropertyFlags() & CPF_OutParm) != 0;
-			param.Size = prop->GetSize();
-			param.Offest = offest;
-
-			offest += param.Size;
-
-			for (auto p : Parameters)
-			{
-				if (p.Name == param.Name)
-				{
-					param.Value = p.Value;
-					break;
-				}
-			}
-
-			newParameters.Add(param);
-			params.Add(prop, param);
-
-			prop = prop->PropertyLinkNext;
-		}
-
-		Parameters = newParameters;
+		Parameters.RemoveAt(Parameters.Num() - 1);
+	}
+	while (params.Num() > Parameters.Num())
+	{
+		Parameters.Add("0");
 	}
 
-	auto prop = func->PropertyLink;
-	while (prop != NULL)
-	{
-		if (params.Contains(prop) && !params[prop].Compile(prop, ParameterData, ErrorMessage))
-		{
-			if (ErrorMessage.IsEmpty())
-			{
-				ERROR("Argument type not supported. (%s.%s in %s)", *EventName.ToString(), *prop->GetName(), *Object->GetName());
-			}
-			return false;
-		}
+	Command = EventName.ToString();
 
-		prop = prop->PropertyLinkNext;
+	for (auto& p : Parameters)
+	{
+		Command.AppendChar(' ');
+		Command.Append(p);
 	}
 
 	return true;
 }
 
-bool FDialogPhraseEventParam::Compile(const UProperty* Property, TArray<uint8>& ParameterData, FString& ErrorMessage) const
+bool FDialogPhraseCondition::Compile(FString& ErrorMessage, bool& needUpdate)
 {
-	ParameterData.AddDefaulted(Property->GetSize());
-	void* ptr = (void*)(&ParameterData[0] + ParameterData.Num() - Property->GetSize());
+	if (!Super::Compile(ErrorMessage, needUpdate))
+		return false;
 
-	if (Property->IsA(UIntProperty::StaticClass()))
-	{
-		Cast<UIntProperty>(Property)->SetPropertyValue(ptr, FCString::Atoi(*Value));
-		return true;
-	}
-	else if (Property->IsA(UFloatProperty::StaticClass()))
-	{
-		Cast<UFloatProperty>(Property)->SetPropertyValue(ptr, FCString::Atof(*Value));
-		return true;
-	}
-	//else if (Property->IsA(UStrProperty::StaticClass()))
-	//{
-	//	Cast<UStrProperty>(Property)->SetPropertyValue(ptr, Value);
-	//	return true;
-	//}
-	else if (Property->IsA(UBoolProperty::StaticClass()))
-	{
-		bool value = Value.ToLower() == "true" | Value == "1";
-		Cast<UBoolProperty>(Property)->SetPropertyValue(ptr, value);
+	auto func = ObjectClass->ClassDefaultObject->FindFunction(EventName);
 
-		return true;
-	}
-	else if (Property->IsA(UByteProperty::StaticClass()))
+	int found = 0;
+	for (TFieldIterator<UProperty> It(func); It && (It->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == CPF_Parm; ++It)
 	{
-		Cast<UByteProperty>(Property)->SetPropertyValue(ptr, (uint8)FCString::Atoi(*Value));
-		return true;
+		if (It->IsA(UBoolProperty::StaticClass()))
+			found++;
 	}
 
-	return false;
+	if (found == 0)
+	{
+		ERROR("Function %s does not return a boolean value", *EventName.ToString());
+	}
+	else if (found > 1)
+	{
+		ERROR("Function %s returns several Boolean values", *EventName.ToString());
+	}
+
+	return true;
 }
-
 #undef ERROR
 
 
@@ -216,11 +136,6 @@ UObject* FDialogPhraseEvent::GetObject(UDialogImplementer* Implementer) const
 
 	case EDialogPhraseEventCallType::Interlocutor:
 		obj = Implementer->Interlocutor;
-		break;
-
-	case EDialogPhraseEventCallType::CreateNew:
-		obj = NewObject<UObject>(Implementer, ObjectClass);
-		obj->PostLoad();
 		break;
 
 	case EDialogPhraseEventCallType::FindByTag:
@@ -257,72 +172,157 @@ UObject* FDialogPhraseEvent::GetObject(UDialogImplementer* Implementer) const
 	return obj;
 }
 
-void FDialogPhraseEvent::Invoke(UDialogImplementer* Implementer) const
+void FDialogPhraseEvent::Invoke(UDialogImplementer* Implementer)
 {
 	auto obj = GetObject(Implementer);
 	if (obj != NULL)
 	{
-		auto func = obj->FindFunction(EventName);
-
-		if (func != NULL)
-		{
-			if (func->ParmsSize == ParameterData.Num())
-			{
-				obj->ProcessEvent(func, const_cast<uint8*>(ParameterData.GetData()));
-
-				//FTimerDynamicDelegate Delegate;
-				//Delegate.BindUFunction(obj, EventName);
-				//Delegate.Execute();
-			}
-			else
-			{
-				UE_LOG(DialogModuleLog, Error, TEXT("Invalid function signature %s.%s. Please recompile '%s' dialog"), *obj->GetName(), *EventName.ToString(), *Implementer->Asset->GetName())
-				UE_LOG(DialogModuleLog, Error, TEXT("Expected signature:"))
-
-				if (Parameters.Num() != 0)
-				{
-					for (auto param : Parameters)
-						UE_LOG(DialogModuleLog, Error, TEXT("%s = '%s'"), *param.Name, *param.Value)
-				}
-				else
-					UE_LOG(DialogModuleLog, Error, TEXT("Not have argument"))
-			}
-		}
-		else
-			UE_LOG(DialogModuleLog, Error, TEXT("Function %s.%s not found"), *obj->GetName(), *EventName.ToString())
+		auto ar = FOutputDeviceRedirector::Get();
+		obj->CallFunctionByNameWithArguments(*Command, *ar, obj, true);
 	}
 	else
-		UE_LOG(DialogModuleLog, Error, TEXT("Object for function call not found"))
+		UE_LOG(DialogModuleLog, Error, TEXT("Object for function call not found"));
 }
 
-
-bool FDialogPhraseCondition::Compile(FString& ErrorMessage, bool& isNeedUpdateProp)
-{
-	return Super::Compile(ErrorMessage, isNeedUpdateProp);
-}
-
-bool FDialogPhraseCondition::InvokeCheck(class UDialogImplementer* Implementer) const
+bool FDialogPhraseCondition::InvokeCheck(class UDialogImplementer* Implementer)
 {
 	auto obj = GetObject(Implementer);
 	if (obj != NULL)
 	{
-		auto func = obj->FindFunction(EventName);
-		if (func != NULL)
-		{
-			if (func->NumParms == 1 && func->Children[0].IsA(UBoolProperty::StaticClass()))
-			{
-				FDialogConditionDelegate Delegate;
-				Delegate.BindUFunction(obj, EventName);
+		bool checkResult;
 
-				if (!Delegate.Execute())
-					return InvertCondition;
-			}
-			else
-				UE_LOG(DialogModuleLog, Error, TEXT("Function %s.%s must return only a Boolean value and do not have input parameters"), *obj->GetName(), *EventName.ToString())
+		if (!CallCheckFunction(obj, *Command, checkResult) || !checkResult)
+		{
+			return InvertCondition;
 		}
-		else
-			UE_LOG(DialogModuleLog, Error, TEXT("Function %s.%s not found"), *obj->GetName(), *EventName.ToString())
 	}
+	else
+		UE_LOG(DialogModuleLog, Error, TEXT("Object for function call not found"));
 
 	return !InvertCondition;
+}
+
+
+// Copy from ScriptCore.cpp UObject::CallFunctionByNameWithArguments
+bool FDialogPhraseCondition::CallCheckFunction(UObject* Executor, const TCHAR* Str, bool& checkResult)
+{
+	FString MsgStr;
+	if (!FParse::Token(Str, MsgStr, true))
+	{
+		UE_LOG(DialogModuleLog, Error, TEXT("CallFunctionByNameWithArguments: Not Parsed '%s'"), Str);
+		return false;
+	}
+	const FName Message = FName(*MsgStr, FNAME_Find);
+	if (Message == NAME_None)
+	{
+		UE_LOG(DialogModuleLog, Error, TEXT("CallFunctionByNameWithArguments: Name not found '%s'"), Str);
+		return false;
+	}
+	UFunction* Function = Executor->FindFunction(Message);
+	if (nullptr == Function)
+	{
+		UE_LOG(DialogModuleLog, Error, TEXT("CallFunctionByNameWithArguments: Function not found '%s'"), Str);
+		return false;
+	}
+
+	UProperty* LastParameter = nullptr;
+
+	// find the last parameter
+	for (TFieldIterator<UProperty> It(Function); It && (It->PropertyFlags&(CPF_Parm | CPF_ReturnParm)) == CPF_Parm; ++It)
+	{
+		LastParameter = *It;
+	}
+
+	// Parse all function parameters.
+	uint8* Parms = (uint8*)FMemory_Alloca(Function->ParmsSize);
+	FMemory::Memzero(Parms, Function->ParmsSize);
+
+	const uint32 ExportFlags = PPF_Localized;
+	bool Failed = 0;
+	int32 NumParamsEvaluated = 0;
+	for (TFieldIterator<UProperty> It(Function); It && (It->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == CPF_Parm; ++It, NumParamsEvaluated++)
+	{
+		UProperty* PropertyParam = *It;
+		checkSlow(PropertyParam); // Fix static analysis warning
+		if (NumParamsEvaluated == 0 && Executor)
+		{
+			UObjectPropertyBase* Op = dynamic_cast<UObjectPropertyBase*>(*It);
+			if (Op && Executor->IsA(Op->PropertyClass))
+			{
+				// First parameter is implicit reference to object executing the command.
+				Op->SetObjectPropertyValue(Op->ContainerPtrToValuePtr<uint8>(Parms), Executor);
+				continue;
+			}
+		}
+
+		// Keep old string around in case we need to pass the whole remaining string
+		const TCHAR* RemainingStr = Str;
+
+		// Parse a new argument out of Str
+		FString ArgStr;
+		FParse::Token(Str, ArgStr, true);
+
+		// if ArgStr is empty but we have more params to read parse the function to see if these have defaults, if so set them
+		bool bFoundDefault = false;
+		bool bFailedImport = true;
+		if (!FCString::Strcmp(*ArgStr, TEXT("")))
+		{
+			const FName DefaultPropertyKey(*(FString(TEXT("CPP_Default_")) + PropertyParam->GetName()));
+#if WITH_EDITOR
+			const FString PropertyDefaultValue = Function->GetMetaData(DefaultPropertyKey);
+#else
+			const FString PropertyDefaultValue = TEXT("");
+#endif
+			if (!PropertyDefaultValue.IsEmpty())
+			{
+				bFoundDefault = true;
+
+				const TCHAR* Result = It->ImportText(*PropertyDefaultValue, It->ContainerPtrToValuePtr<uint8>(Parms), ExportFlags, NULL);
+				bFailedImport = (Result == nullptr);
+			}
+		}
+
+		if (!bFoundDefault)
+		{
+			// if this is the last string property and we have remaining arguments to process, we have to assume that this
+			// is a sub-command that will be passed to another exec (like "cheat giveall weapons", for example). Therefore
+			// we need to use the whole remaining string as an argument, regardless of quotes, spaces etc.
+			if (PropertyParam == LastParameter && PropertyParam->IsA<UStrProperty>() && FCString::Strcmp(Str, TEXT("")) != 0)
+			{
+				ArgStr = FString(RemainingStr).Trim();
+			}
+
+			const TCHAR* Result = It->ImportText(*ArgStr, It->ContainerPtrToValuePtr<uint8>(Parms), ExportFlags, NULL);
+			bFailedImport = (Result == nullptr);
+		}
+
+		if (bFailedImport)
+		{
+			UE_LOG(DialogModuleLog, Error, TEXT("'%s': Bad or missing property '%s'"), *Message.ToString(), *It->GetName());
+			Failed = true;
+
+			break;
+		}
+
+	}
+
+	if (!Failed)
+	{
+		Executor->ProcessEvent(Function, Parms);
+	}
+
+	//!!destructframe see also UObject::ProcessEvent
+	for (TFieldIterator<UProperty> It(Function); It && (It->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == CPF_Parm; ++It)
+	{
+		// Copy result in params
+		if (UBoolProperty* BoolProperty = Cast<UBoolProperty>(*It))
+		{
+			checkResult = BoolProperty->GetPropertyValue(It->ContainerPtrToValuePtr<uint8>(Parms));
+		}
+
+		It->DestroyValue_InContainer(Parms);
+	}
+
+	// Success.
+	return true;
 }

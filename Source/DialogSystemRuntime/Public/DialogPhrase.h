@@ -8,6 +8,55 @@
 #include "DialogPhraseEvent.h"
 #include "DialogPhrase.generated.h"
 
+UENUM(BlueprintType)
+enum class EDialogPhraseSource : uint8
+{
+	Player,
+	Interlocutor,
+};
+
+USTRUCT(BlueprintType)
+struct DIALOGSYSTEMRUNTIME_API FDialogPhraseInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
+	FText Text;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
+	bool Important = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
+	bool AutoTime = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
+	float PhraseManualTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
+	USoundBase* Sound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
+	EDialogPhraseSource Source;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
+	TArray<FName> CheckHasKeys;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
+	TArray<FName> CheckDontHasKeys;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
+	TArray<FDialogPhraseCondition> CustomConditions;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Activate")
+	TArray<FName> GiveKeys;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Activate")
+	TArray<FName> RemoveKeys;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Activate")
+	TArray<FDialogPhraseEvent> CustomEvents;
+};
+
 UCLASS()
 class DIALOGSYSTEMRUNTIME_API UDialogNode : public UObject
 {
@@ -21,10 +70,7 @@ public:
 	class UDialogAsset* OwnerDialog;
 
 	virtual void Invoke(class UDialogImplementer* Implementer);
-	virtual bool Check(class UDialogImplementer* Implementer) const;
-
-	void AddEvent(TArray<FDialogPhraseEvent>* Array, const FDialogPhraseEvent& Event);
-	void AddCondition(TArray<FDialogPhraseCondition>* Array, const FDialogPhraseCondition& Event);
+	virtual bool Check(class UDialogImplementer* Implementer);
 
 	TArray<UDialogNode*> GetChilds();
 };
@@ -34,47 +80,15 @@ class DIALOGSYSTEMRUNTIME_API UDialogPhrase : public UDialogNode
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(BlueprintReadOnly)
-	FText Text;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool AutoTime = true;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool Important = true;
-
-	UPROPERTY(BlueprintReadOnly)
-	float PhraseManualTime;
 
 	UPROPERTY(BlueprintReadOnly)
 	FGuid UID;
 
 	UPROPERTY(BlueprintReadOnly)
-	USoundBase* Sound;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool IsPlayer;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FName> CheckHasKeys;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FName> CheckDontHasKeys;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FName> GiveKeys;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FName> RemoveKeys;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FDialogPhraseCondition> CustomConditions;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FDialogPhraseEvent> CustomEvents;
+	FDialogPhraseInfo Data;
 
 	void Invoke(class UDialogImplementer* Implementer) override;
-	bool Check(class UDialogImplementer* Implementer) const override;
+	bool Check(class UDialogImplementer* Implementer) override;
 };
 
 UCLASS()

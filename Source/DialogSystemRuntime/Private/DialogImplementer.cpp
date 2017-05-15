@@ -89,11 +89,7 @@ void UDialogImplementer::Next(int PhraseIndex)
 	bool isPlayerNext;
 	GetValidPhrases(NextNodes, CurrentNode->GetChilds(), isPlayerNext);
 
-	FDialogPhraseInfo phraseInfo;
-	phraseInfo.Text = CurrentNode->Text;
-	phraseInfo.Sound = CurrentNode->Sound;
-
-	if (CurrentNode->IsPlayer)
+	if (CurrentNode->Data.Source == EDialogPhraseSource::Player)
 	{
 		if (isPlayerNext)
 		{
@@ -102,8 +98,7 @@ void UDialogImplementer::Next(int PhraseIndex)
 			return;
 		}
 
-		phraseInfo.Source = EDialogPhraseSource::Player;
-		OnActivatePhrase.Broadcast(phraseInfo);
+		OnActivatePhrase.Broadcast(CurrentNode->Data);
 		if (DialogScript != NULL)
 			DialogScript->ActivatePhrase();
 
@@ -118,8 +113,8 @@ void UDialogImplementer::Next(int PhraseIndex)
 			for (auto& node : NextNodes)
 			{
 				FDialogAnswerInfo answerInfo;
-				answerInfo.Text = node->Text;
-				answerInfo.Important = node->Important;
+				answerInfo.Text = node->Data.Text;
+				answerInfo.Important = node->Data.Important;
 				answerInfo.Read = 
 					node->UID.IsValid() &&
 					UStoryKeyManager::HasKey(*(Asset->Name.ToString() + node->UID.ToString()), EStoryKeyTypes::DialogPhrases);
@@ -130,8 +125,7 @@ void UDialogImplementer::Next(int PhraseIndex)
 		else
 			DelayNext();
 
-		phraseInfo.Source = EDialogPhraseSource::Interlocutor;
-		OnActivatePhrase.Broadcast(phraseInfo);
+		OnActivatePhrase.Broadcast(CurrentNode->Data);
 		
 		if (DialogScript != NULL)
 			DialogScript->ActivatePhrase();
@@ -157,16 +151,16 @@ void UDialogImplementer::DelayNext()
 
 float UDialogImplementer::GetPhraseTime()
 {
-	if (!CurrentNode->AutoTime)
-		return CurrentNode->PhraseManualTime;
-	else if (CurrentNode->Sound != NULL)
-		return CurrentNode->Sound->Duration;
+	if (!CurrentNode->Data.AutoTime)
+		return CurrentNode->Data.PhraseManualTime;
+	else if (CurrentNode->Data.Sound != NULL)
+		return CurrentNode->Data.Sound->Duration;
 	else
 	{
-		if (CurrentNode->IsPlayer)
+		if (CurrentNode->Data.Source == EDialogPhraseSource::Player)
 			return 0.0f;
 
-		int len = CurrentNode->Text.ToString().Len();
+		int len = CurrentNode->Data.Text.ToString().Len();
 		return .2f + len * 0.05f;
 	}
 }
@@ -184,9 +178,9 @@ bool UDialogImplementer::GetValidPhrases(TArray<UDialogPhrase*>& result, TArray<
 		{
 			if (!found)
 			{
-				IsPlayer = phrase->IsPlayer;
+				IsPlayer = phrase->Data.Source == EDialogPhraseSource::Player;
 			}
-			else if (IsPlayer != phrase->IsPlayer)
+			else if (IsPlayer != (phrase->Data.Source == EDialogPhraseSource::Player))
 			{
 				UE_LOG(DialogModuleLog, Error, TEXT("Invalid graph: Phrase cannot simultaneously refer to phrases of different types"));
 				return false;

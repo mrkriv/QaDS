@@ -41,7 +41,6 @@ public class DialogSystemEditor : ModuleRules
                 "EditorStyle",
                 "GraphEditor",
                 "BlueprintGraph",
-                "ImageWrapper",
 
 
                 "DialogSystemRuntime",

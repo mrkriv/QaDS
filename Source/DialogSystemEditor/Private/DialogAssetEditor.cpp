@@ -344,7 +344,6 @@ bool FDialogAssetEditor::CanCopyNodes() const
 
 void FDialogAssetEditor::PasteNodes()
 {
-
 	PasteNodesHere(GraphEditor->GetPasteLocation());
 }
 
@@ -473,6 +472,18 @@ void FDialogAssetEditor::OnGraphChanged(const FEdGraphEditAction& Action)
 
 void FDialogAssetEditor::OnPropertyChanged(const FPropertyChangedEvent& Event)
 {
+	if (Event.MemberProperty->GetFName().ToString() == TEXT("CustomEvents") &&
+		Event.Property->GetFName().ToString() == TEXT("EventName") ||
+		Event.MemberProperty->GetFName().ToString() == TEXT("CustomCondition") &&
+		Event.Property->GetFName().ToString() == TEXT("EventName"))
+	{
+		auto selected = GraphEditor->GetSelectedNodes();
+		GraphEditor->ClearSelectionSet();
+
+		for (auto n : selected.Array())
+			GraphEditor->SetNodeSelection(Cast<UEdGraphNode>(n), true);
+	}
+
 	if (GetDefault<UDialogSettings>()->AutoCompile)
 		CompileExecute();
 }
@@ -543,19 +554,10 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 	Node->CompilePhrase = phrase;
 
 	phrase->OwnerDialog = Cast<UDialogAsset>(EditedAsset);
-	phrase->Text = Node->Text;
-	phrase->AutoTime = Node->AutoTime;
-	phrase->Important = Node->Important;
-	phrase->PhraseManualTime = Node->PhraseManualTime;
+	phrase->Data = Node->Data;
 	phrase->UID = Node->UID;
-	phrase->Sound = Node->Sound;
-	phrase->IsPlayer = Node->IsPlayer;
-	phrase->CheckHasKeys = Node->CheckHasKeys;
-	phrase->CheckDontHasKeys = Node->CheckDontHasKeys;
-	phrase->GiveKeys = Node->GiveKeys;
-	phrase->RemoveKeys = Node->RemoveKeys;
 
-	if (Node->MemorizeReading)
+	if (GetDefault<UDialogSettings>()->MemorizeReadingPhrase)
 	{
 		if (!Node->UID.IsValid())
 			Node->UID = FGuid::NewGuid();
@@ -565,38 +567,38 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 
 	phrase->UID = Node->UID;
 
-	bool needUpdateProp = false;
-	for (auto& Event : Node->CustomEvents)
-	{
-		FString ErrorMessage;
+	bool needUpdate = false;
 
+	FString ErrorMessage;
+
+	for (auto& Event : Node->Data.CustomEvents)
+	{
 		Event.OwnerNode = phrase;
 
-		if (Event.Compile(ErrorMessage, needUpdateProp))
-			phrase->AddEvent(&phrase->CustomEvents, Event);
-		else
-			CompileLogResults.Error(*ErrorMessage);
+		if (!Event.Compile(ErrorMessage, needUpdate))
+		{
+			CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + Node->Data.Text.ToString() + "\""));
+		}
 	}
 
-	for (auto& Condition : Node->CustomConditions)
+	for (auto& Condition : Node->Data.CustomConditions)
 	{
-		FString ErrorMessage;
-
 		Condition.OwnerNode = phrase;
-		if (Condition.Compile(ErrorMessage, needUpdateProp))
-			phrase->AddCondition(&phrase->CustomConditions, Condition);
-		else
-			CompileLogResults.Error(*ErrorMessage);
-	}
 
-	bool first = true;
-	bool isPlayer = false;
+		if (!Condition.Compile(ErrorMessage, needUpdate))
+		{
+			CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + Node->Data.Text.ToString() + "\""));
+		}
+	}
 
 	auto childs = Node->GetChildNodes();
-	childs.Sort([](UDialogNodeEditorBase& a, UDialogNodeEditorBase& b)
+	childs.Sort([](auto& a, auto& b)
 	{
 		return a.NodePosX < b.NodePosX;
 	});
+
+	bool first = true;
+	EDialogPhraseSource source;
 
 	for (auto& child : childs)
 	{
@@ -606,10 +608,10 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 		{
 			if (first)
 			{
-				isPlayer = childPhrase->IsPlayer;
+				source = childPhrase->Data.Source;
 				first = false;
 			}
-			else if (isPlayer != childPhrase->IsPlayer)
+			else if (source != childPhrase->Data.Source)
 			{
 				CompileLogResults.Error(TEXT("Invalid graph: Phrase cannot simultaneously refer to phrases of different types"));
 			}
@@ -618,7 +620,7 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 		}
 	}
 
-	if (needUpdateProp)
+	if (needUpdate)
 	{
 		for (auto& obj : PropertyEditor->GetSelectedObjects())
 		{
@@ -626,8 +628,10 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 			{
 				auto selected = GraphEditor->GetSelectedNodes();
 				GraphEditor->ClearSelectionSet();
-				GraphEditor->SetNodeSelection(Node, true);
-				//PropertyEditor->SetObjects(PropertyEditor->GetSelectedObjects(), true, true);
+
+				for (auto n : selected.Array())
+					GraphEditor->SetNodeSelection(Cast<UEdGraphNode>(n), true);
+
 				break;
 			}
 		}

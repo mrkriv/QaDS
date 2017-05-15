@@ -324,21 +324,21 @@ void SGraphNode_Phrase::CreateNodeWidget()
 {
 	SGraphNode_DialogNodeBase::CreateNodeWidget();
 	
-	AddIconIF("DialogSystem.Sound", PhraseNode->Sound != NULL);
-	AddIconIF("DialogSystem.Time", !PhraseNode->AutoTime);
-	AddIconIF("DialogSystem.Book", PhraseNode->Important);
-	AddIconIF("DialogSystem.Event", PhraseNode->CustomEvents.Num() != 0);
-	AddIconIF("DialogSystem.Condition", PhraseNode->CustomConditions.Num() != 0);
+	AddIconIF("DialogSystem.Sound", PhraseNode->Data.Sound != NULL);
+	AddIconIF("DialogSystem.Time", !PhraseNode->Data.AutoTime);
+	AddIconIF("DialogSystem.Book", PhraseNode->Data.Important);
+	AddIconIF("DialogSystem.Event", PhraseNode->Data.CustomEvents.Num() != 0);
+	AddIconIF("DialogSystem.Condition", PhraseNode->Data.CustomConditions.Num() != 0);
 
-	for (auto key : PhraseNode->CheckHasKeys)
+	for (auto key : PhraseNode->Data.CheckHasKeys)
 		AddTextToContent(TEXT("IF ") + key.ToString(), FColor(255, 255, 255));
 
-	for (auto key : PhraseNode->CheckDontHasKeys)
+	for (auto key : PhraseNode->Data.CheckDontHasKeys)
 		AddTextToContent(TEXT("IF NOT ") + key.ToString(), FColor(255, 255, 255));
 
-	for (auto key : PhraseNode->GiveKeys)
+	for (auto key : PhraseNode->Data.GiveKeys)
 		AddTextToContent(TEXT("+ ") + key.ToString(), FColor(0, 255, 0));
 
-	for (auto key : PhraseNode->RemoveKeys)
+	for (auto key : PhraseNode->Data.RemoveKeys)
 		AddTextToContent(TEXT("- ") + key.ToString(), FColor(255, 0, 0));
 }
