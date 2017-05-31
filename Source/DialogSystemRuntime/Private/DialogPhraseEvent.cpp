@@ -176,7 +176,7 @@ void FDialogPhraseEvent::Invoke(UDialogImplementer* Implementer)
 {
 	auto obj = GetObject(Implementer);
 	if (obj != NULL)
-	{
+	{ 
 		auto ar = FOutputDeviceRedirector::Get();
 		obj->CallFunctionByNameWithArguments(*Command, *ar, obj, true);
 	}

@@ -4,10 +4,6 @@
 #include "DialogAsset.h"
 #include "DialogAssetEditor.h"
 #include "DialogScript.h"
-#include "Kismet2/BlueprintEditorUtils.h"
-#include "Kismet2/KismetEditorUtilities.h"
-#include "BlueprintEditorModule.h"
-#include "BlueprintEditor.h"
 
 FDialogAssetTypeActions::FDialogAssetTypeActions(EAssetTypeCategories::Type InAssetCategory)
 	: AssetCategory(InAssetCategory)

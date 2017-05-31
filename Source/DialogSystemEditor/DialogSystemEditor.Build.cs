@@ -2,21 +2,20 @@ using UnrealBuildTool;
 
 public class DialogSystemEditor : ModuleRules
 {
-    public DialogSystemEditor(TargetInfo Target)
+    public DialogSystemEditor(ReadOnlyTargetRules Target) : base(Target)
     {
-
         PublicIncludePaths.AddRange(
             new string[] {
                 "DialogSystemEditor/Public",
             }
-            );
+        );
 
 
         PrivateIncludePaths.AddRange(
             new string[] {
                 "DialogSystemEditor/Private",
             }
-            );
+        );
 
 
         PublicDependencyModuleNames.AddRange(
@@ -24,7 +23,7 @@ public class DialogSystemEditor : ModuleRules
             {
                 "Core",
             }
-            );
+        );
 
 
         PrivateDependencyModuleNames.AddRange(
@@ -41,16 +40,11 @@ public class DialogSystemEditor : ModuleRules
                 "EditorStyle",
                 "GraphEditor",
                 "BlueprintGraph",
+                "Projects",
 
 
                 "DialogSystemRuntime",
             }
-            );
-
-        DynamicallyLoadedModuleNames.AddRange(
-            new string[]
-            {
-            }
-            );
+        );
     }
 }

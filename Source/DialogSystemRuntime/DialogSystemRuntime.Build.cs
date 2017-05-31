@@ -2,7 +2,7 @@ using UnrealBuildTool;
 
 public class DialogSystemRuntime : ModuleRules
 {
-    public DialogSystemRuntime(TargetInfo Target)
+    public DialogSystemRuntime(ReadOnlyTargetRules Target) : base(Target)
     {
 
         PublicIncludePaths.AddRange(

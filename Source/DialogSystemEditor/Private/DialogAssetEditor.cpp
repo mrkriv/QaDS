@@ -9,6 +9,7 @@
 #include "EdGraphUtilities.h"
 #include "ScopedTransaction.h"
 #include "SNodePanel.h"
+#include "SGraphPanel.h"
 #include "BlueprintEditorModule.h"
 #include "PropertyEditorModule.h"
 #include "DialogSettings.h"

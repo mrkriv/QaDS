@@ -18,7 +18,7 @@ struct FDialogSchemaAction_NewNode : public FEdGraphSchemaAction
 	{}
 
 	FDialogSchemaAction_NewNode(const FText& InNodeCategory, const FText& InMenuDesc, const FString& InToolTip, const int32 InGrouping)
-		: FEdGraphSchemaAction(InNodeCategory, InMenuDesc, InToolTip, InGrouping)
+		: FEdGraphSchemaAction(InNodeCategory, InMenuDesc, FText::FromString(InToolTip), InGrouping)
 		, NodeTemplate(NULL)
 	{}
 
