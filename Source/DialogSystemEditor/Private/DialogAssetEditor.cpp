@@ -1,26 +1,38 @@
 // Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "DialogAssetEditor.h"
-#include "DialogCommands.h"
+#include "Editor.h"
 #include "DialogGraphSchema.h"
-#include "SDockTab.h"
 #include "GenericCommands.h"
 #include "BlueprintEditorUtils.h"
 #include "EdGraphUtilities.h"
+#include "Kismet2/DebuggerCommands.h"
 #include "ScopedTransaction.h"
+#include "SDockTab.h"
 #include "SNodePanel.h"
 #include "SGraphPanel.h"
+#include "Widgets/Text/STextBlock.h"
+#include "Widgets/Input/SButton.h"
+#include "Widgets/Views/SListView.h"
 #include "BlueprintEditorModule.h"
 #include "PropertyEditorModule.h"
 #include "DialogSettings.h"
 #include "DialogEditorNodes.h"
 
+#define LOCTEXT_NAMESPACE "DialogGraph"
+
 const FName DialogEditorAppName(TEXT("DialogEditorApp"));
 
 const FName FDialogAssetEditorTabs::DetailsID(TEXT("Details"));
 const FName FDialogAssetEditorTabs::GraphEditorID(TEXT("Viewport"));
+const FName FDialogAssetEditorTabs::KeysWindowID(TEXT("KeysWindow"));
 const FName FDialogAssetEditorTabs::CompilerResultsID(TEXT("CompilerResults"));
 
+void FDialogCommands::RegisterCommands()
+{
+	UI_COMMAND(Compile, "Compile", "Compile this dialog graph", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(Keys, "Keys", "View using game story information key", EUserInterfaceActionType::Button, FInputChord());
+}
 
 FName FDialogAssetEditor::GetToolkitFName() const
 {
@@ -56,7 +68,7 @@ void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, co
 
 		EditedAsset->UpdateGraph = CustGraph;
 	}
-
+	
 	GraphEditor = CreateGraphEditorWidget(EditedAsset->UpdateGraph);
 
 	const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout("DialogEditor_Layout")
@@ -82,12 +94,13 @@ void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, co
 					->SetSizeCoefficient(0.8f)
 					->SetHideTabWell(false)
 					->AddTab(FDialogAssetEditorTabs::GraphEditorID, ETabState::OpenedTab)
+					->AddTab(FDialogAssetEditorTabs::KeysWindowID, ETabState::ClosedTab)
 				)
 				->Split
 				(
 					FTabManager::NewStack()
 					->SetSizeCoefficient(0.2f)
-					->SetHideTabWell(true)
+					->SetHideTabWell(false)
 					->AddTab(FDialogAssetEditorTabs::DetailsID, ETabState::OpenedTab)
 				)
 			)
@@ -100,13 +113,15 @@ void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, co
 		);
 
 	ToolkitCommands = MakeShareable(new FUICommandList);
+	ToolkitCommands->Append(FPlayWorldCommands::GlobalPlayWorldActions.ToSharedRef());
 	ToolkitCommands->MapAction(FDialogCommands::Get().Compile, FExecuteAction::CreateSP(this, &FDialogAssetEditor::CompileExecute));
-
+	ToolkitCommands->MapAction(FDialogCommands::Get().Keys, FExecuteAction::CreateSP(this, &FDialogAssetEditor::OpenKeysWindow));
+	
 	ToolbarExtender = MakeShareable(new FExtender);
 	ToolbarExtender->AddToolBarExtension("Asset", EExtensionHook::After, ToolkitCommands, FToolBarExtensionDelegate::CreateRaw(this, &FDialogAssetEditor::BuildToolbar));
 	AddToolbarExtender(ToolbarExtender);
 
-	InitAssetEditor(Mode, InitToolkitHost, DialogEditorAppName, StandaloneDefaultLayout, /*bCreateDefaultStandaloneMenu=*/ true, /*bCreateDefaultToolbar=*/ true, Object);
+	InitAssetEditor(Mode, InitToolkitHost, DialogEditorAppName, StandaloneDefaultLayout, true, true, Object);
 
 	OnGraphChangedDelegateHandle = GraphEditor->GetCurrentGraph()->AddOnGraphChangedHandler(FOnGraphChanged::FDelegate::CreateRaw(this, &FDialogAssetEditor::OnGraphChanged));
 	bGraphStateChanged = true;
@@ -115,8 +130,14 @@ void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, co
 void FDialogAssetEditor::BuildToolbar(FToolBarBuilder &builder)
 {
 	FSlateIcon IconBrushCompile = FSlateIcon(FEditorStyle::GetStyleSetName(), "AssetEditor.ReimportAsset", "AssetEditor.ReimportAsset.Small");
+	FSlateIcon IconBrushKeys = FSlateIcon(FEditorStyle::GetStyleSetName(), "FullBlueprintEditor.EditClassDefaults", "FullBlueprintEditor.EditClassDefaults.Small");
 
-	builder.AddToolBarButton(FDialogCommands::Get().Compile, NAME_None, FText::FromString("Compile"), FText::FromString("Compile dialog graph"), IconBrushCompile, NAME_None);
+	builder.AddSeparator();
+	builder.AddToolBarButton(FDialogCommands::Get().Compile, NAME_None, FText::FromString("Compile"), FText::FromString("Compile this dialog"), IconBrushCompile, NAME_None);
+	builder.AddToolBarButton(FDialogCommands::Get().Keys, NAME_None, FText::FromString("Keys"), FText::FromString("View using GSI keys"), IconBrushKeys, NAME_None);
+	builder.AddSeparator();
+
+	FPlayWorldCommands::BuildToolbar(builder);
 }
 
 
@@ -141,6 +162,11 @@ void FDialogAssetEditor::RegisterTabSpawners(const TSharedRef<FTabManager>& InTa
 		.SetDisplayName(FText::FromString("Details"))
 		.SetGroup(WorkspaceMenuCategoryRef)
 		.SetIcon(FSlateIcon(FEditorStyle::GetStyleSetName(), "LevelEditor.Tabs.Details"));
+
+	InTabManager->RegisterTabSpawner(FDialogAssetEditorTabs::KeysWindowID, FOnSpawnTab::CreateSP(this, &FDialogAssetEditor::SpawnTab_KeysWindow))
+		.SetDisplayName(FText::FromString("Keys"))
+		.SetGroup(WorkspaceMenuCategoryRef)
+		.SetIcon(FSlateIcon(FEditorStyle::GetStyleSetName(), "LevelEditor.Tabs.Details"));
 }
 
 void FDialogAssetEditor::UnregisterTabSpawners(const TSharedRef<FTabManager>& InTabManager)
@@ -149,6 +175,7 @@ void FDialogAssetEditor::UnregisterTabSpawners(const TSharedRef<FTabManager>& In
 	
 	InTabManager->UnregisterTabSpawner(FDialogAssetEditorTabs::GraphEditorID);
 	InTabManager->UnregisterTabSpawner(FDialogAssetEditorTabs::CompilerResultsID);
+	InTabManager->UnregisterTabSpawner(FDialogAssetEditorTabs::KeysWindowID);
 	InTabManager->UnregisterTabSpawner(FDialogAssetEditorTabs::DetailsID);
 }
 
@@ -166,10 +193,14 @@ TSharedRef<SDockTab> FDialogAssetEditor::SpawnTab_CompilerResults(const FSpawnTa
 {
 	FMessageLogModule& MessageLogModule = FModuleManager::LoadModuleChecked<FMessageLogModule>("MessageLog");
 	CompilerResultsListing = MessageLogModule.CreateLogListing("DialogCompileResults");
-
+	
 	return SNew(SDockTab)
 		.Label(FText::FromString("Compile Results"))
 		.TabColorScale(GetTabColorScale())
+		.OnTabClosed_Lambda([this](auto _)
+		{
+			CompilerResultsTab.Reset();
+		})
 		[
 			MessageLogModule.CreateLogListingWidget(CompilerResultsListing.ToSharedRef())
 		];
@@ -188,6 +219,68 @@ TSharedRef<SDockTab> FDialogAssetEditor::SpawnTab_Details(const FSpawnTabArgs& A
 		[
 			PropertyEditorRef
 		];
+}
+
+TSharedRef<SDockTab> FDialogAssetEditor::SpawnTab_KeysWindow(const FSpawnTabArgs& Args)
+{
+	TSharedPtr<SVerticalBox> table;
+	
+	auto Window = SNew(SDockTab)
+		.Label(FText::FromString("Using GSI Keys"))
+		.OnTabClosed_Lambda([this](auto _)
+		{
+			KeysTab.Reset();
+		})
+		[
+			SNew(SScrollBox)
+			+ SScrollBox::Slot()
+			[
+				SAssignNew(UsingKeysListView, SListView<TSharedPtr<FUsingKey>)
+				.VAlign(VAlign_Fill)
+				.HAlign(HAlign_Fill)
+				.FillHeight(1.0f)
+				.ItemHeight(24)
+				.ListItemsSource(&UsingKeysListItems)
+				.OnGenerateRow(this, &FDialogAssetEditor::OnGenerateWidgetForUsingKeysListView)
+				.HeaderRow
+				(
+					SNew(SHeaderRow)
+					+ SHeaderRow::Column("Key")
+					+ SHeaderRow::Column("Add")
+				)
+				//SAssignNew(table, SVerticalBox)
+				//+ SVerticalBox::Slot()
+				//.VAlign(VAlign_Fill)
+				//.HAlign(HAlign_Fill)
+				//.FillHeight(1.0f)
+			]
+		];
+		
+	UpdateUsingKeysList();
+	
+	//for (auto key : UsingKeys)
+	//{
+	//	table->AddSlot()
+	//		.VAlign(VAlign_Top)
+	//		.HAlign(HAlign_Fill)
+	//		.AutoHeight()
+	//		[
+	//			SNew(SButton)
+	//			.Text(FText::FromName(key.Key))
+	//		];
+	//}
+
+	/*
+	TSharedPtr<SListView<TSharedPtr<FUsingKey>> UsingKeysListView;
+	TArray<TSharedPtr<FUsingKey>> UsingKeysListItems;
+	*/
+
+	return Window;
+}
+
+TSharedRef<ITableRow> FDialogAssetEditor::OnGenerateWidgetForUsingKeysListView(TSharedPtr<FUsingKey> InItem, const TSharedRef<STableViewBase>& OwnerTable)
+{
+
 }
 
 TSharedRef<SGraphEditor> FDialogAssetEditor::CreateGraphEditorWidget(UEdGraph* InGraph)
@@ -241,8 +334,13 @@ TSharedRef<SGraphEditor> FDialogAssetEditor::CreateGraphEditorWidget(UEdGraph* I
 	return _GraphEditor;
 }
 
-
-// Editor Actions......................................................................................................
+void FDialogAssetEditor::OpenKeysWindow()
+{
+	if (!KeysTab.IsValid() || TabManager->IsTabCloseable(KeysTab.ToSharedRef()))
+	{
+		KeysTab = TabManager->InvokeTab(FDialogAssetEditorTabs::KeysWindowID);
+	}
+}
 
 void FDialogAssetEditor::OnSelectedNodesChanged(const TSet<class UObject*>& NewSelection)
 {
@@ -256,7 +354,8 @@ void FDialogAssetEditor::OnSelectedNodesChanged(const TSet<class UObject*>& NewS
 	if(SelectedObjects.Num() == 0)
 		SelectedObjects.Add(EditedAsset);
 
-	PropertyEditor->SetObjects(SelectedObjects);
+	if(PropertyEditor.IsValid())
+		PropertyEditor->SetObjects(SelectedObjects);
 }
 
 void FDialogAssetEditor::OnNodeDoubleClicked(class UEdGraphNode* Node)
@@ -303,9 +402,8 @@ void FDialogAssetEditor::DeleteNodes(const TArray<class UEdGraphNode*>& NodesToD
 	{
 		for (int32 Index = 0; Index < NodesToDelete.Num(); ++Index)
 		{
-			if (!CanDeleteNode(NodesToDelete[Index])) {
+			if (!CanDeleteNode(NodesToDelete[Index]))
 				continue;
-			}
 
 			NodesToDelete[Index]->BreakAllNodeLinks();
 
@@ -313,7 +411,6 @@ void FDialogAssetEditor::DeleteNodes(const TArray<class UEdGraphNode*>& NodesToD
 		}
 	}
 }
-
 
 void FDialogAssetEditor::CopySelectedNodes()
 {
@@ -489,6 +586,78 @@ void FDialogAssetEditor::OnPropertyChanged(const FPropertyChangedEvent& Event)
 		CompileExecute();
 }
 
+URootNode* FDialogAssetEditor::GetRootNode()
+{
+	for (auto node : GraphEditor->GetCurrentGraph()->Nodes)
+	{
+		if (URootNode* root = Cast<URootNode>(node))
+			return root;
+	}
+
+	return NULL;
+}
+
+void FDialogAssetEditor::UpdateUsingKeysList()
+{
+	UsingKeys.Reset();
+
+	TSet<UDialogNodeEditorBase*> included;
+	UpdateUsingKeysList(GetRootNode(), included);
+
+	if (UsingKeysListView.IsValid())
+	{
+		UsingKeysListView->RequestListRefresh();
+	}
+}
+
+void FDialogAssetEditor::UpdateUsingKeysList(UDialogNodeEditorBase* Node, TSet<UDialogNodeEditorBase*>& included)
+{
+	included.Add(Node);
+
+	if (auto Phrase = Cast<UPhraseNode>(Node))
+	{
+		for (auto key : Phrase->Data.GiveKeys)
+			AddUsingKey(key, Node, true, false, false, false);
+		for (auto key : Phrase->Data.RemoveKeys)
+			AddUsingKey(key, Node, false, true, false, false);
+		for (auto key : Phrase->Data.CheckHasKeys)
+			AddUsingKey(key, Node, false, false, true, false);
+		for (auto key : Phrase->Data.CheckDontHasKeys)
+			AddUsingKey(key, Node, false, false, false, true);
+	}
+
+	for (auto child : Node->GetChildNodes())
+	{
+		if (!included.Contains(child))
+			UpdateUsingKeysList(child, included);
+	}
+}
+
+void FDialogAssetEditor::AddUsingKey(FName KeyName, UDialogNodeEditorBase* Node, bool IsAdd, bool IsRemove, bool IsCheckHas, bool IsCheckDontHas)
+{
+	FUsingKey* Key;
+
+	if (UsingKeys.Contains(KeyName))
+	{
+		Key = UsingKeys.Find(KeyName);
+	}
+	else
+	{
+		Key = &UsingKeys.Add(KeyName, FUsingKey());
+	}
+
+	Key->Nodes.Add(Node);
+
+	if (IsAdd)
+		Key->IsRemove = true;
+	if (IsRemove)
+		Key->IsRemove = true;
+	if (IsCheckHas)
+		Key->IsRemove = true;
+	if (IsCheckDontHas)
+		Key->IsRemove = true;
+}
+
 void FDialogAssetEditor::CompileExecute()
 {
 	UE_LOG(DialogModuleLog, Log, TEXT("Compile dialog %s"), *EditedAsset->GetPathName());
@@ -504,21 +673,10 @@ void FDialogAssetEditor::CompileExecute()
 
 	CompilerResultsListing->ClearMessages();
 
-	UDialogPhrase* rootPhrase = NULL;
-	for (auto node : GraphEditor->GetCurrentGraph()->Nodes)
-	{
-		auto root = Cast<URootNode>(node);
-		if (root)
-		{
-			if (rootPhrase != NULL)
-			{
-				CompileLogResults.Error(TEXT("Multiple root nodes found"));
-				break;
-			}
-			ResetCompilePhrase(root);
-			rootPhrase = Compile(root);
-		}
-	}
+	auto rootNode = GetRootNode();
+	ResetCompilePhrase(rootNode);
+
+	auto rootPhrase = Compile(rootNode);
 
 	if (rootPhrase != NULL)
 	{
@@ -526,6 +684,8 @@ void FDialogAssetEditor::CompileExecute()
 	}
 	else
 		CompileLogResults.Error(TEXT("Root node not found"));
+
+	UpdateUsingKeysList();
 
 	CompileLogResults.EndEvent();
 	CompilerResultsListing->AddMessages(CompileLogResults.Messages);
@@ -599,7 +759,7 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 	});
 
 	bool first = true;
-	EDialogPhraseSource source;
+	EDialogPhraseSource source = EDialogPhraseSource::Interlocutor;
 
 	for (auto& child : childs)
 	{
@@ -621,7 +781,7 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 		}
 	}
 
-	if (needUpdate)
+	if (needUpdate && PropertyEditor.IsValid())
 	{
 		for (auto& obj : PropertyEditor->GetSelectedObjects())
 		{
@@ -646,3 +806,5 @@ FDialogAssetEditor::~FDialogAssetEditor()
 	if (GraphEditor->GetCurrentGraph())
 		GraphEditor->GetCurrentGraph()->RemoveOnGraphChangedHandler(OnGraphChangedDelegateHandle);
 }
+
+#undef LOCTEXT_NAMESPACE

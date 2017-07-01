@@ -9,7 +9,12 @@
 #include "GraphEditor.h"
 #include "IDetailsView.h"
 #include "DialogAsset.h"
+#include "SlateBasics.h"
+#include "Commands.h"
+#include "EditorStyle.h"
 #include "Runtime/Core/Public/Logging/TokenizedMessage.h"
+#include "Widgets/Views/STableViewBase.h"
+#include "Widgets/Views/STableRow.h"
 #include "DialogEditorNodes.h"
 
 struct DIALOGSYSTEMEDITOR_API FDialogAssetEditorTabs
@@ -17,9 +22,30 @@ struct DIALOGSYSTEMEDITOR_API FDialogAssetEditorTabs
 	static const FName DetailsID;
 	static const FName CompilerResultsID;
 	static const FName GraphEditorID;
-
+	static const FName KeysWindowID;
+	
 private:
 	FDialogAssetEditorTabs() {}
+};
+
+struct DIALOGSYSTEMEDITOR_API FDialogCommands : public TCommands<FDialogCommands>
+{
+	TSharedPtr<FUICommandInfo> Compile;
+	TSharedPtr<FUICommandInfo> Keys;
+
+	FDialogCommands()
+		: TCommands<FDialogCommands>(TEXT("Dialog Graph Commands"), FText::FromString("Dialog Graph Commands"), NAME_None, FEditorStyle::GetStyleSetName())
+	{
+	}
+
+	virtual void RegisterCommands() override;
+};
+
+struct FUsingKey
+{
+	FName Name;
+	TArray<UDialogNodeEditorBase*> Nodes;
+	bool IsAdd, IsRemove, IsCheckHas, IsCheckDontHas;
 };
 
 class DIALOGSYSTEMEDITOR_API FDialogAssetEditor : public FAssetEditorToolkit, public FNotifyHook
@@ -48,6 +74,10 @@ private:
 	TSharedPtr<FUICommandList> MyToolBarCommands;
 	TSharedPtr<FExtender> ToolbarExtender;
 	TSharedPtr<SDockTab> CompilerResultsTab;
+	TSharedPtr<SDockTab> KeysTab;
+	TSharedPtr<SListView<TSharedPtr<FUsingKey>> UsingKeysListView;
+	TArray<TSharedPtr<FUsingKey>> UsingKeysListItems;
+	TMap<FName, FUsingKey> UsingKeys;
 	UDialogAsset* EditedAsset;
 	FDelegateHandle OnGraphChangedDelegateHandle;
 	FDelegateHandle OnPropertyChangedDelegateHandle;
@@ -57,8 +87,11 @@ private:
 	TSharedRef<class SGraphEditor> CreateGraphEditorWidget(UEdGraph* InGraph);
 	TSharedRef<SDockTab> SpawnTab_Viewport(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnTab_CompilerResults(const FSpawnTabArgs& Args);
+	TSharedRef<SDockTab> SpawnTab_KeysWindow(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& Args);
+	TSharedRef<ITableRow> OnGenerateWidgetForUsingKeysListView(TSharedPtr<FUsingKey> InItem, const TSharedRef<STableViewBase>& OwnerTable);
 	
+	void OpenKeysWindow();
 	void OnGraphChanged(const FEdGraphEditAction& Action);
 	void OnPropertyChanged(const FPropertyChangedEvent& Event);
 	void BuildToolbar(FToolBarBuilder &builder);
@@ -82,7 +115,12 @@ private:
 	void OnSelectedNodesChanged(const TSet<class UObject*>& NewSelection);
 	void OnNodeDoubleClicked(class UEdGraphNode* Node);
 
+	void UpdateUsingKeysList();
+	void UpdateUsingKeysList(UDialogNodeEditorBase* Node, TSet<UDialogNodeEditorBase*>& included);
+	void AddUsingKey(FName KeyName, UDialogNodeEditorBase* Node, bool IsAdd, bool IsRemove, bool IsCheckHas, bool IsCheckDontHas);
+
 	void CompileExecute();
 	void ResetCompilePhrase(UPhraseNode* Node);
 	UDialogPhrase* Compile(UPhraseNode* Node);
+	URootNode* GetRootNode();
 };

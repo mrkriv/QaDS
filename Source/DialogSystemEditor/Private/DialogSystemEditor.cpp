@@ -6,7 +6,7 @@
 #include "DialogPhraseEventCustomization.h"
 #include "PhraseNodeCustomization.h"
 #include "DialogAssetTypeActions.h"
-#include "DialogCommands.h"
+#include "DialogAssetEditor.h"
 #include "ISettingsModule.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "DialogSettings.h"
