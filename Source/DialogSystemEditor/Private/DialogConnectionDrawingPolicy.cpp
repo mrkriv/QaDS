@@ -1,4 +1,4 @@
-// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
+// Copyright 2017-2018 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "GraphEditor.h"
 #include "SGraphNode.h"
@@ -94,13 +94,12 @@ void FDialogConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVector2D&
 		ArrowLayerID,
 		FPaintGeometry(ArrowDrawPos, ArrowImage->ImageSize * ZoomFactor, ZoomFactor),
 		ArrowImage,
-		ClippingRect,
 		ESlateDrawEffect::None,
 		AngleInRadians,
 		TOptional<FVector2D>(),
 		FSlateDrawElement::RelativeToElement,
 		Params.WireColor
-		);
+	);
 }
 
 void FDialogConnectionDrawingPolicy::DrawSplineWithArrow(const FGeometry& StartGeom, const FGeometry& EndGeom, const FConnectionParams& Params)
@@ -134,7 +133,6 @@ void FDialogConnectionDrawingPolicy::DrawConnection(int32 LayerId, const FVector
 		LayerId,
 		P0, P0Tangent,
 		P1, P1Tangent,
-		ClippingRect,
 		Params.WireThickness,
 		ESlateDrawEffect::None,
 		Params.WireColor

@@ -1,4 +1,4 @@
-// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
+// Copyright 2017-2018 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemRuntime.h"
 #include "EdGraph/EdGraphPin.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
@@ -127,7 +127,7 @@ UObject* FDialogPhraseEvent::GetObject(UDialogImplementer* Implementer) const
 	switch (CallType)
 	{
 	case EDialogPhraseEventCallType::DialogScript:
-		obj = Implementer->DialogScript;
+		obj = Cast<UObject>(Implementer->DialogScript);
 		break;
 
 	case EDialogPhraseEventCallType::Player:
@@ -237,7 +237,6 @@ bool FDialogPhraseCondition::CallCheckFunction(UObject* Executor, const TCHAR* S
 	uint8* Parms = (uint8*)FMemory_Alloca(Function->ParmsSize);
 	FMemory::Memzero(Parms, Function->ParmsSize);
 
-	const uint32 ExportFlags = PPF_Localized;
 	bool Failed = 0;
 	int32 NumParamsEvaluated = 0;
 	for (TFieldIterator<UProperty> It(Function); It && (It->PropertyFlags & (CPF_Parm | CPF_ReturnParm)) == CPF_Parm; ++It, NumParamsEvaluated++)
@@ -277,7 +276,7 @@ bool FDialogPhraseCondition::CallCheckFunction(UObject* Executor, const TCHAR* S
 			{
 				bFoundDefault = true;
 
-				const TCHAR* Result = It->ImportText(*PropertyDefaultValue, It->ContainerPtrToValuePtr<uint8>(Parms), ExportFlags, NULL);
+				const TCHAR* Result = It->ImportText(*PropertyDefaultValue, It->ContainerPtrToValuePtr<uint8>(Parms), 0, NULL);
 				bFailedImport = (Result == nullptr);
 			}
 		}
@@ -289,10 +288,10 @@ bool FDialogPhraseCondition::CallCheckFunction(UObject* Executor, const TCHAR* S
 			// we need to use the whole remaining string as an argument, regardless of quotes, spaces etc.
 			if (PropertyParam == LastParameter && PropertyParam->IsA<UStrProperty>() && FCString::Strcmp(Str, TEXT("")) != 0)
 			{
-				ArgStr = FString(RemainingStr).Trim();
+				ArgStr = FString(RemainingStr).TrimStart();
 			}
 
-			const TCHAR* Result = It->ImportText(*ArgStr, It->ContainerPtrToValuePtr<uint8>(Parms), ExportFlags, NULL);
+			const TCHAR* Result = It->ImportText(*ArgStr, It->ContainerPtrToValuePtr<uint8>(Parms), 0, NULL);
 			bFailedImport = (Result == nullptr);
 		}
 

@@ -1,4 +1,4 @@
-// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
+// Copyright 2017-2018 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "DialogAssetFactory.h"
 #include "DialogEditorNodes.h"

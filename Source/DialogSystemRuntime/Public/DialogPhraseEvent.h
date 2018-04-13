@@ -18,41 +18,42 @@ enum class EDialogPhraseEventCallType : uint8
 	FindByTag,
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct DIALOGSYSTEMRUNTIME_API FDialogPhraseEvent
 {
 	GENERATED_BODY()
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Phrase")
 	TSubclassOf<UObject> ObjectClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Phrase")
 	EDialogPhraseEventCallType CallType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Phrase")
 	FName EventName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Phrase")
 	FString FindTag;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Phrase")
 	FString Command;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
 	class UDialogNode* OwnerNode;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
 	TArray<FString> Parameters;
 
 	virtual bool Compile(FString& ErrorMessage, bool& needUpdate);
 	virtual UObject* GetObject(class UDialogImplementer* Implementer) const;
 	virtual void Invoke(class UDialogImplementer* Implementer);
+	virtual ~FDialogPhraseEvent() {}
 };
 
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct DIALOGSYSTEMRUNTIME_API FDialogPhraseCondition : public FDialogPhraseEvent
 {
 	GENERATED_BODY()
@@ -62,6 +63,7 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseCondition : public FDialogPhraseEven
 
 	virtual bool InvokeCheck(class UDialogImplementer* Implementer); 
 	bool Compile(FString& ErrorMessage, bool& needUpdate) override;
+	virtual ~FDialogPhraseCondition() {}
 
 private:
 	bool CallCheckFunction(UObject* Executor, const TCHAR* Str, bool& checkResult);

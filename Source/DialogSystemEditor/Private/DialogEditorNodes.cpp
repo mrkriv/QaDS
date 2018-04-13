@@ -1,4 +1,4 @@
-// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
+// Copyright 2017-2018 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "EdGraph/EdGraphPin.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
@@ -52,8 +52,8 @@ UPhraseNode::UPhraseNode(const FObjectInitializer& ObjectInitializer)
 
 void UPhraseNode::AllocateDefaultPins()
 {
-	UEdGraphPin* Inputs = CreatePin(EGPD_Input, FPinDataTypes::PinType_Root, TEXT(""), NULL, false, false, TEXT(""));
-	UEdGraphPin* Outputs = CreatePin(EGPD_Output, FPinDataTypes::PinType_Root, TEXT(""), NULL, false, false, TEXT(""));
+	UEdGraphPin* Inputs = CreatePin(EGPD_Input, NAME_None, FName(""));
+	UEdGraphPin* Outputs = CreatePin(EGPD_Output, NAME_None, FName(""));
 }
 
 FLinearColor UPhraseNode::GetNodeTitleColor() const
@@ -101,7 +101,7 @@ URootNode::URootNode(const FObjectInitializer& ObjectInitializer)
 
 void URootNode::AllocateDefaultPins()
 {
-	UEdGraphPin* Outputs = CreatePin(EGPD_Output, FPinDataTypes::PinType_Root, TEXT(""), NULL, false, false, TEXT("Start"));
+	UEdGraphPin* Outputs = CreatePin(EGPD_Output, NAME_None, FName("Start"));
 }
 
 FLinearColor URootNode::GetNodeTitleColor() const
@@ -127,8 +127,8 @@ UWaitNode::UWaitNode(const FObjectInitializer& ObjectInitializer)
 
 void UWaitNode::AllocateDefaultPins()
 {
-	UEdGraphPin* Inputs = CreatePin(EGPD_Input, FPinDataTypes::PinType_Root, TEXT(""), NULL, false, false, TEXT(""));
-	UEdGraphPin* Outputs = CreatePin(EGPD_Output, FPinDataTypes::PinType_Root, TEXT(""), NULL, false, false, TEXT(""));
+	UEdGraphPin* Inputs = CreatePin(EGPD_Input, NAME_None, FName(""));
+	UEdGraphPin* Outputs = CreatePin(EGPD_Output, NAME_None, FName(""));
 }
 
 FLinearColor UWaitNode::GetNodeTitleColor() const

@@ -75,7 +75,7 @@ private:
 	TSharedPtr<FExtender> ToolbarExtender;
 	TSharedPtr<SDockTab> CompilerResultsTab;
 	TSharedPtr<SDockTab> KeysTab;
-	TSharedPtr<SListView<TSharedPtr<FUsingKey>> UsingKeysListView;
+	TSharedPtr<SListView<TSharedPtr<FUsingKey>>> UsingKeysListView;
 	TArray<TSharedPtr<FUsingKey>> UsingKeysListItems;
 	TMap<FName, FUsingKey> UsingKeys;
 	UDialogAsset* EditedAsset;

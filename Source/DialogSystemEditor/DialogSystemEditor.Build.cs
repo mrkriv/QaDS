@@ -41,7 +41,7 @@ public class DialogSystemEditor : ModuleRules
                 "GraphEditor",
                 "BlueprintGraph",
                 "Projects",
-
+                "ApplicationCore",
 
                 "DialogSystemRuntime",
             }

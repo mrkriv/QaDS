@@ -1,4 +1,4 @@
-// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
+// Copyright 2017-2018 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "GraphEditor.h"
 #include "SInlineEditableTextBlock.h"
@@ -170,7 +170,7 @@ void SGraphNode_DialogNodeBase::CreateNodeWidget()
 	NodeWiget->SetText(NodeBace->GetNodeTitle(ENodeTitleType::FullTitle));
 
 	NodeWiget->SetFont(FSlateFontInfo(
-		FPaths::GamePluginsDir() / TEXT("DialogSystem/Resources/MainFont.ttf"), 
+		FPaths::ProjectPluginsDir() / TEXT("DialogSystem/Resources/MainFont.ttf"),
 		GetDefault<UDialogSettings>()->FontSize));
 }
 
@@ -267,7 +267,7 @@ void SGraphNode_DialogNodeBase::AddTextToContent(FString Text, FColor Color)
 			SNew(STextBlock)
 			.Text(FText::FromString(Text))
 			.ColorAndOpacity(Color)
-			.Font(FSlateFontInfo(FPaths::GamePluginsDir() / TEXT("DialogSystem/Resources/MainFont.ttf"), GetDefault<UDialogSettings>()->FontSize))
+			.Font(FSlateFontInfo(FPaths::ProjectPluginsDir() / TEXT("DialogSystem/Resources/MainFont.ttf"), GetDefault<UDialogSettings>()->FontSize))
 		];
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

@@ -18,6 +18,7 @@
 #include "PropertyEditorModule.h"
 #include "DialogSettings.h"
 #include "DialogEditorNodes.h"
+#include "HAL/PlatformApplicationMisc.h"
 
 #define LOCTEXT_NAMESPACE "DialogGraph"
 
@@ -234,13 +235,13 @@ TSharedRef<SDockTab> FDialogAssetEditor::SpawnTab_KeysWindow(const FSpawnTabArgs
 		[
 			SNew(SScrollBox)
 			+ SScrollBox::Slot()
+			.VAlign(VAlign_Fill)
+			.HAlign(HAlign_Fill)
 			[
-				SAssignNew(UsingKeysListView, SListView<TSharedPtr<FUsingKey>)
-				.VAlign(VAlign_Fill)
-				.HAlign(HAlign_Fill)
-				.FillHeight(1.0f)
-				.ItemHeight(24)
+				SAssignNew(UsingKeysListView, SListView<TSharedPtr<FUsingKey>>)
 				.ListItemsSource(&UsingKeysListItems)
+				//.FillHeight(1.0f)
+				.ItemHeight(24)
 				.OnGenerateRow(this, &FDialogAssetEditor::OnGenerateWidgetForUsingKeysListView)
 				.HeaderRow
 				(
@@ -280,7 +281,7 @@ TSharedRef<SDockTab> FDialogAssetEditor::SpawnTab_KeysWindow(const FSpawnTabArgs
 
 TSharedRef<ITableRow> FDialogAssetEditor::OnGenerateWidgetForUsingKeysListView(TSharedPtr<FUsingKey> InItem, const TSharedRef<STableViewBase>& OwnerTable)
 {
-
+	return MakeShareable((ITableRow*)NULL);
 }
 
 TSharedRef<SGraphEditor> FDialogAssetEditor::CreateGraphEditorWidget(UEdGraph* InGraph)
@@ -425,7 +426,7 @@ void FDialogAssetEditor::CopySelectedNodes()
 	}
 
 	FEdGraphUtilities::ExportNodesToText(SelectedNodes, ExportedText);
-	FPlatformMisc::ClipboardCopy(*ExportedText);
+	FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
 }
 
 bool FDialogAssetEditor::CanCopyNodes() const
@@ -452,7 +453,7 @@ void FDialogAssetEditor::PasteNodesHere(const FVector2D& Location)
 	GraphEditor->ClearSelectionSet();
 
 	FString TextToImport;
-	FPlatformMisc::ClipboardPaste(TextToImport);
+	FPlatformApplicationMisc::ClipboardPaste(TextToImport);
 
 	if (!EditedAsset)
 		return;
@@ -503,7 +504,7 @@ void FDialogAssetEditor::PasteNodesHere(const FVector2D& Location)
 bool FDialogAssetEditor::CanPasteNodes() const
 {
 	FString ClipboardContent;
-	FPlatformMisc::ClipboardPaste(ClipboardContent);
+	FPlatformApplicationMisc::ClipboardPaste(ClipboardContent);
 
 	return FEdGraphUtilities::CanImportNodesFromText(GraphEditor->GetCurrentGraph(), ClipboardContent);
 }

@@ -1,4 +1,4 @@
-// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
+// Copyright 2017-2018 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "DialogAsset.h"
 #include "DialogScript.h"
@@ -82,18 +82,18 @@ void FDialogPhraseEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle
 
 void FDialogPhraseEventCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> StructPropertyHandle, IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
-	StructBuilder.AddChildProperty(PropertyHandle_CallType.ToSharedRef());
+	StructBuilder.AddProperty(PropertyHandle_CallType.ToSharedRef());
 
-	StructBuilder.AddChildProperty(PropertyHandle_ObjectClass.ToSharedRef())
+	StructBuilder.AddProperty(PropertyHandle_ObjectClass.ToSharedRef())
 		.Visibility(TAttribute<EVisibility>(this, &FDialogPhraseEventCustomization::GetObjectClassVisibility));
 
-	StructBuilder.AddChildProperty(PropertyHandle_EventName.ToSharedRef());
+	StructBuilder.AddProperty(PropertyHandle_EventName.ToSharedRef());
 
-	StructBuilder.AddChildProperty(PropertyHandle_FindTag.ToSharedRef())
+	StructBuilder.AddProperty(PropertyHandle_FindTag.ToSharedRef())
 		.Visibility(TAttribute<EVisibility>(this, &FDialogPhraseEventCustomization::GetFingTagVisibility));
 
 	if (PropertyHandle_Invert.IsValid())
-		StructBuilder.AddChildProperty(PropertyHandle_Invert.ToSharedRef());
+		StructBuilder.AddProperty(PropertyHandle_Invert.ToSharedRef());
 
 	UObject* Property_ObjectClass;
 	FName Property_EventName;
@@ -127,7 +127,7 @@ void FDialogPhraseEventCustomization::CustomizeChildren(TSharedRef<IPropertyHand
 			auto param = array->GetElement(i);
 			param->GetValue(value);
 
-			StructBuilder.AddChildContent(name)
+			StructBuilder.AddCustomRow(name)
 				.NameContent()
 				[
 					StructPropertyHandle->CreatePropertyNameWidget(name)
