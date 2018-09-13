@@ -48,16 +48,16 @@ public:
 
 protected:
 	UDialogNodeEditorBase* NodeBace;
-	virtual FSlateColor GetBorderBackgroundColor() const;
 	TSharedPtr<SHorizontalBox> OutputPinBox;
 	TSharedPtr<SHorizontalBox> InputPinBox;
-	TSharedPtr<SVerticalBox> IconBox;
-	TSharedPtr<SVerticalBox> ContentBox;
-	FLinearColor BackgroundColor;
+	TSharedPtr<SVerticalBox> EventsBox;
+	TSharedPtr<SVerticalBox> ConditionsBox;
 	TSharedPtr<STextBlock> NodeWiget;
+	TSharedPtr<SImage> NodeIcon;
 
-	void AddIconIF(FName BrushName, bool condition);
-	void AddTextToContent(FString Text, FColor Color);
+	virtual FName GetIcon() const;
+	virtual FReply OnClickedIcon();
+	void AddTextToContent(TSharedPtr<SVerticalBox> Container, FString Text, FColor Color);
 };
 
 //RootNode.............................................................................................................
@@ -65,13 +65,9 @@ class SGraphNode_Root : public SGraphNode_DialogNodeBase
 {
 public:
 	SGraphNode_Root();
-};
 
-//WaitNode.............................................................................................................
-class SGraphNode_Wait : public SGraphNode_DialogNodeBase
-{
-public:
-	SGraphNode_Wait();
+protected:
+	virtual FName GetIcon() const override;
 };
 
 //PhraseNode..................................................................................................................
@@ -93,5 +89,6 @@ public:
 
 protected:
 	TSharedPtr<SWidget> IndexOverlay;
-	virtual FSlateColor GetBorderBackgroundColor() const override;
+	virtual FName GetIcon() const override;
+	virtual FReply OnClickedIcon() override;
 };

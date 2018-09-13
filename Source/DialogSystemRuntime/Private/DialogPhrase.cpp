@@ -6,14 +6,14 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
 #include "StoryInformationManager.h"
-#include "DialogImplementer.h"
+#include "DialogProcessor.h"
 #include "DialogPhrase.h"
 
-void UDialogNode::Invoke(class UDialogImplementer* Implementer)
+void UDialogNode::Invoke(class UDialogProcessor* Implementer)
 {
 }
 
-bool UDialogNode::Check(UDialogImplementer* Implementer)
+bool UDialogNode::Check(UDialogProcessor* Implementer)
 {
 	return false;
 }
@@ -23,32 +23,35 @@ TArray<UDialogNode*> UDialogNode::GetChilds()
 	return Childs;
 }
 
-void UDialogPhrase::Invoke(UDialogImplementer* Implementer)
+void UDialogPhrase::Invoke(UDialogProcessor* Implementer)
 {
+	auto storyKeyManager = UStoryKeyManager::GetStoryKeyManager();
+
 	for (auto key : Data.GiveKeys)
-		UStoryKeyManager::AddKey(key);
+		storyKeyManager->AddKey(key);
 
 	for (auto key : Data.RemoveKeys)
-		UStoryKeyManager::RemoveKey(key);
+		storyKeyManager->RemoveKey(key);
 	
-	if (UID.IsValid())
-		UStoryKeyManager::AddKey(*(Implementer->Asset->Name.ToString() + UID.ToString()), EStoryKeyTypes::DialogPhrases);
+	storyKeyManager->AddKey(Data.UID, EStoryKeyTypes::DialogPhrases);
 
 	for (auto& Event : Data.CustomEvents)
 		Event.Invoke(Implementer);
 }
 
-bool UDialogPhrase::Check(UDialogImplementer* Implementer)
+bool UDialogPhrase::Check(UDialogProcessor* Implementer)
 {
+	auto storyKeyManager = UStoryKeyManager::GetStoryKeyManager();
+
 	for (auto key : Data.CheckHasKeys)
 	{
-		if (UStoryKeyManager::DontHasKey(key))
+		if (storyKeyManager->DontHasKey(key))
 			return false;
 	}
 
 	for (auto key : Data.CheckDontHasKeys)
 	{
-		if (UStoryKeyManager::HasKey(key))
+		if (storyKeyManager->HasKey(key))
 			return false;
 	}
 

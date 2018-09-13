@@ -37,6 +37,8 @@ FDialogPhraseEventCustomization::FDialogPhraseEventCustomization()
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void FDialogPhraseEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> StructPropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
+	// уииииииии
+
 	static const FName PropertyName_ObjectClass = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, ObjectClass);
 	static const FName PropertyName_Parameters = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, Parameters);
 	static const FName PropertyName_EventName = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, EventName);
@@ -45,7 +47,6 @@ void FDialogPhraseEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle
 	static const FName PropertyName_FindTag = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, FindTag);
 	static const FName PropertyName_Invert = GET_MEMBER_NAME_CHECKED(FDialogPhraseCondition, InvertCondition);
 
-
 	PropertyHandle_ObjectClass = StructPropertyHandle->GetChildHandle(PropertyName_ObjectClass);
 	PropertyHandle_Parameters = StructPropertyHandle->GetChildHandle(PropertyName_Parameters);
 	PropertyHandle_EventName = StructPropertyHandle->GetChildHandle(PropertyName_EventName);
@@ -53,6 +54,7 @@ void FDialogPhraseEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle
 	PropertyHandle_CallType = StructPropertyHandle->GetChildHandle(PropertyName_CallType);
 	PropertyHandle_FindTag = StructPropertyHandle->GetChildHandle(PropertyName_FindTag);
 	PropertyHandle_Invert = StructPropertyHandle->GetChildHandle(PropertyName_Invert);
+	PropertyHandle_PhraseEvent = StructPropertyHandle;
 
 	check(PropertyHandle_ObjectClass.IsValid());
 	check(PropertyHandle_Parameters.IsValid());
@@ -83,11 +85,10 @@ void FDialogPhraseEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle
 void FDialogPhraseEventCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> StructPropertyHandle, IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
 	StructBuilder.AddProperty(PropertyHandle_CallType.ToSharedRef());
+	StructBuilder.AddProperty(PropertyHandle_EventName.ToSharedRef());
 
 	StructBuilder.AddProperty(PropertyHandle_ObjectClass.ToSharedRef())
 		.Visibility(TAttribute<EVisibility>(this, &FDialogPhraseEventCustomization::GetObjectClassVisibility));
-
-	StructBuilder.AddProperty(PropertyHandle_EventName.ToSharedRef());
 
 	StructBuilder.AddProperty(PropertyHandle_FindTag.ToSharedRef())
 		.Visibility(TAttribute<EVisibility>(this, &FDialogPhraseEventCustomization::GetFingTagVisibility));
@@ -107,60 +108,59 @@ void FDialogPhraseEventCustomization::CustomizeChildren(TSharedRef<IPropertyHand
 	auto func = Cast<UClass>(Property_ObjectClass)->ClassDefaultObject->FindFunction(Property_EventName);
 	auto array = PropertyHandle_Parameters->AsArray();
 
+	if (func == NULL || !array.IsValid())
+		return;
+
 	uint32 i = 0;
-
-	if (func != NULL)
+	for (TFieldIterator<UProperty> PropIt(func); PropIt && (PropIt->PropertyFlags & CPF_Parm); ++PropIt, ++i)
 	{
-		for (TFieldIterator<UProperty> PropIt(func); PropIt && (PropIt->PropertyFlags & CPF_Parm); ++PropIt, ++i)
-		{
-			UProperty *Prop = *PropIt;
+		UProperty *Prop = *PropIt;
 
-			FText name = FText::FromString(Prop->GetName());
-			FString value;
+		FText name = FText::FromString(Prop->GetName());
+		FString value;
 
-			uint32 arrayLenght;
-			array->GetNumElements(arrayLenght);
+		uint32 arrayLenght;
+		array->GetNumElements(arrayLenght);
 
-			if (i >= arrayLenght)
-				break;
+		if (i >= arrayLenght)
+			break;
 			
-			auto param = array->GetElement(i);
-			param->GetValue(value);
+		auto param = array->GetElement(i);
+		param->GetValue(value);
 
-			StructBuilder.AddCustomRow(name)
-				.NameContent()
+		StructBuilder.AddCustomRow(name)
+			.NameContent()
+			[
+				StructPropertyHandle->CreatePropertyNameWidget(name)
+			]
+			.ValueContent()
+			.MinDesiredWidth(250)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.VAlign(VAlign_Fill)
+				.HAlign(HAlign_Fill)
+				.FillWidth(4)
 				[
-					StructPropertyHandle->CreatePropertyNameWidget(name)
+					SNew(SEditableTextBox)
+					.Text(FText::FromString(value))
+					.Font(IDetailLayoutBuilder::GetDetailFont())
+					.OnTextCommitted_Lambda([param](const FText& Text, ETextCommit::Type CommitMethod)
+					{
+						param->SetValue(Text.ToString());
+					})
 				]
-				.ValueContent()
-				.MinDesiredWidth(250)
+				+ SHorizontalBox::Slot()
+				.Padding(8, 2, 0, 0)
+				.VAlign(VAlign_Center)
+				.HAlign(HAlign_Left)
+				.FillWidth(1)
 				[
-					SNew(SHorizontalBox)
-					+ SHorizontalBox::Slot()
-					.VAlign(VAlign_Fill)
-					.HAlign(HAlign_Fill)
-					.FillWidth(4)
-					[
-						SNew(SEditableTextBox)
-						.Text(FText::FromString(value))
-						.Font(IDetailLayoutBuilder::GetDetailFont())
-						.OnTextCommitted_Lambda([param](const FText& Text, ETextCommit::Type CommitMethod)
-						{
-							param->SetValue(Text.ToString());
-						})
-					]
-					+ SHorizontalBox::Slot()
-					.Padding(8, 2, 0, 0)
-					.VAlign(VAlign_Center)
-					.HAlign(HAlign_Left)
-					.FillWidth(1)
-					[
-						SNew(STextBlock)
-						.Text(FText::FromString(Prop->GetCPPType()))
-						.Font(IDetailLayoutBuilder::GetDetailFont())
-					]
-				];
-		}
+					SNew(STextBlock)
+					.Text(FText::FromString(Prop->GetCPPType()))
+					.Font(IDetailLayoutBuilder::GetDetailFont())
+				]
+			];
 	}
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -175,9 +175,13 @@ FReply FDialogPhraseEventCustomization::OnTitleClick()
 	PropertyHandle_CallType->GetValue((uint8&)Property_CallType);
 	PropertyHandle_OwnerNode->GetValue(Property_OwnerNode);
 
-
 	if (Property_CallType == EDialogPhraseEventCallType::DialogScript && Property_OwnerNode != NULL)
 	{
+		auto node = Cast<UDialogNode>(Property_OwnerNode);
+
+		if (node == NULL || node->OwnerDialog == NULL || node->OwnerDialog->DialogScriptClass == NULL)
+			return FReply::Handled();
+
 		auto sc = Cast<UDialogNode>(Property_OwnerNode)->OwnerDialog->DialogScriptClass->ClassDefaultObject;
 
 		if (sc != NULL)
@@ -193,42 +197,10 @@ FReply FDialogPhraseEventCustomization::OnTitleClick()
 
 FText FDialogPhraseEventCustomization::GetTitleText() const
 {
-	UObject* Property_ObjectClass;
-	EDialogPhraseEventCallType Property_CallType;
-	FString Property_FindTag;
-	FName Property_EventName;
+	FDialogPhraseEvent phraseEvent;
+	PropertyHandle_PhraseEvent->GetValue((uint8&)phraseEvent);
 
-	PropertyHandle_ObjectClass->GetValue(Property_ObjectClass);
-	PropertyHandle_CallType->GetValue((uint8&)Property_CallType);
-	PropertyHandle_EventName->GetValue(Property_EventName);
-	PropertyHandle_FindTag->GetValue(Property_FindTag);
-
-	FString title = TEXT("None");
-
-	switch (Property_CallType)
-	{
-	case EDialogPhraseEventCallType::DialogScript:
-		title = Property_EventName.ToString();
-		break;
-
-	case EDialogPhraseEventCallType::Player:
-		title = TEXT("Player->") + Property_EventName.ToString();
-		break;
-
-	case EDialogPhraseEventCallType::Interlocutor:
-		title = TEXT("Interlocutor->") + Property_EventName.ToString();
-		break;
-
-	case EDialogPhraseEventCallType::FindByTag:
-		if (Property_ObjectClass)
-			title = Property_ObjectClass->GetName() + TEXT("[") + Property_FindTag + TEXT("]->") + Property_EventName.ToString();
-		break;
-
-	default:
-		break;
-	}
-
-	return FText::FromString(title);
+	return FText::FromString(phraseEvent.ToString());
 }
 
 EVisibility FDialogPhraseEventCustomization::GetFingTagVisibility() const

@@ -23,6 +23,7 @@ public:
 private:
 	FReply OnTitleClick();
 
+	TSharedPtr<IPropertyHandle> PropertyHandle_PhraseEvent;
 	TSharedPtr<IPropertyHandle> PropertyHandle_ObjectClass;
 	TSharedPtr<IPropertyHandle> PropertyHandle_EventName;
 	TSharedPtr<IPropertyHandle> PropertyHandle_CallType;

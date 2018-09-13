@@ -6,7 +6,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
 #include "StoryInformationManager.h"
-#include "DialogImplementer.h"
+#include "DialogProcessor.h"
 #include "DialogPhraseEvent.h"
 
 #define ERROR(Message, ...) ErrorMessage =  FString::Printf(TEXT(Message), ##__VA_ARGS__); return false
@@ -38,7 +38,7 @@ bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 		break;
 		
 	case EDialogPhraseEventCallType::Player:
-	case EDialogPhraseEventCallType::Interlocutor:
+	case EDialogPhraseEventCallType::NPC:
 		break;
 
 	case EDialogPhraseEventCallType::FindByTag:
@@ -120,28 +120,28 @@ bool FDialogPhraseCondition::Compile(FString& ErrorMessage, bool& needUpdate)
 #undef ERROR
 
 
-UObject* FDialogPhraseEvent::GetObject(UDialogImplementer* Implementer) const
+UObject* FDialogPhraseEvent::GetObject(UDialogProcessor* DialogProcessor) const
 {
 	UObject* obj = NULL;
 
 	switch (CallType)
 	{
 	case EDialogPhraseEventCallType::DialogScript:
-		obj = Cast<UObject>(Implementer->DialogScript);
+		obj = Cast<UObject>(DialogProcessor->DialogScript);
 		break;
 
 	case EDialogPhraseEventCallType::Player:
-		obj = UGameplayStatics::GetPlayerCharacter(Implementer->Interlocutor->GetWorld(), 0);
+		obj = UGameplayStatics::GetPlayerCharacter(DialogProcessor->NPC->GetWorld(), 0);
 		break;
 
-	case EDialogPhraseEventCallType::Interlocutor:
-		obj = Implementer->Interlocutor;
+	case EDialogPhraseEventCallType::NPC:
+		obj = DialogProcessor->NPC;
 		break;
 
 	case EDialogPhraseEventCallType::FindByTag:
 		for (FObjectIterator Itr(ObjectClass); Itr; ++Itr)
 		{
-			AActor* actor = Cast<AActor>(*Itr);
+			auto actor = Cast<AActor>(*Itr);
 			if (actor != NULL)
 			{
 				if (actor->Tags.Contains(*FindTag))
@@ -150,7 +150,8 @@ UObject* FDialogPhraseEvent::GetObject(UDialogImplementer* Implementer) const
 					break;
 				}
 			}
-			UActorComponent* component = Cast<UActorComponent>(*Itr);
+
+			auto component = Cast<UActorComponent>(*Itr);
 			if (component != NULL)
 			{
 				if (component->ComponentHasTag(*FindTag))
@@ -167,14 +168,14 @@ UObject* FDialogPhraseEvent::GetObject(UDialogImplementer* Implementer) const
 	}
 
 	if (obj == NULL)
-		UE_LOG(DialogModuleLog, Warning, TEXT("Event terget not found in %s"), *Implementer->Asset->GetPathName());
+		UE_LOG(DialogModuleLog, Warning, TEXT("Event terget not found in %s"), *DialogProcessor->Asset->GetPathName());
 
 	return obj;
 }
 
-void FDialogPhraseEvent::Invoke(UDialogImplementer* Implementer)
+void FDialogPhraseEvent::Invoke(UDialogProcessor* DialogProcessor)
 {
-	auto obj = GetObject(Implementer);
+	auto obj = GetObject(DialogProcessor);
 	if (obj != NULL)
 	{ 
 		auto ar = FOutputDeviceRedirector::Get();
@@ -184,24 +185,68 @@ void FDialogPhraseEvent::Invoke(UDialogImplementer* Implementer)
 		UE_LOG(DialogModuleLog, Error, TEXT("Object for function call not found"));
 }
 
-bool FDialogPhraseCondition::InvokeCheck(class UDialogImplementer* Implementer)
+FString FDialogPhraseEvent::ToString() const
 {
-	auto obj = GetObject(Implementer);
-	if (obj != NULL)
-	{
-		bool checkResult;
+	auto funcName = EventName.ToString() + "(";
 
-		if (!CallCheckFunction(obj, *Command, checkResult) || !checkResult)
-		{
-			return InvertCondition;
-		}
+	for (auto i = 0; i < Parameters.Num(); i++)
+	{
+		if (i != 0)
+			funcName.Append(", ");
+
+		funcName.Append(Parameters[i]);
 	}
-	else
+
+	funcName += ")";
+
+	switch (CallType)
+	{
+	case EDialogPhraseEventCallType::DialogScript:
+		return funcName;
+
+	case EDialogPhraseEventCallType::Player:
+		return TEXT("Player.") + funcName;
+
+	case EDialogPhraseEventCallType::NPC:
+		return TEXT("NPC.") + funcName;
+
+	case EDialogPhraseEventCallType::FindByTag:
+		if (ObjectClass)
+			return ObjectClass->GetName() + TEXT("[") + FindTag + TEXT("].") + funcName;
+		break;
+	}
+
+	return TEXT("None");
+}
+
+bool FDialogPhraseCondition::InvokeCheck(class UDialogProcessor* DialogProcessor)
+{
+	auto obj = GetObject(DialogProcessor);
+
+	if (obj == NULL)
+	{
 		UE_LOG(DialogModuleLog, Error, TEXT("Object for function call not found"));
+		return false;
+	}
+
+	bool checkResult;
+	if (!CallCheckFunction(obj, *Command, checkResult) || !checkResult)
+	{
+		return InvertCondition;
+	}
 
 	return !InvertCondition;
 }
 
+FString FDialogPhraseCondition::ToString() const
+{
+	auto baseText = FDialogPhraseEvent::ToString();
+
+	if (InvertCondition)
+		return "NOT(" + baseText + ")";
+
+	return baseText;
+}
 
 // Copy from ScriptCore.cpp UObject::CallFunctionByNameWithArguments
 bool FDialogPhraseCondition::CallCheckFunction(UObject* Executor, const TCHAR* Str, bool& checkResult)

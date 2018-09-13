@@ -14,7 +14,7 @@ enum class EDialogPhraseEventCallType : uint8
 {
 	DialogScript,
 	Player,
-	Interlocutor,
+	NPC,
 	FindByTag,
 };
 
@@ -47,9 +47,11 @@ public:
 	TArray<FString> Parameters;
 
 	virtual bool Compile(FString& ErrorMessage, bool& needUpdate);
-	virtual UObject* GetObject(class UDialogImplementer* Implementer) const;
-	virtual void Invoke(class UDialogImplementer* Implementer);
+	virtual UObject* GetObject(class UDialogProcessor* Implementer) const;
+	virtual void Invoke(class UDialogProcessor* Implementer);
 	virtual ~FDialogPhraseEvent() {}
+
+	virtual FString ToString() const;
 };
 
 
@@ -58,11 +60,14 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseCondition : public FDialogPhraseEven
 {
 	GENERATED_BODY()
 
+public:
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool InvertCondition;
 
-	virtual bool InvokeCheck(class UDialogImplementer* Implementer); 
-	bool Compile(FString& ErrorMessage, bool& needUpdate) override;
+	virtual bool Compile(FString& ErrorMessage, bool& needUpdate) override;
+	virtual bool InvokeCheck(class UDialogProcessor* Implementer);
+	virtual FString ToString() const override;
 	virtual ~FDialogPhraseCondition() {}
 
 private:

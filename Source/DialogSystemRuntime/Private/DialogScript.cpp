@@ -1,6 +1,6 @@
 // Copyright 2017-2018 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemRuntime.h"
-#include "DialogImplementer.h"
+#include "DialogProcessor.h"
 #include "DialogScript.h"
 
 ADialogScript::ADialogScript()
@@ -9,41 +9,10 @@ ADialogScript::ADialogScript()
 
 AActor* ADialogScript::GetPlayer()
 {
-	return UGameplayStatics::GetPlayerCharacter(GetInterlocutor()->GetWorld(), 0);
+	return UGameplayStatics::GetPlayerCharacter(GetNPC()->GetWorld(), 0);
 }
 
-AActor* ADialogScript::GetInterlocutor()
+AActor* ADialogScript::GetNPC()
 {
-	return Implementer->Interlocutor;
-}
-
-void ADialogScript::SetTrigger()
-{
-	if (Trigger == true)
-		return;
-
-	Trigger = true;
-	OnTriggerChange(Trigger);
-}
-
-void ADialogScript::ResetTrigger()
-{
-	if (Trigger == false)
-		return;
-
-	Trigger = false;
-	OnTriggerChange(Trigger);
-}
-
-void ADialogScript::SetTriggerValue(bool IsSetNew)
-{
-	if (IsSetNew)
-		SetTrigger();
-	else
-		ResetTrigger();
-}
-
-bool ADialogScript::GetTrigger()
-{
-	return Trigger;
+	return Implementer->NPC;
 }

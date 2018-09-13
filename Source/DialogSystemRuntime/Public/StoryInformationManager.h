@@ -10,6 +10,7 @@ enum class EStoryKeyTypes : uint8
 {
 	General,
 	DialogPhrases,
+	Task
 };
 
 UCLASS()
@@ -17,35 +18,29 @@ class DIALOGSYSTEMRUNTIME_API UStoryKeyManager : public UObject
 {
 	GENERATED_BODY()
 
+	TMap<EStoryKeyTypes, TSet<FName>> Database;
+
 public:
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FName> Keys;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FName> DialogPhrasesKeys;
+    UStoryKeyManager();
 
 	UFUNCTION(BlueprintPure, Category = "Gameplay|StoryKey")
-	static UStoryKeyManager* GetInstance();
+	static UStoryKeyManager* GetStoryKeyManager();
 
 	UFUNCTION(BlueprintPure, Category = "Gameplay|StoryKey")
-	static bool HasKey(FName Key, EStoryKeyTypes Type = EStoryKeyTypes::General);
+	bool HasKey(FName Key, EStoryKeyTypes Type = EStoryKeyTypes::General);
 
 	UFUNCTION(BlueprintPure, Category = "Gameplay|StoryKey")
-	static bool DontHasKey(FName Key, EStoryKeyTypes Type = EStoryKeyTypes::General);
+	bool DontHasKey(FName Key, EStoryKeyTypes Type = EStoryKeyTypes::General);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
-	static bool AddKey(FName Key, EStoryKeyTypes Type = EStoryKeyTypes::General);
+	bool AddKey(FName Key, EStoryKeyTypes Type = EStoryKeyTypes::General);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
-	static bool RemoveKey(FName Key, EStoryKeyTypes Type = EStoryKeyTypes::General);
+	bool RemoveKey(FName Key, EStoryKeyTypes Type = EStoryKeyTypes::General);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
-	static void ClearType(EStoryKeyTypes Type = EStoryKeyTypes::General);
+	void ClearType(EStoryKeyTypes Type = EStoryKeyTypes::General);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
-	static void ClearAllTypes();
-
-protected:
-	TArray<FName>* GetSetByType(EStoryKeyTypes Type);
+	void ClearAll();
 };

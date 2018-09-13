@@ -22,9 +22,9 @@ void FDialogSystemEditorModule::StartupModule()
 	FBrushSet::Register();
 	FDialogCommands::Register();
 
-	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	ISettingsModule& SettingsModule = FModuleManager::LoadModuleChecked<ISettingsModule>("Settings");
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	auto& SettingsModule = FModuleManager::LoadModuleChecked<ISettingsModule>("Settings");
+	auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
 	AssetCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Gameplay")), LOCTEXT("GameplayAssetCategory", "Gameplay"));
 	AssetTools.RegisterAssetTypeActions(MakeShareable(new FDialogAssetTypeActions(AssetCategory)));
@@ -49,17 +49,25 @@ void FDialogSystemEditorModule::ShutdownModule()
 	FDialogCommands::Unregister();
 	FBrushSet::Unregister();
 
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	ISettingsModule& SettingsModule = FModuleManager::LoadModuleChecked<ISettingsModule>("Settings");
+	if (FModuleManager::Get().IsModuleLoaded("Settings"))
+	{
+		auto& SettingsModule = FModuleManager::LoadModuleChecked<ISettingsModule>("Settings");
+		SettingsModule.UnregisterSettings("Project", "Plugins", "Dialog");
+	}
 
-	SettingsModule.UnregisterSettings("Project", "Plugins", "Dialog");
+	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	{
+		auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseCondition");
+		PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseEvent");
+		PropertyModule.UnregisterCustomClassLayout("PhraseNode");
+	}
 
-	PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseCondition");
-	PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseEvent");
-	PropertyModule.UnregisterCustomClassLayout("PhraseNode");
-
-	AssetTools.UnregisterAssetTypeActions(MakeShareable(new FDialogAssetTypeActions(AssetCategory)));
+	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
+	{
+		auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+		AssetTools.UnregisterAssetTypeActions(MakeShareable(new FDialogAssetTypeActions(AssetCategory)));
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

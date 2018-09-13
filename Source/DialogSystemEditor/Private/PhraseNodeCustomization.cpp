@@ -49,7 +49,7 @@ void FPhraseNodeDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 
 		auto& categoty = DetailLayout.EditCategory(FName(*prop->GetMetaData("Category")));
 
-		if (name == "Text")
+		/*if (name == "Text")
 		{
 			FText Text;
 			prop->GetValue(Text);
@@ -86,7 +86,7 @@ void FPhraseNodeDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 				]
 			];
 		}
-		else if (name == "PhraseManualTime" && isAutoTime)
+		else*/ if (name == "PhraseManualTime" && isAutoTime)
 		{
 			continue;
 		}

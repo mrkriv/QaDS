@@ -47,25 +47,13 @@ void UDialogNodeEditorBase::PostEditChangeProperty(struct FPropertyChangedEvent&
 UPhraseNode::UPhraseNode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	Data.Source = EDialogPhraseSource::Interlocutor;
+	Data.Source = EDialogPhraseSource::NPC;
 }
 
 void UPhraseNode::AllocateDefaultPins()
 {
 	UEdGraphPin* Inputs = CreatePin(EGPD_Input, NAME_None, FName(""));
 	UEdGraphPin* Outputs = CreatePin(EGPD_Output, NAME_None, FName(""));
-}
-
-FLinearColor UPhraseNode::GetNodeTitleColor() const
-{
-	if (Data.Source == EDialogPhraseSource::Player)
-	{
-		return GetDefault<UDialogSettings>()->NodePlayer;
-	}
-	else
-	{
-		return GetDefault<UDialogSettings>()->NodeNPC;
-	}
 }
 
 FText UPhraseNode::GetTooltipText() const
@@ -104,11 +92,6 @@ void URootNode::AllocateDefaultPins()
 	UEdGraphPin* Outputs = CreatePin(EGPD_Output, NAME_None, FName("Start"));
 }
 
-FLinearColor URootNode::GetNodeTitleColor() const
-{
-	return FLinearColor(0.08f, 0.08f, 0.08f);
-}
-
 FText URootNode::GetTooltipText() const
 {
 	return FText::FromString("Dialog Start Node");
@@ -119,29 +102,7 @@ FText URootNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 	return FText::FromString(TEXT("Start ") + Cast<UDialogAsset>(GetGraph()->GetOuter())->Name.ToString());
 }
 
-//UWaitNode...........................................................................................
-UWaitNode::UWaitNode(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+bool URootNode::CanUserDeleteNode() const
 {
-}
-
-void UWaitNode::AllocateDefaultPins()
-{
-	UEdGraphPin* Inputs = CreatePin(EGPD_Input, NAME_None, FName(""));
-	UEdGraphPin* Outputs = CreatePin(EGPD_Output, NAME_None, FName(""));
-}
-
-FLinearColor UWaitNode::GetNodeTitleColor() const
-{
-	return FLinearColor(0.08f, 0.08f, 0.08f);
-}
-
-FText UWaitNode::GetTooltipText() const
-{
-	return FText::FromString("Wait node");
-}
-
-FText UWaitNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
-{
-	return FText::FromString(TEXT("Wait"));
+	return false;
 }

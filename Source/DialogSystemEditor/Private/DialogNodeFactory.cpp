@@ -16,10 +16,6 @@ TSharedPtr<class SGraphNode> FDialogNodeFactory::CreateNode(UEdGraphNode* Node) 
 	{
 		SNode = SNew(SGraphNode_Phrase, Cast<UPhraseNode>(Node));
 	}
-	else if (Node->IsA(UWaitNode::StaticClass()))
-	{
-		SNode = SNew(SGraphNode_Wait, Cast<UWaitNode>(Node));
-	}
 	else if (Node->IsA(URootNode::StaticClass()))
 	{
 		SNode = SNew(SGraphNode_Root, Cast<URootNode>(Node));

@@ -23,6 +23,7 @@ struct DIALOGSYSTEMEDITOR_API FDialogAssetEditorTabs
 	static const FName CompilerResultsID;
 	static const FName GraphEditorID;
 	static const FName KeysWindowID;
+	static const FName KeyManagerWindowID;
 	
 private:
 	FDialogAssetEditorTabs() {}
@@ -32,6 +33,7 @@ struct DIALOGSYSTEMEDITOR_API FDialogCommands : public TCommands<FDialogCommands
 {
 	TSharedPtr<FUICommandInfo> Compile;
 	TSharedPtr<FUICommandInfo> Keys;
+	TSharedPtr<FUICommandInfo> KeyManager;
 
 	FDialogCommands()
 		: TCommands<FDialogCommands>(TEXT("Dialog Graph Commands"), FText::FromString("Dialog Graph Commands"), NAME_None, FEditorStyle::GetStyleSetName())
@@ -75,6 +77,7 @@ private:
 	TSharedPtr<FExtender> ToolbarExtender;
 	TSharedPtr<SDockTab> CompilerResultsTab;
 	TSharedPtr<SDockTab> KeysTab;
+	TSharedPtr<SDockTab> KeyManagerTab;
 	TSharedPtr<SListView<TSharedPtr<FUsingKey>>> UsingKeysListView;
 	TArray<TSharedPtr<FUsingKey>> UsingKeysListItems;
 	TMap<FName, FUsingKey> UsingKeys;
@@ -88,10 +91,12 @@ private:
 	TSharedRef<SDockTab> SpawnTab_Viewport(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnTab_CompilerResults(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnTab_KeysWindow(const FSpawnTabArgs& Args);
+	TSharedRef<SDockTab> SpawnTab_KeyManagerWindow(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& Args);
 	TSharedRef<ITableRow> OnGenerateWidgetForUsingKeysListView(TSharedPtr<FUsingKey> InItem, const TSharedRef<STableViewBase>& OwnerTable);
 	
 	void OpenKeysWindow();
+	void OpenKeyManagerWindow();
 	void OnGraphChanged(const FEdGraphEditAction& Action);
 	void OnPropertyChanged(const FPropertyChangedEvent& Event);
 	void BuildToolbar(FToolBarBuilder &builder);

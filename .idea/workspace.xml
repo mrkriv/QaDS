@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="false">
+    <generated />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c4047cce-5d29-43b1-bcd8-4ab0a5e17d92" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/Source/DialogSystemRuntime/Private/DialogProcessor.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/DialogSystemRuntime/Public/DialogProcessor.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DialogSystem.uplugin" beforeDir="false" afterPath="$PROJECT_DIR$/DialogSystem.uplugin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Resources/MainFont.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogAssetEditor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogAssetEditor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogConnectionDrawingPolicy.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogConnectionDrawingPolicy.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogEditorNodes.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogEditorNodes.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogNodeFactory.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogNodeFactory.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogPhraseEventCustomization.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogPhraseEventCustomization.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogSGraphNodes.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogSGraphNodes.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogSettings.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogSystemEditor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/DialogSystemEditor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/PhraseNodeCustomization.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemEditor/Private/PhraseNodeCustomization.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemEditor/Public/DialogEditorNodes.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemEditor/Public/DialogEditorNodes.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemEditor/Public/DialogPhraseEventCustomization.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemEditor/Public/DialogPhraseEventCustomization.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemEditor/Public/DialogSGraphNodes.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemEditor/Public/DialogSGraphNodes.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemEditor/Public/DialogSettings.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemEditor/Public/DialogSettings.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemRuntime/Private/DialogImplementer.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemRuntime/Private/DialogPhrase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemRuntime/Private/DialogPhrase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemRuntime/Private/DialogPhraseEvent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemRuntime/Private/DialogPhraseEvent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemRuntime/Private/DialogScript.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemRuntime/Private/DialogScript.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemRuntime/Private/StoryInformationManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemRuntime/Private/StoryInformationManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemRuntime/Public/DialogImplementer.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemRuntime/Public/DialogPhrase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemRuntime/Public/DialogPhrase.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemRuntime/Public/DialogPhraseEvent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemRuntime/Public/DialogPhraseEvent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemRuntime/Public/DialogScript.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemRuntime/Public/DialogScript.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DialogSystemRuntime/Public/StoryInformationManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DialogSystemRuntime/Public/StoryInformationManager.h" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FUSProjectUsageTrigger">
+    <session id="-1651863543">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.closed" value="2" />
+          <entry key="project.open.time.0" value="1" />
+          <entry key="project.open.time.10" value="1" />
+          <entry key="project.open.time.19" value="1" />
+          <entry key="project.opened" value="3" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="cpp" value="2" />
+          <entry key="h" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="ObjectiveC" value="3" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="cpp" value="126" />
+          <entry key="h" value="56" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="ObjectiveC" value="182" />
+        </counts>
+      </usages-collector>
+    </session>
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Source/DialogSystemRuntime/Private/StoryInformationManager.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="100">
+              <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>GetInstance</find>
+      <find>inst-&gt;</find>
+      <find>GetSetByType(Type)</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>Database[Type]</replace>
+    </replaceStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/Source/DialogSystemRuntime/Public/StoryInformationManager.h" />
+        <option value="$PROJECT_DIR$/Source/DialogSystemRuntime/Private/StoryInformationManager.cpp" />
+      </list>
+    </option>
+  </component>
+  <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="17" />
+    <option name="y" value="-26" />
+    <option name="width" value="1400" />
+    <option name="height" value="920" />
+  </component>
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="DialogPlugin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DialogPlugin" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DialogPlugin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DialogPlugin" type="462c0819:PsiDirectoryNode" />
+              <item name="Source" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DialogPlugin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DialogPlugin" type="462c0819:PsiDirectoryNode" />
+              <item name="Source" type="462c0819:PsiDirectoryNode" />
+              <item name="DialogSystemRuntime" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DialogPlugin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DialogPlugin" type="462c0819:PsiDirectoryNode" />
+              <item name="Source" type="462c0819:PsiDirectoryNode" />
+              <item name="DialogSystemRuntime" type="462c0819:PsiDirectoryNode" />
+              <item name="Private" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="DialogPlugin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DialogPlugin" type="462c0819:PsiDirectoryNode" />
+              <item name="Source" type="462c0819:PsiDirectoryNode" />
+              <item name="DialogSystemRuntime" type="462c0819:PsiDirectoryNode" />
+              <item name="Public" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.16302083" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="8" />
+      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="LuaJ" order="3" />
+      <window_info anchor="right" id="Database" order="4" />
+    </layout>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/Source/DialogSystemRuntime/Private/DialogSystemRuntime.cpp">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/DialogSystemRuntime/Public/StoryInformationManager.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="440">
+          <caret line="28" column="60" lean-forward="true" selection-start-line="28" selection-start-column="60" selection-end-line="28" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/DialogSystemRuntime/Private/StoryInformationManager.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="100">
+          <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

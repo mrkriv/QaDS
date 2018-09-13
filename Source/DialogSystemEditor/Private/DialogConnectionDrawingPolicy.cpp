@@ -44,7 +44,7 @@ void FDialogConnectionDrawingPolicy::DrawPreviewConnector(const FGeometry& PinGe
 {
 	bool bBiDirectional = false;
 	FConnectionParams Params;
-	Params.WireThickness = 1.0f;
+	Params.WireThickness = 0.5f;
 	Params.WireColor = FLinearColor::White;
 	Params.bDrawBubbles = false;
 	Params.bUserFlag1 = bBiDirectional;
@@ -56,7 +56,6 @@ void FDialogConnectionDrawingPolicy::DrawPreviewConnector(const FGeometry& PinGe
 		DrawSplineWithArrow(FGeometryHelper::FindClosestPointOnGeom(PinGeometry, StartPoint), StartPoint, Params);
 }
 
-
 void FDialogConnectionDrawingPolicy::DrawSplineWithArrow(const FVector2D& StartAnchorPoint, const FVector2D& EndAnchorPoint, const FConnectionParams& Params)
 {
 	// hacky: use bBidirectional flag to reverse direction of connection (used by debugger)
@@ -65,41 +64,6 @@ void FDialogConnectionDrawingPolicy::DrawSplineWithArrow(const FVector2D& StartA
 	const FVector2D& P1 = Bidirectional ? StartAnchorPoint : EndAnchorPoint;
 
 	Internal_DrawLineWithArrow(P0, P1, Params);
-}
-
-void FDialogConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVector2D& StartAnchorPoint, const FVector2D& EndAnchorPoint, const FConnectionParams& Params)
-{
-	//@TODO: Should this be scaled by zoom factor?
-	const float LineSeparationAmount = 4.5f;
-
-	const FVector2D DeltaPos = EndAnchorPoint - StartAnchorPoint;
-	const FVector2D UnitDelta = DeltaPos.GetSafeNormal();
-	const FVector2D Normal = FVector2D(DeltaPos.Y, -DeltaPos.X).GetSafeNormal();
-
-	// Come up with the final start/end points
-	const FVector2D DirectionBias = Normal * LineSeparationAmount;
-	const FVector2D LengthBias = ArrowRadius.X * UnitDelta;
-	const FVector2D StartPoint = StartAnchorPoint + DirectionBias + LengthBias;
-	const FVector2D EndPoint = EndAnchorPoint + DirectionBias - LengthBias;
-
-	// Draw a line/spline
-	DrawConnection(WireLayerID, StartPoint, EndPoint, Params);
-
-	// Draw the arrow
-	const FVector2D ArrowDrawPos = EndPoint - ArrowRadius;//((StartPoint + EndPoint) ) / 2;
-	const float AngleInRadians = FMath::Atan2(DeltaPos.Y, DeltaPos.X);
-	
-	FSlateDrawElement::MakeRotatedBox(
-		DrawElementsList,
-		ArrowLayerID,
-		FPaintGeometry(ArrowDrawPos, ArrowImage->ImageSize * ZoomFactor, ZoomFactor),
-		ArrowImage,
-		ESlateDrawEffect::None,
-		AngleInRadians,
-		TOptional<FVector2D>(),
-		FSlateDrawElement::RelativeToElement,
-		Params.WireColor
-	);
 }
 
 void FDialogConnectionDrawingPolicy::DrawSplineWithArrow(const FGeometry& StartGeom, const FGeometry& EndGeom, const FConnectionParams& Params)
@@ -114,6 +78,68 @@ void FDialogConnectionDrawingPolicy::DrawSplineWithArrow(const FGeometry& StartG
 	const FVector2D EndAnchorPoint = FGeometryHelper::FindClosestPointOnGeom(EndGeom, SeedPoint);
 
 	DrawSplineWithArrow(StartAnchorPoint, EndAnchorPoint, Params);
+}
+
+void FDialogConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVector2D& StartAnchorPoint, const FVector2D& EndAnchorPoint, const FConnectionParams& Params)
+{
+	//@TODO: Should this be scaled by zoom factor?
+	auto LineSeparationAmount = 2.5f;
+
+	auto DeltaPos = EndAnchorPoint - StartAnchorPoint;
+	auto UnitDelta = DeltaPos.GetSafeNormal();
+	auto Normal = FVector2D(DeltaPos.Y, -DeltaPos.X).GetSafeNormal();
+
+	// Come up with the final start/end points
+	auto DirectionBias = Normal * LineSeparationAmount;
+	auto LengthBias = ArrowRadius.X * UnitDelta;
+	auto StartPoint = StartAnchorPoint + DirectionBias + LengthBias;
+	auto EndPoint = EndAnchorPoint + DirectionBias - LengthBias;
+
+	FVector2D CenterLeft;
+	FVector2D CenterRight;
+
+	if (Normal.X < 0)
+	{
+		CenterLeft = FVector2D(EndPoint.X + (StartPoint.X - EndPoint.X) / 2, StartPoint.Y);
+		CenterLeft = FVector2D(EndPoint.X + (StartPoint.X - EndPoint.X) / 2, EndPoint.Y);
+
+		DrawConnection(WireLayerID, StartPoint, EndPoint, Params);
+	}
+	else
+	{
+		CenterLeft = FVector2D(StartPoint.X, StartPoint.Y + (EndPoint.Y - StartPoint.Y) / 2);
+		CenterRight = FVector2D(EndPoint.X, StartPoint.Y + (EndPoint.Y - StartPoint.Y) / 2);
+
+		if (Normal.Y > 0)
+		{
+			StartPoint.X += 25;
+			EndPoint.X -= 25;
+		}
+		else if (Normal.Y < 0)
+		{
+			StartPoint.X -= 25;
+			EndPoint.X += 25;
+		}
+
+		DrawConnection(WireLayerID, StartPoint, CenterLeft, Params);
+		DrawConnection(WireLayerID, CenterRight, CenterLeft, Params);
+		DrawConnection(WireLayerID, CenterRight, EndPoint, Params);
+	}
+
+	auto ArrowDrawPos = EndPoint - CenterLeft;//((StartPoint + EndPoint) ) / 2;
+	auto AngleInRadians = FMath::Atan2(DeltaPos.Y, DeltaPos.X);
+	
+	FSlateDrawElement::MakeRotatedBox(
+		DrawElementsList,
+		ArrowLayerID,
+		FPaintGeometry(ArrowDrawPos, ArrowImage->ImageSize * ZoomFactor, ZoomFactor),
+		ArrowImage,
+		ESlateDrawEffect::None,
+		AngleInRadians,
+		TOptional<FVector2D>(),
+		FSlateDrawElement::RelativeToElement,
+		Params.WireColor
+	);
 }
 
 void FDialogConnectionDrawingPolicy::DrawConnection(int32 LayerId, const FVector2D& Start, const FVector2D& End, const FConnectionParams& Params)
@@ -136,8 +162,5 @@ void FDialogConnectionDrawingPolicy::DrawConnection(int32 LayerId, const FVector
 		Params.WireThickness,
 		ESlateDrawEffect::None,
 		Params.WireColor
-		);
+	);
 }
-
-
-

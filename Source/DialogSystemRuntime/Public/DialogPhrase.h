@@ -12,7 +12,22 @@ UENUM(BlueprintType)
 enum class EDialogPhraseSource : uint8
 {
 	Player,
-	Interlocutor,
+	NPC,
+};
+
+USTRUCT(BlueprintType)
+struct DIALOGSYSTEMRUNTIME_API FDialogPhraseShortInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	FText Text;
+
+	UPROPERTY(BlueprintReadOnly)
+	FName UID;
+
+	UPROPERTY(BlueprintReadOnly)
+	TMap<FName, FString> AditionalData;
 };
 
 USTRUCT(BlueprintType)
@@ -21,10 +36,10 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
-	FText Text;
+	FName UID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
-	bool Important = true;
+	FText Text;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
 	bool AutoTime = true;
@@ -37,6 +52,9 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
 	EDialogPhraseSource Source;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
+	TMap<FName, FString> AditionalData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
 	TArray<FName> CheckHasKeys;
@@ -57,6 +75,7 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseInfo
 	TArray<FDialogPhraseEvent> CustomEvents;
 };
 
+
 UCLASS()
 class DIALOGSYSTEMRUNTIME_API UDialogNode : public UObject
 {
@@ -69,8 +88,8 @@ public:
 	UPROPERTY()
 	class UDialogAsset* OwnerDialog;
 
-	virtual void Invoke(class UDialogImplementer* Implementer);
-	virtual bool Check(class UDialogImplementer* Implementer);
+	virtual void Invoke(class UDialogProcessor* Implementer);
+	virtual bool Check(class UDialogProcessor* Implementer);
 
 	TArray<UDialogNode*> GetChilds();
 };
@@ -87,30 +106,6 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	FDialogPhraseInfo Data;
 
-	void Invoke(class UDialogImplementer* Implementer) override;
-	bool Check(class UDialogImplementer* Implementer) override;
-};
-
-UCLASS()
-class DIALOGSYSTEMRUNTIME_API UDialogWait : public UDialogNode
-{
-	GENERATED_BODY()
-public:
-	UPROPERTY(BlueprintReadOnly)
-	FText Description;
-
-	UPROPERTY(BlueprintReadOnly)
-	float MinTime;
-
-	UPROPERTY(BlueprintReadOnly)
-	float MaxTime;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FName> WaitGiveKeys;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FName> WaitRemoveKeys;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FDialogPhraseCondition> WaitConditions;
+	void Invoke(class UDialogProcessor* Implementer) override;
+	bool Check(class UDialogProcessor* Implementer) override;
 };

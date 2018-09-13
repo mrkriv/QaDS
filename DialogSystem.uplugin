@@ -18,7 +18,7 @@
 		{
 			"Name" : "DialogSystemRuntime",
 			"Type" : "Runtime",
-			"LoadingPhase" : "PreDefault"
+			"LoadingPhase" : "Default"
 		},
 		{
 			"Name" : "DialogSystemEditor",

@@ -4,7 +4,7 @@
 #include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
 #include "StoryInformationManager.h"
 
-UStoryKeyManager* UStoryKeyManager::GetInstance()
+UStoryKeyManager* UStoryKeyManager::GetStoryKeyManager()
 {
 	for (TObjectIterator<UStoryKeyManager> Itr; Itr; ++Itr)
 		return *Itr;
@@ -12,95 +12,45 @@ UStoryKeyManager* UStoryKeyManager::GetInstance()
 	return NewObject<UStoryKeyManager>();
 }
 
-TArray<FName>* UStoryKeyManager::GetSetByType(EStoryKeyTypes Type)
+UStoryKeyManager::UStoryKeyManager()
 {
-	switch (Type)
-	{
-	case EStoryKeyTypes::General:
-		return &Keys;
-		break;
-	case EStoryKeyTypes::DialogPhrases:
-		return &DialogPhrasesKeys;
-		break;
-	default:
-		return &Keys;
-		break;
-	}
+	Database.Add(EStoryKeyTypes::General, TSet<FName>());
+	Database.Add(EStoryKeyTypes::DialogPhrases, TSet<FName>());
+	Database.Add(EStoryKeyTypes::Task, TSet<FName>());
 }
 
 bool UStoryKeyManager::HasKey(FName Key, EStoryKeyTypes Type)
 {
-	auto inst = GetInstance();
-	if (inst == NULL)
-	{
-		UE_LOG(DialogModuleLog, Error, TEXT("StoryKeyManager inst not found"));
-		return false;
-	}
-
-	return inst->GetSetByType(Type)->Contains(Key);
+	return Database[Type].Contains(Key);
 }
 
 bool UStoryKeyManager::DontHasKey(FName Key, EStoryKeyTypes Type)
 {
-	auto inst = GetInstance();
-	if (inst == NULL)
-	{
-		UE_LOG(DialogModuleLog, Error, TEXT("StoryKeyManager inst not found"));
-		return true;
-	}
-
-	return !inst->GetSetByType(Type)->Contains(Key);
+	return !Database[Type].Contains(Key);
 }
 
 bool UStoryKeyManager::AddKey(FName Key, EStoryKeyTypes Type)
 {
-	auto inst = GetInstance();
-	if (inst == NULL)
-	{
-		UE_LOG(DialogModuleLog, Error, TEXT("StoryKeyManager inst not found"));
+	if (Database[Type].Contains(Key))
 		return false;
-	}
-
-	if (inst->GetSetByType(Type)->Contains(Key))
-		return false;
-
-	inst->GetSetByType(Type)->Add(Key);
+	
+	Database[Type].Add(Key);
 	return true;
 }
 
 bool UStoryKeyManager::RemoveKey(FName Key, EStoryKeyTypes Type)
 {
-	auto inst = GetInstance();
-	if (inst == NULL)
-	{
-		UE_LOG(DialogModuleLog, Error, TEXT("StoryKeyManager inst not found"));
-		return false;
-	}
-
-	return inst->GetSetByType(Type)->Remove(Key) == 1;
+	return Database[Type].Remove(Key) == 1;
 }
 
 void UStoryKeyManager::ClearType(EStoryKeyTypes Type)
 {
-	auto inst = GetInstance();
-	if (inst == NULL)
-	{
-		UE_LOG(DialogModuleLog, Error, TEXT("StoryKeyManager inst not found"));
-		return;
-	}
-
-	inst->GetSetByType(Type)->Reset();
+	Database[Type].Reset();
 }
 
-void UStoryKeyManager::ClearAllTypes()
+void UStoryKeyManager::ClearAll()
 {
-	auto inst = GetInstance();
-	if (inst == NULL)
-	{
-		UE_LOG(DialogModuleLog, Error, TEXT("StoryKeyManager inst not found"));
-		return;
-	}
-
-	inst->Keys.Reset();
-	inst->DialogPhrasesKeys.Reset();
+	ClearType(EStoryKeyTypes::General);
+	ClearType(EStoryKeyTypes::DialogPhrases);
+	ClearType(EStoryKeyTypes::Task);
 }

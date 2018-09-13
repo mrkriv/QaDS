@@ -16,8 +16,6 @@ void SDialogOutputPin::Construct(const FArguments& InArgs, UEdGraphPin* InPin)
 {
 	this->SetCursor(EMouseCursor::Default);
 
-	typedef SDialogOutputPin ThisClass;
-
 	bShowLabel = true;
 	IsEditable = true;
 
@@ -29,9 +27,9 @@ void SDialogOutputPin::Construct(const FArguments& InArgs, UEdGraphPin* InPin)
 
 	SBorder::Construct(SBorder::FArguments()
 		.BorderImage(this, &SDialogOutputPin::GetPinBorder)
-		.BorderBackgroundColor(this, &ThisClass::GetPinColor)
-		.OnMouseButtonDown(this, &ThisClass::OnPinMouseDown)
-		.Cursor(this, &ThisClass::GetPinCursor)
+		.BorderBackgroundColor(this, &SDialogOutputPin::GetPinColor)
+		.OnMouseButtonDown(this, &SDialogOutputPin::OnPinMouseDown)
+		.Cursor(this, &SDialogOutputPin::GetPinCursor)
 		.Padding(FMargin(5.0f))
 	);
 }
@@ -43,24 +41,14 @@ TSharedRef<SWidget>	SDialogOutputPin::GetDefaultValueWidget()
 
 const FSlateBrush* SDialogOutputPin::GetPinBorder() const
 {
-	return FEditorStyle::GetBrush(TEXT("BTEditor.Graph.BTNode.Body"));
+	return FEditorStyle::GetBrush(TEXT("DetailsView.CategoryMiddle"));
 }
 
 FSlateColor SDialogOutputPin::GetPinColor() const
 {
-	SGraphNode_Phrase* phraseNode = NULL;
+	FLinearColor defaultColor = FLinearColor(0.9f, 0.9f, 0.9f);
 
-	if (OwnerNodePtr.IsValid())
-		phraseNode = StaticCast<SGraphNode_Phrase*>(OwnerNodePtr.Pin().Get());
-
-	FLinearColor defaultColor;
-
-	if (phraseNode && phraseNode->GetNodeObj() && phraseNode->GetNodeObj()->IsA(UPhraseNode::StaticClass()))
-		defaultColor = Cast<UPhraseNode>(phraseNode->GetNodeObj())->GetNodeTitleColor();
-	else
-		GetDefault<UDialogSettings>()->NodeButtonDefault;
-
-	return IsHovered() ? GetDefault<UDialogSettings>()->NodeButtonHovered : defaultColor;
+	return IsHovered() ? FLinearColor(0.65f, 0.65f, 0.65f) : defaultColor;
 }
 
 //DialogNodeBase............................................................................................................
@@ -82,79 +70,139 @@ void SGraphNode_DialogNodeBase::UpdateGraphNode()
 	InputPinBox.Reset();
 	RightNodeBox.Reset();
 	OutputPinBox.Reset();
-	IconBox.Reset();
+
+	EventsBox.Reset();
+	ConditionsBox.Reset();
 
 	this->ContentScale.Bind(this, &SGraphNode::GetContentScale);
 	this->GetOrAddSlot(ENodeZone::Center)
 		.HAlign(HAlign_Center)
 		.VAlign(VAlign_Center)
 		[
-			SNew(SBorder)
-			.BorderImage(FEditorStyle::GetBrush("BTEditor.Graph.BTNode.Body"))
-			.Padding(2)
-			.BorderBackgroundColor(this, &SGraphNode_Root::GetBorderBackgroundColor)
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.Padding(0.0f, 0.0f)
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Top)
+			.AutoHeight()
 			[
-				SNew(SVerticalBox)
-
-				// INPUT PIN AREA
-				+ SVerticalBox::Slot()
-				.HAlign(HAlign_Fill)
-				.VAlign(VAlign_Top)
-				.AutoHeight()
+				SNew(SBorder)
+				.BorderImage(FEditorStyle::GetBrush("DetailsView.CategoryTop"))
+				.BorderBackgroundColor(FLinearColor(.7f, .7f, .7f))
 				[
-					SAssignNew(InputPinBox, SHorizontalBox)
-				]
+					SNew(SVerticalBox)
 
-				// CONTENT AREA
-				+ SVerticalBox::Slot()
-				.HAlign(HAlign_Fill)
-				.VAlign(VAlign_Fill)
-				.FillHeight(1.0f)
+					+ SVerticalBox::Slot()
+					.HAlign(HAlign_Fill)
+					.VAlign(VAlign_Top)
+					.AutoHeight()
+					[
+						SAssignNew(InputPinBox, SHorizontalBox) // INPUT PIN AREA
+					]
+	
+					+ SVerticalBox::Slot()
+					.HAlign(HAlign_Fill)
+					.VAlign(VAlign_Top)
+					.Padding(5.0f, 7.0f)
+					.AutoHeight()
+					[
+						SAssignNew(ConditionsBox, SVerticalBox)
+					]
+				]
+			]
+
+			+ SVerticalBox::Slot()
+			.Padding(-15.0f, 0.0f)
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Top)
+			.AutoHeight()
+			[
+				SNew(SBorder)
+				.BorderImage(FEditorStyle::GetBrush("DetailsView.CategoryTop"))
+			]
+	
+			+ SVerticalBox::Slot()
+			.Padding(-15.0f, 0.0f)
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Fill)
+			.FillHeight(1.0f)
+			[
+				SNew(SBorder)
+				.BorderImage(FEditorStyle::GetBrush("DetailsView.CategoryMiddle"))
 				[
 					SNew(SHorizontalBox)
 
-					// ICONS AREA
 					+ SHorizontalBox::Slot()
 					.HAlign(HAlign_Left)
 					.VAlign(VAlign_Top)
-					.Padding(5.0f, 10.0f, 5.0f, 0.0f)
+					.Padding(-15.0f, 0.0f, -5.0f, 0.0f)
 					.AutoWidth()
 					[
-						SAssignNew(IconBox, SVerticalBox)
+						SNew(SButton)
+						.OnClicked(this, &SGraphNode_DialogNodeBase::OnClickedIcon)
+						.ButtonStyle(FEditorStyle::Get(), "FlatButton")
+						[
+							SAssignNew(NodeIcon, SImage)
+							.Image(FBrushSet::Get().GetBrush(GetIcon()))
+						]
 					]
 
-					// TEXT AREA
 					+ SHorizontalBox::Slot()
 					.HAlign(HAlign_Fill)
 					.VAlign(VAlign_Center)
 					.FillWidth(1.0f)
-					.Padding(10.0f, 5.0f, 10.0f, 5.0f)
+					.Padding(2.0f, 2.0f, 10.0f, 4.0f)
 					[
-						SAssignNew(ContentBox, SVerticalBox)
-						+ SVerticalBox::Slot()
+						SNew(SBox)
 						.HAlign(HAlign_Fill)
-						.VAlign(VAlign_Top)
+						.VAlign(VAlign_Center)
+						.MinDesiredHeight(70.0f)
+						.WidthOverride(320.0f)
+						.MaxDesiredWidth(320.0f)
 						[
-							SNew(SBox)
-							.HAlign(HAlign_Fill)
-							.VAlign(VAlign_Fill)
-							.MinDesiredHeight(70.0f)
-							.WidthOverride(320.0f)
-							.MaxDesiredWidth(320.0f)
-							[
-								SAssignNew(NodeWiget, STextBlock)
-							]
+							SAssignNew(NodeWiget, STextBlock)
 						]
 					]
 				]
+			]
 
-				// OUTPUT PIN AREA
-				+ SVerticalBox::Slot()
-				.HAlign(HAlign_Fill)
-				.VAlign(VAlign_Bottom)
-				.AutoHeight()
+			+ SVerticalBox::Slot()
+			.Padding(-15.0f, 0.0f)
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Bottom)
+			.AutoHeight()
+			[
+				SNew(SBorder)
+				.BorderImage(FEditorStyle::GetBrush("DetailsView.CategoryBottom"))
+			]
+	
+			+ SVerticalBox::Slot()
+			.Padding(0.0f, 0.0f)
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Bottom)
+			.AutoHeight()
+			[
+				SNew(SBorder)
+				.BorderImage(FEditorStyle::GetBrush("DetailsView.CategoryBottom"))
+				.BorderBackgroundColor(FLinearColor(.7f, .7f, .7f))
 				[
-					SAssignNew(OutputPinBox, SHorizontalBox)
+					SNew(SVerticalBox)
+					
+					+ SVerticalBox::Slot()
+					.Padding(5.0f, 7.0f)
+					.HAlign(HAlign_Fill)
+					.VAlign(VAlign_Bottom)
+					[
+						SAssignNew(EventsBox, SVerticalBox)
+					]
+
+					+ SVerticalBox::Slot()
+					.HAlign(HAlign_Fill)
+					.VAlign(VAlign_Bottom)
+					.AutoHeight()
+					[
+						SAssignNew(OutputPinBox, SHorizontalBox) // OUTPUT PIN AREA
+					]
 				]
 			]
 		];
@@ -163,15 +211,16 @@ void SGraphNode_DialogNodeBase::UpdateGraphNode()
 	CreatePinWidgets();
 }
 
+FReply SGraphNode_DialogNodeBase::OnClickedIcon()
+{
+	return FReply::Handled();
+}
+
 void SGraphNode_DialogNodeBase::CreateNodeWidget()
 {
 	NodeWiget->SetAutoWrapText(true);
 	NodeWiget->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
 	NodeWiget->SetText(NodeBace->GetNodeTitle(ENodeTitleType::FullTitle));
-
-	NodeWiget->SetFont(FSlateFontInfo(
-		FPaths::ProjectPluginsDir() / TEXT("DialogSystem/Resources/MainFont.ttf"),
-		GetDefault<UDialogSettings>()->FontSize));
 }
 
 void SGraphNode_DialogNodeBase::CreatePinWidgets()
@@ -244,22 +293,9 @@ void SGraphNode_DialogNodeBase::AddPin(const TSharedRef<SGraphPin>& PinToAdd)
 	}
 }
 
-void SGraphNode_DialogNodeBase::AddIconIF(FName BrushName, bool condition)
+void SGraphNode_DialogNodeBase::AddTextToContent(TSharedPtr<SVerticalBox> Container, FString Text, FColor Color)
 {
-	if (condition)
-	{
-		IconBox->AddSlot()
-			.Padding(0, 0.0f, 0.0f, 5.0f)
-			[
-				SNew(SImage)
-				.Image(FBrushSet::Get().GetBrush(BrushName))
-			];
-	}
-}
-
-void SGraphNode_DialogNodeBase::AddTextToContent(FString Text, FColor Color)
-{
-	ContentBox->AddSlot()
+	Container->AddSlot()
 		.HAlign(HAlign_Fill)
 		.VAlign(VAlign_Bottom)
 		.AutoHeight()
@@ -267,7 +303,6 @@ void SGraphNode_DialogNodeBase::AddTextToContent(FString Text, FColor Color)
 			SNew(STextBlock)
 			.Text(FText::FromString(Text))
 			.ColorAndOpacity(Color)
-			.Font(FSlateFontInfo(FPaths::ProjectPluginsDir() / TEXT("DialogSystem/Resources/MainFont.ttf"), GetDefault<UDialogSettings>()->FontSize))
 		];
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -277,22 +312,19 @@ void SGraphNode_DialogNodeBase::OnPropertyChanged(UEdGraphNode* Sender, const FN
 	UpdateGraphNode();
 }
 
-FSlateColor SGraphNode_DialogNodeBase::GetBorderBackgroundColor() const
+FName SGraphNode_DialogNodeBase::GetIcon() const
 {
-	return BackgroundColor;
+	return "";
 }
-
 
 //RootNode............................................................................................................
 SGraphNode_Root::SGraphNode_Root()
 {
-	BackgroundColor = GetDefault<UDialogSettings>()->NodeRoot;
 }
 
-//WaitNode............................................................................................................
-SGraphNode_Wait::SGraphNode_Wait()
+FName SGraphNode_Root::GetIcon() const
 {
-	BackgroundColor = GetDefault<UDialogSettings>()->NodeRoot;
+	return "DialogSystem.Root";
 }
 
 //PhraseNode.......................................................................................................
@@ -305,6 +337,7 @@ void SGraphNode_Phrase::Construct(const FArguments& InArgs, UPhraseNode* InNode)
 	GraphNode = InNode;
 	NodeBace = InNode;
 	PhraseNode = InNode;
+
 	SetCursor(EMouseCursor::CardinalCross);
 	UpdateGraphNode();
 }
@@ -314,31 +347,56 @@ void SGraphNode_Phrase::OnPropertyChanged(UEdGraphNode* Sender, const FName& Pro
 	UpdateGraphNode();
 }
 
-FSlateColor SGraphNode_Phrase::GetBorderBackgroundColor() const
+FName SGraphNode_Phrase::GetIcon() const
 {
-	return PhraseNode != NULL ? PhraseNode->GetNodeTitleColor() :
-		SGraphNode_DialogNodeBase::GetBorderBackgroundColor();
+	if (PhraseNode->Data.Source == EDialogPhraseSource::Player)
+	{
+		return "DialogSystem.Player";
+	}
+	else
+	{
+		return "DialogSystem.NPC";
+	}
 }
 
 void SGraphNode_Phrase::CreateNodeWidget()
 {
 	SGraphNode_DialogNodeBase::CreateNodeWidget();
 	
-	AddIconIF("DialogSystem.Sound", PhraseNode->Data.Sound != NULL);
-	AddIconIF("DialogSystem.Time", !PhraseNode->Data.AutoTime);
-	AddIconIF("DialogSystem.Book", PhraseNode->Data.Important);
-	AddIconIF("DialogSystem.Event", PhraseNode->Data.CustomEvents.Num() != 0);
-	AddIconIF("DialogSystem.Condition", PhraseNode->Data.CustomConditions.Num() != 0);
-
 	for (auto key : PhraseNode->Data.CheckHasKeys)
-		AddTextToContent(TEXT("IF ") + key.ToString(), FColor(255, 255, 255));
+		AddTextToContent(ConditionsBox, TEXT("HAS KEY ") + key.ToString(), FColor(255, 255, 255));
 
 	for (auto key : PhraseNode->Data.CheckDontHasKeys)
-		AddTextToContent(TEXT("IF NOT ") + key.ToString(), FColor(255, 255, 255));
+		AddTextToContent(ConditionsBox, TEXT("HAS NOT KEY ") + key.ToString(), FColor(255, 255, 255));
+
+	for (auto key : PhraseNode->Data.CustomConditions)
+		AddTextToContent(ConditionsBox, TEXT("IF ") + key.ToString(), FColor(255, 255, 255));
+	
+	for (auto key : PhraseNode->Data.CustomEvents)
+		AddTextToContent(EventsBox, TEXT("E ") + key.ToString(), FColor(255, 0, 0));
 
 	for (auto key : PhraseNode->Data.GiveKeys)
-		AddTextToContent(TEXT("+ ") + key.ToString(), FColor(0, 255, 0));
+		AddTextToContent(EventsBox, TEXT("+ ") + key.ToString(), FColor(0, 255, 0));
 
 	for (auto key : PhraseNode->Data.RemoveKeys)
-		AddTextToContent(TEXT("- ") + key.ToString(), FColor(255, 0, 0));
+		AddTextToContent(EventsBox, TEXT("- ") + key.ToString(), FColor(255, 0, 0));
+
+	ConditionsBox->SetVisibility(ConditionsBox->NumSlots() > 0 ? EVisibility::Visible : EVisibility::Collapsed);
+	EventsBox->SetVisibility(EventsBox->NumSlots() > 0 ? EVisibility::Visible : EVisibility::Collapsed);
+}
+
+FReply SGraphNode_Phrase::OnClickedIcon()
+{
+	if (PhraseNode->Data.Source == EDialogPhraseSource::Player)
+	{
+		PhraseNode->Data.Source = EDialogPhraseSource::NPC;
+	}
+	else
+	{
+		PhraseNode->Data.Source = EDialogPhraseSource::Player;
+	}
+
+	NodeIcon->SetImage(FBrushSet::Get().GetBrush(GetIcon()));
+
+	return FReply::Handled();
 }
