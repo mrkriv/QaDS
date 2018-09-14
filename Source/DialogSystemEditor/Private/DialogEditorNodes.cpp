@@ -52,8 +52,8 @@ UPhraseNode::UPhraseNode(const FObjectInitializer& ObjectInitializer)
 
 void UPhraseNode::AllocateDefaultPins()
 {
-	UEdGraphPin* Inputs = CreatePin(EGPD_Input, NAME_None, FName(""));
-	UEdGraphPin* Outputs = CreatePin(EGPD_Output, NAME_None, FName(""));
+	InputPin = CreatePin(EGPD_Input, NAME_None, FName(""));
+	OutputPin = CreatePin(EGPD_Output, NAME_None, FName(""));
 }
 
 FText UPhraseNode::GetTooltipText() const
@@ -89,7 +89,7 @@ URootNode::URootNode(const FObjectInitializer& ObjectInitializer)
 
 void URootNode::AllocateDefaultPins()
 {
-	UEdGraphPin* Outputs = CreatePin(EGPD_Output, NAME_None, FName("Start"));
+	OutputPin = CreatePin(EGPD_Output, NAME_None, FName("Start"));
 }
 
 FText URootNode::GetTooltipText() const

@@ -42,6 +42,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FDialogPhraseInfo Data;
 
+	class UEdGraphPin* InputPin;
+	class UEdGraphPin* OutputPin;
+
 	virtual void AllocateDefaultPins() override;
 	virtual FText GetTooltipText() const override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
