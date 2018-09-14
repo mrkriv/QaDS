@@ -1,6 +1,6 @@
 // Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #include "ImportWindow.h"
-#include "Modules/ModuleManager.h"
+#include "DialogStalkerInporterModule.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/SOverlay.h"
 #include "Styling/CoreStyle.h"
@@ -11,6 +11,8 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SEditableTextBox.h"
+#include "FileManager.h"
+#include "XmlFile.h"
 
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -53,8 +55,44 @@ void SImportWindow::Construct(const FArguments& InArgs)
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
+TArray<FString> SImportWindow::GetFilesInDir(FString path, FString mask)
+{
+	FPaths::NormalizeDirectoryName(path);
+	path /= mask;
+
+	TArray<FString> files;
+	IFileManager::Get().FindFiles(files, *path, true, false);
+
+	return files;
+}
+
 FReply SImportWindow::HandleScanButton()
 {
+	auto basePath = gamedataPathTextBox->GetText().ToString();
+	auto gameplayPath = basePath / "configs" / "gameplay";
+	auto dialogs = GetFilesInDir(gameplayPath, "dialogs*.xml");
+
+	for (auto dialogFile : dialogs)
+	{
+		UE_LOG(DialogStalkerInporterLog, Log, TEXT("Dialog file: (%s)"), *dialogFile);
+
+		FXmlFile file(gameplayPath / dialogFile);
+		auto root = file.GetRootNode();
+
+		if (root == NULL)
+			continue;
+
+		for (auto node : root->GetChildrenNodes())
+		{
+			if (node->GetTag() != "dialog")
+				continue;
+
+			auto id = node->GetAttribute("id");
+
+			UE_LOG(DialogStalkerInporterLog, Log, TEXT("Dialog found: (%s)"), *id);
+		}
+	}
+
 	return FReply::Handled();
 }
 

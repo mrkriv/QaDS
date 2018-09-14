@@ -35,13 +35,11 @@ public class DialogStalkerInporter : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
-                "LevelEditor",
                 "EditorStyle",
-                "BlueprintGraph",
                 "Projects",
                 "UnrealEd",
-                "ApplicationCore",
                 "WorkspaceMenuStructure",
+                "XmlParser",
 
                 "DialogSystemRuntime",
             }

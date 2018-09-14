@@ -18,4 +18,6 @@ public:
 
 private:
 	TSharedPtr<class SEditableTextBox> gamedataPathTextBox;
+
+	TArray<FString> GetFilesInDir(FString path, FString mask);
 };
