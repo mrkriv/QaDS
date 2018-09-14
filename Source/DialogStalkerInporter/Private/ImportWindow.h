@@ -5,6 +5,11 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SCompoundWidget.h"
 
+class UDialogPhrase;
+class UDialogAsset;
+class SEditableTextBox;
+class FXmlNode;
+
 class SImportWindow : public SCompoundWidget
 {
 public:
@@ -13,11 +18,14 @@ public:
 
 	void Construct(const FArguments& InArgs);
 
-	FReply HandleScanButton();
 	FReply HandleImportButton();
 
 private:
-	TSharedPtr<class SEditableTextBox> gamedataPathTextBox;
+	TSharedPtr<SEditableTextBox> gamedataPathTextBox;
+	TSharedPtr<SEditableTextBox> outputPathTextBox;
 
 	TArray<FString> GetFilesInDir(FString path, FString mask);
+	UDialogAsset* CreateDialogAsset(const FString& path, const FString& name);
+	void ImportNodes(UDialogAsset* asset, FXmlNode* dialogNode); 
+	void SetNodeSource(TArray<UDialogPhrase*>& handled, UDialogPhrase* phrase, bool isParentActor);
 };

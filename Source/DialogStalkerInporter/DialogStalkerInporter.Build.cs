@@ -42,6 +42,7 @@ public class DialogStalkerInporter : ModuleRules
                 "XmlParser",
 
                 "DialogSystemRuntime",
+                "DialogSystemEditor",
             }
         );
     }

@@ -14,6 +14,13 @@
 #include "FileManager.h"
 #include "XmlFile.h"
 
+#include "DialogAssetFactory.h"
+#include "DialogAsset.h"
+#include "Engine/Engine.h"
+#include "IAssetTools.h"
+#include "AssetToolsModule.h"
+#include "UnrealEd.h"
+
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
@@ -32,20 +39,53 @@ void SImportWindow::Construct(const FArguments& InArgs)
 			[
 				SNew(SVerticalBox)
 				+ SVerticalBox::Slot()
+				.Padding(4.0f, 2.0f, 4.0f, 2.0f)
 				.AutoHeight()
 				[
 					SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot()
-					.HAlign(HAlign_Fill)
+					.FillWidth(0.2f)
 					[
-						SAssignNew(gamedataPathTextBox, SEditableTextBox)
+					  	SNew(STextBlock)
+						.Text(FText::FromString("Gamedata path"))
 					]
 					+ SHorizontalBox::Slot()
+					.FillWidth(0.8f)
+					[
+					  	SAssignNew(gamedataPathTextBox, SEditableTextBox)
+						.Text(FText::FromString("D:\\Program Files\\Dead Air\\database\\unpacked"))
+					]
+				]
+				+ SVerticalBox::Slot()
+				.Padding(4.0f, 2.0f, 4.0f, 2.0f)
+				.AutoHeight()
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					.FillWidth(0.2f)
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString("Output path"))
+					]
+					+ SHorizontalBox::Slot()
+					.FillWidth(0.8f)
+					[
+					  	SAssignNew(outputPathTextBox, SEditableTextBox)
+						.Text(FText::FromString("/Game//Dialogs"))
+					]
+				]
+				+ SVerticalBox::Slot()
+				.Padding(4.0f, 2.0f, 4.0f, 2.0f)
+				.AutoHeight()
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
 					.AutoWidth()
+					.HAlign(HAlign_Right)
 					[
 						SNew(SButton)
 						.Text(FText::FromString("Import"))
-						.OnClicked(this, &SImportWindow::HandleScanButton)
+						.OnClicked(this, &SImportWindow::HandleImportButton)
 					]
 				]
 			]
@@ -66,7 +106,7 @@ TArray<FString> SImportWindow::GetFilesInDir(FString path, FString mask)
 	return files;
 }
 
-FReply SImportWindow::HandleScanButton()
+FReply SImportWindow::HandleImportButton()
 {
 	auto basePath = gamedataPathTextBox->GetText().ToString();
 	auto gameplayPath = basePath / "configs" / "gameplay";
@@ -74,8 +114,6 @@ FReply SImportWindow::HandleScanButton()
 
 	for (auto dialogFile : dialogs)
 	{
-		UE_LOG(DialogStalkerInporterLog, Log, TEXT("Dialog file: (%s)"), *dialogFile);
-
 		FXmlFile file(gameplayPath / dialogFile);
 		auto root = file.GetRootNode();
 
@@ -87,16 +125,101 @@ FReply SImportWindow::HandleScanButton()
 			if (node->GetTag() != "dialog")
 				continue;
 
-			auto id = node->GetAttribute("id");
+			auto asset = CreateDialogAsset(dialogFile, node->GetAttribute("id"));
+			ImportNodes(asset, node);
 
-			UE_LOG(DialogStalkerInporterLog, Log, TEXT("Dialog found: (%s)"), *id);
+			UE_LOG(DialogStalkerInporterLog, Log, TEXT("Create dialog asset %s"), *asset->GetFullName());
+
+			return FReply::Handled();
 		}
 	}
 
 	return FReply::Handled();
 }
 
-FReply SImportWindow::HandleImportButton()
+UDialogAsset* SImportWindow::CreateDialogAsset(const FString& path, const FString& name)
 {
-	return FReply::Handled();
+	auto& assetTools = FAssetToolsModule::GetModule().Get();
+	auto factory = NewObject<UDialogAssetFactory>();
+
+	auto packageName = outputPathTextBox->GetText().ToString() / path;
+	auto newAsset = assetTools.CreateAsset(name, packageName, factory->GetSupportedClass(), factory);
+	
+	TArray<UObject*> ObjectsToSync;
+	ObjectsToSync.Add(newAsset);
+	GEditor->SyncBrowserToObjects(ObjectsToSync);
+
+	return Cast<UDialogAsset>(newAsset);
+}
+
+void SImportWindow::ImportNodes(UDialogAsset* asset, FXmlNode* dialogNode)
+{
+	auto xmlPhraseList = dialogNode->FindChildNode("phrase_list");
+
+	if (xmlPhraseList == NULL)
+		return;
+
+	TMap<FString, UDialogPhrase*> phrases;
+	for (auto xmlPhrase : xmlPhraseList->GetChildrenNodes())
+	{
+		auto phrase = NewObject<UDialogPhrase>();
+		phrase->OwnerDialog = asset;
+		phrase->Data.UID = *xmlPhrase->GetAttribute("id");
+		phrase->Data.Text = FText::FromString(xmlPhrase->FindChildNode("text")->GetContent());
+
+		phrases.Add(phrase->Data.UID.ToString(), phrase);
+	}
+
+	for (auto xmlPhrase : xmlPhraseList->GetChildrenNodes())
+	{
+		UDialogPhrase* phrase = phrases[xmlPhrase->GetAttribute("id")];
+
+		for (auto node : xmlPhrase->GetChildrenNodes())
+		{
+			auto tag = node->GetTag();
+			auto content = node->GetContent();
+			if (tag == "next")
+			{
+				phrase->Childs.AddUnique(phrases[content]);
+			}
+			else if (tag == "has_info")
+			{
+				phrase->Data.CheckHasKeys.Add(*content);
+			}
+			else if (tag == "dont_has_info")
+			{
+				phrase->Data.CheckDontHasKeys.Add(*content);
+			}
+			else if (tag == "give_info")
+			{
+				phrase->Data.GiveKeys.Add(*content);
+			}
+			else if (tag == "disable_info")
+			{
+				phrase->Data.RemoveKeys.Add(*content);
+			}
+		}
+	}
+
+	asset->RootNode = NewObject<UDialogPhrase>();
+	asset->RootNode->OwnerDialog = asset;
+	asset->RootNode->Data.UID = "0";
+	asset->RootNode->Childs.Add(phrases["0"]);
+
+	TArray<UDialogPhrase*> handled;
+
+	for (auto child : asset->RootNode->Childs)
+		SetNodeSource(handled, Cast<UDialogPhrase>(child), false);
+}
+
+void SImportWindow::SetNodeSource(TArray<UDialogPhrase*>& handled, UDialogPhrase* phrase, bool isParentActor)
+{
+	if (phrase == NULL || handled.Contains(phrase))
+		return;
+
+	handled.Add(phrase);
+	phrase->Data.Source = isParentActor ? EDialogPhraseSource::Player : EDialogPhraseSource::NPC;
+
+	for (auto child : phrase->Childs)
+		SetNodeSource(handled, phrase, !isParentActor);
 }
