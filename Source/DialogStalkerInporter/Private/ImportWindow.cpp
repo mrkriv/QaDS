@@ -80,6 +80,24 @@ void SImportWindow::Construct(const FArguments& InArgs)
 				[
 					SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot()
+					.FillWidth(0.2f)
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString("Local name"))
+					]
+					+ SHorizontalBox::Slot()
+					.FillWidth(0.8f)
+					[
+					  	SAssignNew(localNameTextBox, SEditableTextBox)
+						.Text(FText::FromString("rus"))
+					]
+				]
+				+ SVerticalBox::Slot()
+				.Padding(4.0f, 2.0f, 4.0f, 2.0f)
+				.AutoHeight()
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
 					.AutoWidth()
 					.HAlign(HAlign_Right)
 					[
@@ -110,8 +128,10 @@ FReply SImportWindow::HandleImportButton()
 {
 	auto basePath = gamedataPathTextBox->GetText().ToString();
 	auto gameplayPath = basePath / "configs" / "gameplay";
-	auto dialogs = GetFilesInDir(gameplayPath, "dialogs*.xml");
 
+	LoadLocalize(basePath / "configs" / "text" / localNameTextBox->GetText().ToString());
+
+	auto dialogs = GetFilesInDir(gameplayPath, "dialogs*.xml");
 	for (auto dialogFile : dialogs)
 	{
 		FXmlFile file(gameplayPath / dialogFile);
@@ -129,11 +149,10 @@ FReply SImportWindow::HandleImportButton()
 			ImportNodes(asset, node);
 
 			UE_LOG(DialogStalkerInporterLog, Log, TEXT("Create dialog asset %s"), *asset->GetFullName());
-
-			return FReply::Handled();
 		}
 	}
 
+	FSlateNotificationManager::Get().AddNotification(FNotificationInfo(FText::FromString("Import successful")));
 	return FReply::Handled();
 }
 
@@ -162,10 +181,13 @@ void SImportWindow::ImportNodes(UDialogAsset* asset, FXmlNode* dialogNode)
 	TMap<FString, UDialogPhrase*> phrases;
 	for (auto xmlPhrase : xmlPhraseList->GetChildrenNodes())
 	{
+		auto id = xmlPhrase->GetAttribute("id");
+		auto text = xmlPhrase->FindChildNode("text")->GetContent();
+
 		auto phrase = NewObject<UDialogPhrase>();
 		phrase->OwnerDialog = asset;
-		phrase->Data.UID = *xmlPhrase->GetAttribute("id");
-		phrase->Data.Text = FText::FromString(xmlPhrase->FindChildNode("text")->GetContent());
+		phrase->Data.UID = *id;
+		phrase->Data.Text = GetLocalizeString(text);
 
 		phrases.Add(phrase->Data.UID.ToString(), phrase);
 	}
@@ -209,7 +231,7 @@ void SImportWindow::ImportNodes(UDialogAsset* asset, FXmlNode* dialogNode)
 	TArray<UDialogPhrase*> handled;
 
 	for (auto child : asset->RootNode->Childs)
-		SetNodeSource(handled, Cast<UDialogPhrase>(child), false);
+		SetNodeSource(handled, Cast<UDialogPhrase>(child), true);
 }
 
 void SImportWindow::SetNodeSource(TArray<UDialogPhrase*>& handled, UDialogPhrase* phrase, bool isParentActor)
@@ -221,5 +243,40 @@ void SImportWindow::SetNodeSource(TArray<UDialogPhrase*>& handled, UDialogPhrase
 	phrase->Data.Source = isParentActor ? EDialogPhraseSource::Player : EDialogPhraseSource::NPC;
 
 	for (auto child : phrase->Childs)
-		SetNodeSource(handled, phrase, !isParentActor);
+		SetNodeSource(handled, Cast<UDialogPhrase>(child), !isParentActor);
+}
+
+void SImportWindow::LoadLocalize(FString path)
+{
+	auto xmls = GetFilesInDir(path, "*.xml");
+
+	for (auto file : xmls)
+	{
+		FXmlFile file(path / file);
+		auto root = file.GetRootNode();
+
+		if (root == NULL)
+			continue;
+
+		for (auto node : root->GetChildrenNodes())
+		{
+			auto id = node->GetAttribute("id");
+			auto textNode = node->FindChildNode("text");
+
+			if (textNode != NULL)
+			{
+				localize.Add(id, FText::FromString(textNode->GetContent()));
+			}
+		}
+	}
+}
+
+FText SImportWindow::GetLocalizeString(FString keyName)
+{
+	auto ptr = localize.Find(keyName);
+
+	if (ptr != NULL)
+		return *ptr;
+
+	return FText::FromString(keyName);
 }

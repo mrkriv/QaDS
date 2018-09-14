@@ -21,11 +21,16 @@ public:
 	FReply HandleImportButton();
 
 private:
+	TMap<FString, FText> localize;
+
 	TSharedPtr<SEditableTextBox> gamedataPathTextBox;
+	TSharedPtr<SEditableTextBox> localNameTextBox;
 	TSharedPtr<SEditableTextBox> outputPathTextBox;
 
 	TArray<FString> GetFilesInDir(FString path, FString mask);
 	UDialogAsset* CreateDialogAsset(const FString& path, const FString& name);
-	void ImportNodes(UDialogAsset* asset, FXmlNode* dialogNode); 
+	void ImportNodes(UDialogAsset* asset, FXmlNode* dialogNode);
 	void SetNodeSource(TArray<UDialogPhrase*>& handled, UDialogPhrase* phrase, bool isParentActor);
+	FText GetLocalizeString(FString keyName);
+	void LoadLocalize(FString path);
 };
