@@ -23,6 +23,10 @@
 		{
 			"Name" : "DialogSystemEditor",
 			"Type" : "Editor"
+		},
+		{
+			"Name" : "DialogStalkerInporter",
+			"Type" : "Editor"
 		}
 	],
 
