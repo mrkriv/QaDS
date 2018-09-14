@@ -18,11 +18,6 @@ bool UDialogNode::Check(UDialogProcessor* Implementer)
 	return false;
 }
 
-TArray<UDialogNode*> UDialogNode::GetChilds()
-{
-	return Childs;
-}
-
 void UDialogPhrase::Invoke(UDialogProcessor* Implementer)
 {
 	auto storyKeyManager = UStoryKeyManager::GetStoryKeyManager();

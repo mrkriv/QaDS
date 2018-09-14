@@ -90,8 +90,6 @@ public:
 
 	virtual void Invoke(class UDialogProcessor* Implementer);
 	virtual bool Check(class UDialogProcessor* Implementer);
-
-	TArray<UDialogNode*> GetChilds();
 };
 
 UCLASS()
@@ -99,9 +97,6 @@ class DIALOGSYSTEMRUNTIME_API UDialogPhrase : public UDialogNode
 {
 	GENERATED_BODY()
 public:
-
-	UPROPERTY(BlueprintReadOnly)
-	FGuid UID;
 
 	UPROPERTY(BlueprintReadOnly)
 	FDialogPhraseInfo Data;

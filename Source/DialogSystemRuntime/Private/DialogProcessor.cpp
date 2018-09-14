@@ -48,7 +48,7 @@ void UDialogProcessor::SetCurrentNode(UDialogPhrase* node)
 	NextNodes.Reset();
 	CurrentNode = node;
 
-	for (auto phraseNode : CurrentNode->GetChilds())
+	for (auto phraseNode : CurrentNode->Childs)
 	{
 		auto phrase = Cast<UDialogPhrase>(phraseNode);
 		if (phrase && phrase->Check(this))
