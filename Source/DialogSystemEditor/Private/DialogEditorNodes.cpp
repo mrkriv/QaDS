@@ -7,6 +7,7 @@
 #include "DialogEditorNodes.h"
 #include "DialogSettings.h"
 #include "DialogAsset.h"
+#include "DialogNodes.h"
 
 //UDdialogEdGraphNode...........................................................................................
 UDdialogEdGraphNode::UDdialogEdGraphNode(const FObjectInitializer& ObjectInitializer)

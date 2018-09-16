@@ -3,6 +3,7 @@
 #include "DialogProcessor.h"
 #include "DialogScript.h"
 #include "DialogPhrase.h"
+#include "DialogNodes.h"
 #include "DialogAsset.h"
 #include "StoryInformationManager.h"
 #include "Runtime/Engine/Public/TimerManager.h"

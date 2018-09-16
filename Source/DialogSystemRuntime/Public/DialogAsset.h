@@ -2,7 +2,6 @@
 #pragma once
 
 #include "Engine/DataAsset.h"
-#include "DialogPhrase.h"
 #include "DialogAsset.generated.h"
 
 UCLASS(Blueprintable)
@@ -15,7 +14,7 @@ public:
 	FName Name;
 
 	UPROPERTY()
-	UDialogNode* RootNode;
+	class UDialogNode* RootNode;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "DialogScript"))
 	TSubclassOf<class ADialogScript> DialogScriptClass;

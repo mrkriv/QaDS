@@ -7,7 +7,7 @@
 #include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
 #include "StoryInformationManager.h"
 #include "DialogProcessor.h"
-#include "DialogPhrase.h"
+#include "DialogNodes.h"
 #include "DialogAsset.h"
 #include "DialogPhraseEvent.h"
 

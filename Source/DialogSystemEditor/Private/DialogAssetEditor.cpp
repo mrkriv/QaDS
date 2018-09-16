@@ -17,6 +17,7 @@
 #include "BlueprintEditorModule.h"
 #include "PropertyEditorModule.h"
 #include "DialogSettings.h"
+#include "DialogNodes.h"
 #include "DialogEditorNodes.h"
 #include "HAL/PlatformApplicationMisc.h"
 

@@ -9,12 +9,6 @@
 class UDialogRootEdGraphNode;
 class UDialogPhraseEdGraphNode;
 class UDdialogEdGraphNode;
-class UDialogNode;
-class UDialogPhraseNode;
-class UDialogSubGraphNode;
-class UDialogElseIfNode;
-class ADialogScript;
-class UDialogAsset;
 class UStoryKeyManager;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDialogEndSignature);

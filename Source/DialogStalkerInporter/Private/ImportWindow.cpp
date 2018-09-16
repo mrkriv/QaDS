@@ -16,6 +16,8 @@
 
 #include "DialogAssetFactory.h"
 #include "DialogAsset.h"
+#include "DialogPhrase.h"
+#include "DialogNodes.h"
 #include "Engine/Engine.h"
 #include "IAssetTools.h"
 #include "AssetToolsModule.h"

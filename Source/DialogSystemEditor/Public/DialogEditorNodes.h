@@ -5,6 +5,8 @@
 #include "DialogPhrase.h"
 #include "DialogEditorNodes.generated.h"
 
+class UEdGraphPin;
+
 class DIALOGSYSTEMEDITOR_API FNodePropertyObserver
 {
 public:
@@ -16,8 +18,8 @@ class DIALOGSYSTEMEDITOR_API UDdialogEdGraphNode : public UEdGraphNode
 {
 	GENERATED_UCLASS_BODY()
 		
-	class UEdGraphPin* InputPin;
-	class UEdGraphPin* OutputPin;
+	UEdGraphPin* InputPin;
+	UEdGraphPin* OutputPin;
 
 	UPROPERTY()
 	UDialogNode* CompileNode;
