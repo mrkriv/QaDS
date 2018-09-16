@@ -31,7 +31,7 @@ void FDialogSystemEditorModule::StartupModule()
 	
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseCondition", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseEvent", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
-	PropertyModule.RegisterCustomClassLayout("PhraseNode", FOnGetDetailCustomizationInstance::CreateStatic(&FPhraseNodeDetails::MakeInstance));
+	PropertyModule.RegisterCustomClassLayout("DialogPhraseNode", FOnGetDetailCustomizationInstance::CreateStatic(&FPhraseNodeDetails::MakeInstance));
 
 	SettingsModule.RegisterSettings("Project", "Plugins", "Dialog",
 		LOCTEXT("RuntimeSettingsName", "Dialog Editor"),
@@ -60,7 +60,7 @@ void FDialogSystemEditorModule::ShutdownModule()
 		auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 		PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseCondition");
 		PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseEvent");
-		PropertyModule.UnregisterCustomClassLayout("PhraseNode");
+		PropertyModule.UnregisterCustomClassLayout("DialogPhraseNode");
 	}
 
 	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))

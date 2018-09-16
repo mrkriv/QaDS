@@ -46,7 +46,30 @@ void UDdialogEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEvent& e
 
 int UDdialogEdGraphNode::GetOrder() const
 {
-	return 0;
+	auto inputPin = Pins.FindByPredicate([](const UEdGraphPin* pin) {return pin->Direction == EGPD_Input; });
+
+	if(inputPin == NULL || (*inputPin)->LinkedTo.Num() == 0)
+		return 0;
+	
+	auto bigOwner = (UDdialogEdGraphNode*)(*inputPin)->LinkedTo[0]->GetOwningNode();
+	for(auto ownerPin : (*inputPin)->LinkedTo)
+	{
+		auto owner = (UDdialogEdGraphNode*)ownerPin->GetOwningNode();
+
+		if (owner != NULL && owner->GetChildNodes().Num() > bigOwner->GetChildNodes().Num())
+		{
+			bigOwner = owner;
+		}
+	}
+
+	auto lessCount = 0;
+	for (auto node : bigOwner->GetChildNodes())
+	{
+		if (node->NodePosX < NodePosX)
+			lessCount++;
+	}
+
+	return lessCount + 1;
 }
 
 //PhraseNode..........................................................................................................

@@ -55,10 +55,9 @@ FSlateColor SDialogOutputPin::GetPinColor() const
 
 void SGraphNode_DialogNodeBase::Construct(const FArguments& InArgs, UDdialogEdGraphNode* InNode)
 {
+	SetCursor(EMouseCursor::CardinalCross);
 	GraphNode = InNode;
-	NodeBace = InNode;
-	this->SetCursor(EMouseCursor::CardinalCross);
-	this->UpdateGraphNode();
+	UpdateGraphNode();
 }
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -171,10 +170,9 @@ void SGraphNode_DialogNodeBase::UpdateGraphNode()
 					.Padding(10.0f, -5.0f, 0.0f, 0.0f)
 					.AutoWidth()
 					[
-						SNew(SBorder)
+						SAssignNew(OrderDisplayBorder, SBorder)
 						[
-							SNew(STextBlock)
-							.Text(FText::AsNumber(NodeBace->GetOrder()))
+							SAssignNew(OrderDisplayText, STextBlock)
 						]
 					]
 				]
@@ -234,28 +232,24 @@ void SGraphNode_DialogNodeBase::CreateNodeWidget()
 {
 	NodeWiget->SetAutoWrapText(true);
 	NodeWiget->SetWrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping);
-	NodeWiget->SetText(NodeBace->GetNodeTitle(ENodeTitleType::FullTitle));
+	NodeWiget->SetText(GraphNode->GetNodeTitle(ENodeTitleType::FullTitle));
 }
 
 void SGraphNode_DialogNodeBase::CreatePinWidgets()
 {
-	for (int i = 0; i < NodeBace->Pins.Num(); i++)
+	for (auto pin : GraphNode->Pins)
 	{
-		if (NodeBace->Pins[i]->Direction == EEdGraphPinDirection::EGPD_Input)
+		auto NewPin = SNew(SDialogOutputPin, pin);
+		NewPin->SetIsEditable(IsEditable);
+		AddPin(NewPin);
+
+		if (pin->Direction == EEdGraphPinDirection::EGPD_Input)
 		{
-			UEdGraphPin* CurPin = NodeBace->Pins[i];
-			TSharedPtr<SDialogOutputPin> NewPin = SNew(SDialogOutputPin, CurPin);
-			NewPin->SetIsEditable(IsEditable);
-			this->AddPin(NewPin.ToSharedRef());
-			InputPins.Add(NewPin.ToSharedRef());
+			InputPins.Add(NewPin);
 		}
 		else
 		{
-			UEdGraphPin* CurPin = NodeBace->Pins[i];
-			TSharedPtr<SDialogOutputPin> NewPin = SNew(SDialogOutputPin, CurPin);
-			NewPin->SetIsEditable(IsEditable);
-			this->AddPin(NewPin.ToSharedRef());
-			OutputPins.Add(NewPin.ToSharedRef());
+			OutputPins.Add(NewPin);
 		}
 	}
 }
@@ -326,25 +320,29 @@ void SGraphNode_DialogNodeBase::OnPropertyChanged(UEdGraphNode* Sender, const FN
 	UpdateGraphNode();
 }
 
+void SGraphNode_DialogNodeBase::Tick(const FGeometry& AllottedGeometry, double InCurrentTime, float DeltaTime)
+{
+	SGraphNode::Tick(AllottedGeometry, InCurrentTime, DeltaTime);
+
+	auto order = CastChecked<UDdialogEdGraphNode>(GraphNode)->GetOrder();
+
+	//OrderDisplayBorder->SetVisibility(order > 0 ? EVisibility::Visible : EVisibility::Collapsed);
+	OrderDisplayText->SetText(FText::AsNumber(order));
+}
+
 //PhraseNode.......................................................................................................
 void SGraphNode_Phrase::Construct(const FArguments& InArgs, UDialogPhraseEdGraphNode* InNode)
 {
 	GraphNode = InNode;
-	NodeBace = InNode;
-	PhraseNode = InNode;
-
 	SetCursor(EMouseCursor::CardinalCross);
-	UpdateGraphNode();
-}
-
-void SGraphNode_Phrase::OnPropertyChanged(UEdGraphNode* Sender, const FName& PropertyName)
-{
 	UpdateGraphNode();
 }
 
 FName SGraphNode_Phrase::GetIcon() const
 {
-	if (PhraseNode->Data.Source == EDialogPhraseSource::Player)
+	auto phraseNode = CastChecked<UDialogPhraseEdGraphNode>(GraphNode);
+
+	if (phraseNode->Data.Source == EDialogPhraseSource::Player)
 	{
 		return "DialogSystem.Player";
 	}
@@ -356,24 +354,26 @@ FName SGraphNode_Phrase::GetIcon() const
 
 void SGraphNode_Phrase::CreateNodeWidget()
 {
+	auto phraseNode = CastChecked<UDialogPhraseEdGraphNode>(GraphNode);
+
 	SGraphNode_DialogNodeBase::CreateNodeWidget();
 	
-	for (auto key : PhraseNode->Data.CheckHasKeys)
+	for (auto key : phraseNode->Data.CheckHasKeys)
 		AddTextToContent(ConditionsBox, TEXT("HAS KEY ") + key.ToString(), FColor(170, 255, 0));
 
-	for (auto key : PhraseNode->Data.CheckDontHasKeys)
+	for (auto key : phraseNode->Data.CheckDontHasKeys)
 		AddTextToContent(ConditionsBox, TEXT("HAS NOT KEY ") + key.ToString(), FColor(255, 150, 0));
 
-	for (auto key : PhraseNode->Data.Predicate)
+	for (auto key : phraseNode->Data.Predicate)
 		AddTextToContent(ConditionsBox, TEXT("IF ") + key.ToString(), FColor(255, 255, 0));
 	
-	for (auto key : PhraseNode->Data.Action)
+	for (auto key : phraseNode->Data.Action)
 		AddTextToContent(EventsBox, TEXT("E ") + key.ToString(), FColor(0, 170, 255));
 
-	for (auto key : PhraseNode->Data.GiveKeys)
+	for (auto key : phraseNode->Data.GiveKeys)
 		AddTextToContent(EventsBox, TEXT("+ ") + key.ToString(), FColor(0, 255, 0));
 
-	for (auto key : PhraseNode->Data.RemoveKeys)
+	for (auto key : phraseNode->Data.RemoveKeys)
 		AddTextToContent(EventsBox, TEXT("- ") + key.ToString(), FColor(255, 0, 0));
 
 	ConditionsBox->SetVisibility(ConditionsBox->NumSlots() > 0 ? EVisibility::Visible : EVisibility::Collapsed);
@@ -382,13 +382,15 @@ void SGraphNode_Phrase::CreateNodeWidget()
 
 FReply SGraphNode_Phrase::OnClickedIcon()
 {
-	if (PhraseNode->Data.Source == EDialogPhraseSource::Player)
+	auto phraseNode = CastChecked<UDialogPhraseEdGraphNode>(GraphNode);
+
+	if (phraseNode->Data.Source == EDialogPhraseSource::Player)
 	{
-		PhraseNode->Data.Source = EDialogPhraseSource::NPC;
+		phraseNode->Data.Source = EDialogPhraseSource::NPC;
 	}
 	else
 	{
-		PhraseNode->Data.Source = EDialogPhraseSource::Player;
+		phraseNode->Data.Source = EDialogPhraseSource::Player;
 	}
 
 	NodeIcon->SetImage(FBrushSet::Get().GetBrush(GetIcon()));
