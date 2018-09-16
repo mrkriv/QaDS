@@ -43,4 +43,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
 	void ClearAll();
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
+	TArray<FName> GetKeys(EStoryKeyTypes Type) const;
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
+	TMap<EStoryKeyTypes, TSet<FName>> GetKeys() const;
 };
