@@ -15,7 +15,7 @@ public:
 	FName Name;
 
 	UPROPERTY()
-	UDialogPhrase* RootNode;
+	UDialogNode* RootNode;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "DialogScript"))
 	TSubclassOf<class ADialogScript> DialogScriptClass;
@@ -24,6 +24,4 @@ public:
 	UPROPERTY()
 	class UEdGraph* UpdateGraph;
 #endif	// WITH_EDITORONLY_DATA
-
-	UDialogAsset();
 };

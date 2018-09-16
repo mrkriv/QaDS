@@ -53,7 +53,7 @@ FSlateColor SDialogOutputPin::GetPinColor() const
 
 //DialogNodeBase............................................................................................................
 
-void SGraphNode_DialogNodeBase::Construct(const FArguments& InArgs, UDialogNodeEditorBase* InNode)
+void SGraphNode_DialogNodeBase::Construct(const FArguments& InArgs, UDdialogEdGraphNode* InNode)
 {
 	GraphNode = InNode;
 	NodeBace = InNode;
@@ -161,6 +161,20 @@ void SGraphNode_DialogNodeBase::UpdateGraphNode()
 						.MaxDesiredWidth(320.0f)
 						[
 							SAssignNew(NodeWiget, STextBlock)
+						]
+					]
+					
+
+					+ SHorizontalBox::Slot()
+					.HAlign(HAlign_Right)
+					.VAlign(VAlign_Top)
+					.Padding(10.0f, -5.0f, 0.0f, 0.0f)
+					.AutoWidth()
+					[
+						SNew(SBorder)
+						[
+							SNew(STextBlock)
+							.Text(FText::AsNumber(NodeBace->GetOrder()))
 						]
 					]
 				]
@@ -312,27 +326,8 @@ void SGraphNode_DialogNodeBase::OnPropertyChanged(UEdGraphNode* Sender, const FN
 	UpdateGraphNode();
 }
 
-FName SGraphNode_DialogNodeBase::GetIcon() const
-{
-	return "";
-}
-
-//RootNode............................................................................................................
-SGraphNode_Root::SGraphNode_Root()
-{
-}
-
-FName SGraphNode_Root::GetIcon() const
-{
-	return "DialogSystem.Root";
-}
-
 //PhraseNode.......................................................................................................
-SGraphNode_Phrase::SGraphNode_Phrase()
-{
-}
-
-void SGraphNode_Phrase::Construct(const FArguments& InArgs, UPhraseNode* InNode)
+void SGraphNode_Phrase::Construct(const FArguments& InArgs, UDialogPhraseEdGraphNode* InNode)
 {
 	GraphNode = InNode;
 	NodeBace = InNode;
@@ -364,16 +359,16 @@ void SGraphNode_Phrase::CreateNodeWidget()
 	SGraphNode_DialogNodeBase::CreateNodeWidget();
 	
 	for (auto key : PhraseNode->Data.CheckHasKeys)
-		AddTextToContent(ConditionsBox, TEXT("HAS KEY ") + key.ToString(), FColor(255, 255, 255));
+		AddTextToContent(ConditionsBox, TEXT("HAS KEY ") + key.ToString(), FColor(170, 255, 0));
 
 	for (auto key : PhraseNode->Data.CheckDontHasKeys)
-		AddTextToContent(ConditionsBox, TEXT("HAS NOT KEY ") + key.ToString(), FColor(255, 255, 255));
+		AddTextToContent(ConditionsBox, TEXT("HAS NOT KEY ") + key.ToString(), FColor(255, 150, 0));
 
-	for (auto key : PhraseNode->Data.CustomConditions)
-		AddTextToContent(ConditionsBox, TEXT("IF ") + key.ToString(), FColor(255, 255, 255));
+	for (auto key : PhraseNode->Data.Predicate)
+		AddTextToContent(ConditionsBox, TEXT("IF ") + key.ToString(), FColor(255, 255, 0));
 	
-	for (auto key : PhraseNode->Data.CustomEvents)
-		AddTextToContent(EventsBox, TEXT("E ") + key.ToString(), FColor(255, 0, 0));
+	for (auto key : PhraseNode->Data.Action)
+		AddTextToContent(EventsBox, TEXT("E ") + key.ToString(), FColor(0, 170, 255));
 
 	for (auto key : PhraseNode->Data.GiveKeys)
 		AddTextToContent(EventsBox, TEXT("+ ") + key.ToString(), FColor(0, 255, 0));

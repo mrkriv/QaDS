@@ -53,25 +53,7 @@ void SImportWindow::Construct(const FArguments& InArgs)
 					.FillWidth(0.8f)
 					[
 					  	SAssignNew(gamedataPathTextBox, SEditableTextBox)
-						.Text(FText::FromString("D:\\Program Files\\Dead Air\\database\\unpacked"))
-					]
-				]
-				+ SVerticalBox::Slot()
-				.Padding(4.0f, 2.0f, 4.0f, 2.0f)
-				.AutoHeight()
-				[
-					SNew(SHorizontalBox)
-					+ SHorizontalBox::Slot()
-					.FillWidth(0.2f)
-					[
-						SNew(STextBlock)
-						.Text(FText::FromString("Output path"))
-					]
-					+ SHorizontalBox::Slot()
-					.FillWidth(0.8f)
-					[
-					  	SAssignNew(outputPathTextBox, SEditableTextBox)
-						.Text(FText::FromString("/Game//Dialogs"))
+						.Text(FText::FromString("D:\\gamedata\\"))
 					]
 				]
 				+ SVerticalBox::Slot()
@@ -90,6 +72,42 @@ void SImportWindow::Construct(const FArguments& InArgs)
 					[
 					  	SAssignNew(localNameTextBox, SEditableTextBox)
 						.Text(FText::FromString("rus"))
+					]
+				]
+				+ SVerticalBox::Slot()
+				.Padding(4.0f, 2.0f, 4.0f, 2.0f)
+				.AutoHeight()
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					.FillWidth(0.2f)
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString("Dialog ID mask"))
+					]
+					+ SHorizontalBox::Slot()
+					.FillWidth(0.8f)
+					[
+					  	SAssignNew(dialogIdMaskTextBox, SEditableTextBox)
+						.Text(FText::FromString(""))
+					]
+				]
+				+ SVerticalBox::Slot()
+				.Padding(4.0f, 2.0f, 4.0f, 2.0f)
+				.AutoHeight()
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					.FillWidth(0.2f)
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString("Output path"))
+					]
+					+ SHorizontalBox::Slot()
+					.FillWidth(0.8f)
+					[
+					  	SAssignNew(outputPathTextBox, SEditableTextBox)
+						.Text(FText::FromString("/Game//Dialogs"))
 					]
 				]
 				+ SVerticalBox::Slot()
@@ -132,6 +150,8 @@ FReply SImportWindow::HandleImportButton()
 	LoadLocalize(basePath / "configs" / "text" / localNameTextBox->GetText().ToString());
 
 	auto dialogs = GetFilesInDir(gameplayPath, "dialogs*.xml");
+	auto idMask = dialogIdMaskTextBox->GetText().ToString();
+
 	for (auto dialogFile : dialogs)
 	{
 		FXmlFile file(gameplayPath / dialogFile);
@@ -145,7 +165,11 @@ FReply SImportWindow::HandleImportButton()
 			if (node->GetTag() != "dialog")
 				continue;
 
-			auto asset = CreateDialogAsset(dialogFile, node->GetAttribute("id"));
+			auto id = node->GetAttribute("id");
+			if (!idMask.IsEmpty() && id.Contains(idMask))
+				continue;
+
+			auto asset = CreateDialogAsset(dialogFile, id);
 			ImportNodes(asset, node);
 
 			UE_LOG(DialogStalkerInporterLog, Log, TEXT("Create dialog asset %s"), *asset->GetFullName());
@@ -178,13 +202,13 @@ void SImportWindow::ImportNodes(UDialogAsset* asset, FXmlNode* dialogNode)
 	if (xmlPhraseList == NULL)
 		return;
 
-	TMap<FString, UDialogPhrase*> phrases;
+	TMap<FString, UDialogPhraseNode*> phrases;
 	for (auto xmlPhrase : xmlPhraseList->GetChildrenNodes())
 	{
 		auto id = xmlPhrase->GetAttribute("id");
 		auto text = xmlPhrase->FindChildNode("text")->GetContent();
 
-		auto phrase = NewObject<UDialogPhrase>();
+		auto phrase = NewObject<UDialogPhraseNode>();
 		phrase->OwnerDialog = asset;
 		phrase->Data.UID = *id;
 		phrase->Data.Text = GetLocalizeString(text);
@@ -194,7 +218,7 @@ void SImportWindow::ImportNodes(UDialogAsset* asset, FXmlNode* dialogNode)
 
 	for (auto xmlPhrase : xmlPhraseList->GetChildrenNodes())
 	{
-		UDialogPhrase* phrase = phrases[xmlPhrase->GetAttribute("id")];
+		UDialogPhraseNode* phrase = phrases[xmlPhrase->GetAttribute("id")];
 
 		for (auto node : xmlPhrase->GetChildrenNodes())
 		{
@@ -223,18 +247,17 @@ void SImportWindow::ImportNodes(UDialogAsset* asset, FXmlNode* dialogNode)
 		}
 	}
 
-	asset->RootNode = NewObject<UDialogPhrase>();
+	asset->RootNode = NewObject<UDialogNode>();
 	asset->RootNode->OwnerDialog = asset;
-	asset->RootNode->Data.UID = "0";
 	asset->RootNode->Childs.Add(phrases["0"]);
 
-	TArray<UDialogPhrase*> handled;
+	TArray<UDialogPhraseNode*> handled;
 
 	for (auto child : asset->RootNode->Childs)
-		SetNodeSource(handled, Cast<UDialogPhrase>(child), true);
+		SetNodeSource(handled, Cast<UDialogPhraseNode>(child), true);
 }
 
-void SImportWindow::SetNodeSource(TArray<UDialogPhrase*>& handled, UDialogPhrase* phrase, bool isParentActor)
+void SImportWindow::SetNodeSource(TArray<UDialogPhraseNode*>& handled, UDialogPhraseNode* phrase, bool isParentActor)
 {
 	if (phrase == NULL || handled.Contains(phrase))
 		return;
@@ -243,7 +266,7 @@ void SImportWindow::SetNodeSource(TArray<UDialogPhrase*>& handled, UDialogPhrase
 	phrase->Data.Source = isParentActor ? EDialogPhraseSource::Player : EDialogPhraseSource::NPC;
 
 	for (auto child : phrase->Childs)
-		SetNodeSource(handled, Cast<UDialogPhrase>(child), !isParentActor);
+		SetNodeSource(handled, Cast<UDialogPhraseNode>(child), !isParentActor);
 }
 
 void SImportWindow::LoadLocalize(FString path)

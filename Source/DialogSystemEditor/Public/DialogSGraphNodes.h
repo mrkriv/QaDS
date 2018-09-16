@@ -16,12 +16,8 @@ public:
 
 	void Construct(const FArguments& InArgs, UEdGraphPin* InPin);
 
-protected:
-	// Begin SGraphPin interface
 	virtual TSharedRef<SWidget>	GetDefaultValueWidget() override;
 	virtual FSlateColor GetPinColor() const override;
-	// End SGraphPin interface
-
 	const FSlateBrush* GetPinBorder() const;
 };
 
@@ -32,22 +28,15 @@ public:
 	SLATE_BEGIN_ARGS(SGraphNode_DialogNodeBase) { }
 	SLATE_END_ARGS()
 
-	/** Constructs this widget with InArgs */
-	void Construct(const FArguments& InArgs, UDialogNodeEditorBase* InNode);
+	void Construct(const FArguments& InArgs, UDdialogEdGraphNode* InNode);
 
-	// SGraphNode interface
 	virtual void UpdateGraphNode() override;
 	virtual void CreatePinWidgets() override;
 	virtual void AddPin(const TSharedRef<SGraphPin>& PinToAdd) override;
 	virtual void CreateNodeWidget();
-	// End of SGraphNode interface
-
-	// FPropertyObserver interface
 	virtual void OnPropertyChanged(UEdGraphNode* Sender, const FName& PropertyName) override;
-	// End of FPropertyObserver interface
 
-protected:
-	UDialogNodeEditorBase* NodeBace;
+	UDdialogEdGraphNode* NodeBace;
 	TSharedPtr<SHorizontalBox> OutputPinBox;
 	TSharedPtr<SHorizontalBox> InputPinBox;
 	TSharedPtr<SVerticalBox> EventsBox;
@@ -55,7 +44,7 @@ protected:
 	TSharedPtr<STextBlock> NodeWiget;
 	TSharedPtr<SImage> NodeIcon;
 
-	virtual FName GetIcon() const;
+	virtual FName GetIcon() const { return ""; }
 	virtual FReply OnClickedIcon();
 	void AddTextToContent(TSharedPtr<SVerticalBox> Container, FString Text, FColor Color);
 };
@@ -64,10 +53,7 @@ protected:
 class SGraphNode_Root : public SGraphNode_DialogNodeBase
 {
 public:
-	SGraphNode_Root();
-
-protected:
-	virtual FName GetIcon() const override;
+	virtual FName GetIcon() const override { return "DialogSystem.Root"; }
 };
 
 //PhraseNode..................................................................................................................
@@ -77,18 +63,27 @@ public:
 	SLATE_BEGIN_ARGS(SGraphNode_Phrase) { }
 	SLATE_END_ARGS()
 
-	UPhraseNode* PhraseNode = 0;
+	UDialogPhraseEdGraphNode* PhraseNode = 0;
 
-	SGraphNode_Phrase();
-	virtual void Construct(const FArguments& InArgs, UPhraseNode* InNode);
+	virtual void Construct(const FArguments& InArgs, UDialogPhraseEdGraphNode* InNode);
 	virtual void CreateNodeWidget() override;
-
-	// FPropertyObserver interface
 	virtual void OnPropertyChanged(UEdGraphNode* Sender, const FName& PropertyName) override;
-	// End of FPropertyObserver interface
 
-protected:
 	TSharedPtr<SWidget> IndexOverlay;
 	virtual FName GetIcon() const override;
 	virtual FReply OnClickedIcon() override;
+};
+
+//SubGraph.............................................................................................................
+class SGraphNode_SubGraph : public SGraphNode_DialogNodeBase
+{
+public:
+	virtual FName GetIcon() const override { return "DialogSystem.SubGraph"; }
+};
+
+//ElseIf.............................................................................................................
+class SGraphNode_ElseIf : public SGraphNode_DialogNodeBase
+{
+public:
+	virtual FName GetIcon() const override { return "DialogSystem.ElseIf"; }
 };

@@ -7,9 +7,9 @@
 #include "DialogAsset.h"
 #include "DialogProcessor.generated.h"
 
-class URootNode;
-class UPhraseNode;
-class UDialogNodeEditorBase;
+class UDialogRootEdGraphNode;
+class UDialogPhraseEdGraphNode;
+class UDdialogEdGraphNode;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDialogEndSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangePhraseVariantSignature, const TArray<FDialogPhraseShortInfo>&, Variants);
@@ -22,16 +22,16 @@ class DIALOGSYSTEMRUNTIME_API UDialogProcessor : public UObject
 
 private:
 	UPROPERTY()
-	UDialogPhrase* CurrentNode;
+	UDialogNode* CurrentNode;
 
 	FTimerHandle NextTimerHandle;
-	TArray<UDialogPhrase*> NextNodes;
+	TArray<UDialogPhraseNode*> NextNodes;
 	bool IsPlayerNext;
 
 	void DelayNext();
 	float GetPhraseTime();
-	void SetCurrentNode(UDialogPhrase* node);
-	void InvokeNode(UDialogPhrase* node);
+	void SetCurrentNode(UDialogNode* node);
+	void InvokeNode(UDialogPhraseNode* node);
 	void EndDialog();
 
 public:

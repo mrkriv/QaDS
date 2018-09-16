@@ -63,7 +63,7 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseInfo
 	TArray<FName> CheckDontHasKeys;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
-	TArray<FDialogPhraseCondition> CustomConditions;
+	TArray<FDialogPhraseCondition> Predicate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Activate")
 	TArray<FName> GiveKeys;
@@ -72,9 +72,23 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseInfo
 	TArray<FName> RemoveKeys;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Activate")
-	TArray<FDialogPhraseEvent> CustomEvents;
+	TArray<FDialogPhraseEvent> Action;
 };
 
+USTRUCT(BlueprintType)
+struct DIALOGSYSTEMRUNTIME_API FDialogElseIfCondition
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
+	TArray<FName> CheckHasKeys;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
+	TArray<FName> CheckDontHasKeys;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
+	TArray<FDialogPhraseCondition> Predicate;
+};
 
 UCLASS()
 class DIALOGSYSTEMRUNTIME_API UDialogNode : public UObject
@@ -93,7 +107,7 @@ public:
 };
 
 UCLASS()
-class DIALOGSYSTEMRUNTIME_API UDialogPhrase : public UDialogNode
+class DIALOGSYSTEMRUNTIME_API UDialogPhraseNode : public UDialogNode
 {
 	GENERATED_BODY()
 public:
@@ -103,4 +117,24 @@ public:
 
 	void Invoke(class UDialogProcessor* Implementer) override;
 	bool Check(class UDialogProcessor* Implementer) override;
+};
+
+UCLASS()
+class DIALOGSYSTEMRUNTIME_API UDialogSubGraphNode : public UDialogNode
+{
+	GENERATED_BODY()
+public:
+
+	UPROPERTY()
+	class UDialogAsset* TargetDialog;
+};
+
+UCLASS()
+class DIALOGSYSTEMRUNTIME_API UDialogElseIfNode : public UDialogNode
+{
+	GENERATED_BODY()
+public:
+
+	UPROPERTY()
+	TArray<FDialogElseIfCondition> Conditions;
 };

@@ -40,7 +40,7 @@ void UDialogProcessor::StartDialog()
 	SetCurrentNode(Asset->RootNode);
 }
 
-void UDialogProcessor::SetCurrentNode(UDialogPhrase* node)
+void UDialogProcessor::SetCurrentNode(UDialogNode* node)
 {
 	bool found = false;
 	IsPlayerNext = false;
@@ -50,7 +50,7 @@ void UDialogProcessor::SetCurrentNode(UDialogPhrase* node)
 
 	for (auto phraseNode : CurrentNode->Childs)
 	{
-		auto phrase = Cast<UDialogPhrase>(phraseNode);
+		auto phrase = Cast<UDialogPhraseNode>(phraseNode);
 		if (phrase && phrase->Check(this))
 		{
 			if (!found)
@@ -68,10 +68,12 @@ void UDialogProcessor::SetCurrentNode(UDialogPhrase* node)
 		}
 	}
 
-	InvokeNode(CurrentNode);
+	auto phraseNode = Cast<UDialogPhraseNode>(node);
+	if (phraseNode != NULL)
+		InvokeNode(phraseNode);
 }
 
-void UDialogProcessor::InvokeNode(UDialogPhrase* node)
+void UDialogProcessor::InvokeNode(UDialogPhraseNode* node)
 {
 	if (NextTimerHandle.IsValid() && NPC != NULL)
 		NPC->GetWorldTimerManager().ClearTimer(NextTimerHandle);
@@ -159,22 +161,27 @@ void UDialogProcessor::OnNextTimer()
 
 float UDialogProcessor::GetPhraseTime()
 {
-	if (!CurrentNode->Data.AutoTime) 
+	auto phraseNode = Cast<UDialogPhraseNode>(CurrentNode);
+
+	if (phraseNode == NULL)
+		return 0;
+
+	if (!phraseNode->Data.AutoTime)
 	{
-		return CurrentNode->Data.PhraseManualTime;
+		return phraseNode->Data.PhraseManualTime;
 	}
-	else if (CurrentNode->Data.Sound != NULL) 
+	else if (phraseNode->Data.Sound != NULL)
 	{
-		return CurrentNode->Data.Sound->Duration;
+		return phraseNode->Data.Sound->Duration;
 	}
 	else
 	{
 		return 0;
 
-		/*if (CurrentNode->Data.Source == EDialogPhraseSource::Player)
+		/*if (phraseNode->Data.Source == EDialogPhraseSource::Player)
 			return 0.0f;
 
-		int len = CurrentNode->Data.Text.ToString().Len();
+		int len = phraseNode->Data.Text.ToString().Len();
 		return .2f + len * 0.05f;*/
 	}
 }

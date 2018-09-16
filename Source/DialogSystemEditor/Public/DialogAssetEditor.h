@@ -39,6 +39,14 @@ struct DIALOGSYSTEMEDITOR_API FDialogCommands : public TCommands<FDialogCommands
 	virtual void RegisterCommands() override;
 };
 
+class UEdGraph;
+class UEdGraphNode;
+class SGraphEditor;
+
+class UDialogPhraseNode;
+class UDdialogEdGraphNode;
+class UDialogRootEdGraphNode;
+
 class DIALOGSYSTEMEDITOR_API FDialogAssetEditor : public FAssetEditorToolkit, public FNotifyHook
 {
 public:
@@ -73,7 +81,7 @@ private:
 	FCompilerResultsLog CompileLogResults;
 	bool bGraphStateChanged;
 
-	TSharedRef<class SGraphEditor> CreateGraphEditorWidget(UEdGraph* InGraph);
+	TSharedRef<SGraphEditor> CreateGraphEditorWidget(UEdGraph* InGraph);
 	TSharedRef<SDockTab> SpawnTab_Viewport(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnTab_CompilerResults(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& Args);
@@ -84,9 +92,9 @@ private:
 	void SelectAllNodes();
 	bool CanSelectAllNodes() const;
 	void DeleteSelectedNodes();
-	bool CanDeleteNode(class UEdGraphNode* Node);
+	bool CanDeleteNode(UEdGraphNode* Node);
 	bool CanDeleteNodes() const;
-	void DeleteNodes(const TArray<class UEdGraphNode*>& NodesToDelete);
+	void DeleteNodes(const TArray<UEdGraphNode*>& NodesToDelete);
 	void CopySelectedNodes();
 	bool CanCopyNodes() const;
 	void PasteNodes();
@@ -98,14 +106,14 @@ private:
 	bool CanDuplicateNodes() const;
 	void DeleteSelectedDuplicatableNodes();
 
-	void OnSelectedNodesChanged(const TSet<class UObject*>& NewSelection);
-	void OnNodeDoubleClicked(class UEdGraphNode* Node);
+	void OnSelectedNodesChanged(const TSet<UObject*>& NewSelection);
+	void OnNodeDoubleClicked(UEdGraphNode* Node);
 
-	class UEdGraph* CreateUpdateGraph();
-	void CreateNodesFromPhrase(class UPhraseNode* owner, class UDialogNode* phrase, int level);
+	UEdGraph* CreateUpdateGraph();
+	void CreateNodesFromPhrase(UDdialogEdGraphNode* owner, UDialogNode* phrase, int level);
 
 	void CompileExecute();
-	void ResetCompilePhrase(UPhraseNode* Node);
-	UDialogPhrase* Compile(UPhraseNode* Node);
-	URootNode* GetRootNode();
+	void ResetCompilePhrase(UDdialogEdGraphNode* Node);
+	UDialogNode* Compile(UDdialogEdGraphNode* Node);
+	UDialogRootEdGraphNode* GetRootNode();
 };

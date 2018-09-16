@@ -12,17 +12,25 @@ TSharedPtr<class SGraphNode> FDialogNodeFactory::CreateNode(UEdGraphNode* Node) 
 {
 	TSharedPtr<SGraphNode_DialogNodeBase> SNode;
 
-	if (Node->IsA(UPhraseNode::StaticClass()))
+	if (Node->IsA(UDialogPhraseEdGraphNode::StaticClass()))
 	{
-		SNode = SNew(SGraphNode_Phrase, Cast<UPhraseNode>(Node));
+		SNode = SNew(SGraphNode_Phrase, Cast<UDialogPhraseEdGraphNode>(Node));
 	}
-	else if (Node->IsA(URootNode::StaticClass()))
+	else if (Node->IsA(UDialogRootEdGraphNode::StaticClass()))
 	{
-		SNode = SNew(SGraphNode_Root, Cast<URootNode>(Node));
+		SNode = SNew(SGraphNode_Root, Cast<UDialogRootEdGraphNode>(Node));
+	}
+	else if (Node->IsA(UDialogSubGraphEdGraphNode::StaticClass()))
+	{
+		SNode = SNew(SGraphNode_SubGraph, Cast<UDialogSubGraphEdGraphNode>(Node));
+	}
+	else if (Node->IsA(UDialogElseIfEdGraphNode::StaticClass()))
+	{
+		SNode = SNew(SGraphNode_ElseIf, Cast<UDialogElseIfEdGraphNode>(Node));
 	}
 
-	if (Node != NULL && Node->IsA(UDialogNodeEditorBase::StaticClass()))
-		Cast<UDialogNodeEditorBase>(Node)->PropertyObserver = SNode;
+	if (Node != NULL && Node->IsA(UDdialogEdGraphNode::StaticClass()))
+		Cast<UDdialogEdGraphNode>(Node)->PropertyObserver = SNode;
 
 	return SNode;
 }

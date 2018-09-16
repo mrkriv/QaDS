@@ -255,12 +255,12 @@ TSharedRef<SGraphEditor> FDialogAssetEditor::CreateGraphEditorWidget(UEdGraph* I
 	return _GraphEditor;
 }
 
-void FDialogAssetEditor::OnSelectedNodesChanged(const TSet<class UObject*>& NewSelection)
+void FDialogAssetEditor::OnSelectedNodesChanged(const TSet<UObject*>& NewSelection)
 {
 	TArray<UObject*> SelectedObjects;
 	for (UObject* Object : NewSelection)
 	{
-		if (!Cast<URootNode>(Object))
+		if (!Cast<UDialogRootEdGraphNode>(Object))
 			SelectedObjects.Add(Object);
 	}
 
@@ -402,7 +402,7 @@ void FDialogAssetEditor::PasteNodesHere(const FVector2D& Location)
 
 		Node->CreateNewGuid();
 		
-		auto phraseNode = Cast<UPhraseNode>(Node);
+		auto phraseNode = Cast<UDialogPhraseEdGraphNode>(Node);
 		if (phraseNode != NULL)
 		{
 			phraseNode->CompilePhrase = NULL;
@@ -482,7 +482,7 @@ void FDialogAssetEditor::OnGraphChanged(const FEdGraphEditAction& Action)
 
 void FDialogAssetEditor::OnPropertyChanged(const FPropertyChangedEvent& Event)
 {
-	if (Event.MemberProperty->GetFName().ToString() == TEXT("CustomEvents") &&
+	if (Event.MemberProperty->GetFName().ToString() == TEXT("Action") &&
 		Event.Property->GetFName().ToString() == TEXT("EventName") ||
 		Event.MemberProperty->GetFName().ToString() == TEXT("CustomCondition") &&
 		Event.Property->GetFName().ToString() == TEXT("EventName"))
@@ -498,11 +498,11 @@ void FDialogAssetEditor::OnPropertyChanged(const FPropertyChangedEvent& Event)
 		CompileExecute();
 }
 
-URootNode* FDialogAssetEditor::GetRootNode()
+UDialogRootEdGraphNode* FDialogAssetEditor::GetRootNode()
 {
 	for (auto node : GraphEditor->GetCurrentGraph()->Nodes)
 	{
-		if (URootNode* root = Cast<URootNode>(node))
+		if (UDialogRootEdGraphNode* root = Cast<UDialogRootEdGraphNode>(node))
 			return root;
 	}
 
@@ -514,7 +514,7 @@ UEdGraph* FDialogAssetEditor::CreateUpdateGraph()
 	auto CustGraph = NewObject<UEdGraph>(EditedAsset, UEdGraph::StaticClass(), NAME_None, RF_Transactional);
 	CustGraph->Schema = UDialogGraphSchema::StaticClass();
 
-	auto root = FDialogSchemaAction_NewNode::SpawnNodeFromTemplate<URootNode>(CustGraph, NewObject<URootNode>(), FVector2D::ZeroVector, false);
+	auto root = FDialogSchemaAction_NewNode::SpawnNodeFromTemplate<UDialogRootEdGraphNode>(CustGraph, NewObject<UDialogRootEdGraphNode>(), FVector2D::ZeroVector, false);
 	root->AllocateDefaultPins();
 
 	for (auto phrase : EditedAsset->RootNode->Childs)
@@ -523,16 +523,16 @@ UEdGraph* FDialogAssetEditor::CreateUpdateGraph()
 	return CustGraph;
 }
 
-void FDialogAssetEditor::CreateNodesFromPhrase(UPhraseNode* owner, UDialogNode* phrase, int level)
+void FDialogAssetEditor::CreateNodesFromPhrase(UDdialogEdGraphNode* owner, UDialogNode* phrase, int level)
 {
-	auto dialogPhrase = Cast<UDialogPhrase>(phrase);
+	auto dialogPhrase = Cast<UDialogPhraseNode>(phrase);
 
 	if (dialogPhrase == NULL)
 		return;
-
+	
 	auto location = FVector2D(owner->OutputPin->LinkedTo.Num() * 400, level * 250);
 
-	auto node = FDialogSchemaAction_NewNode::SpawnNodeFromTemplate<UPhraseNode>(owner->GetGraph(), NewObject<UPhraseNode>(), location, false);
+	auto node = FDialogSchemaAction_NewNode::SpawnNodeFromTemplate<UDialogPhraseEdGraphNode>(owner->GetGraph(), NewObject<UDialogPhraseEdGraphNode>(), location, false);
 	node->CompilePhrase = dialogPhrase;
 	node->Data = dialogPhrase->Data;
 
@@ -558,13 +558,19 @@ void FDialogAssetEditor::CompileExecute()
 	CompilerResultsListing->ClearMessages();
 
 	auto rootNode = GetRootNode();
-	ResetCompilePhrase(rootNode);
 
-	auto rootPhrase = Compile(rootNode);
-
-	if (rootPhrase != NULL)
+	if (rootNode != NULL)
 	{
-		EditedAsset->RootNode = rootPhrase;
+		ResetCompilePhrase(rootNode);
+
+		auto rootPhrase = Compile(rootNode);
+
+		if (rootPhrase != NULL)
+		{
+			EditedAsset->RootNode = rootPhrase;
+		}
+		else
+			CompileLogResults.Error(TEXT("Root node not found"));
 	}
 	else
 		CompileLogResults.Error(TEXT("Root node not found"));
@@ -573,61 +579,73 @@ void FDialogAssetEditor::CompileExecute()
 	CompilerResultsListing->AddMessages(CompileLogResults.Messages);
 }
 
-void FDialogAssetEditor::ResetCompilePhrase(UPhraseNode* Node)
+void FDialogAssetEditor::ResetCompilePhrase(UDdialogEdGraphNode* Node)
 {
-	if (Node->CompilePhrase == NULL)
+	if (Node->CompileNode == NULL)
 		return;
 
-	Node->CompilePhrase = NULL;
+	Node->CompileNode = NULL;
 
 	for (auto& child : Node->GetChildNodes())
 	{
-		auto childPhrase = Cast<UPhraseNode>(child);
+		auto childPhrase = Cast<UDdialogEdGraphNode>(child);
 		if (childPhrase)
 			ResetCompilePhrase(childPhrase);
 	}
 }
 
-UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
+UDialogNode* FDialogAssetEditor::Compile(UDdialogEdGraphNode* node)
 {
-	if (Node->CompilePhrase != NULL)
-		return Node->CompilePhrase;
+	if (node->CompileNode != NULL)
+		return node->CompileNode;
 
-	auto phrase = NewObject<UDialogPhrase>((UObject*)EditedAsset);
-	Node->CompilePhrase = phrase;
-	Node->Data.UID = *Node->NodeGuid.ToString();
-
-	phrase->OwnerDialog = Cast<UDialogAsset>(EditedAsset);
-	phrase->Data = Node->Data;
-
+	auto phraseNode = Cast<UDialogPhraseEdGraphNode>(node);
+	auto rootNode = Cast<UDialogRootEdGraphNode>(node);
 	bool needUpdate = false;
 
-	FString ErrorMessage;
-
-	for (auto& Event : Node->Data.CustomEvents)
+	if (rootNode != NULL)
 	{
-		Event.OwnerNode = phrase;
+		auto phrase = NewObject<UDialogNode>((UObject*)EditedAsset);
+		node->CompileNode = phrase;
+	}
+	else if (phraseNode != NULL)
+	{
+		auto phrase = NewObject<UDialogPhraseNode>((UObject*)EditedAsset);
+		node->CompileNode = phrase;
 
-		if (!Event.Compile(ErrorMessage, needUpdate))
+		auto& data = phraseNode->Data;
+		data.UID = *node->NodeGuid.ToString();
+
+		phrase->OwnerDialog = Cast<UDialogAsset>(EditedAsset);
+		phrase->Data = data;
+
+		FString ErrorMessage;
+
+		for (auto& Event : data.Action)
 		{
-			CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + Node->Data.Text.ToString() + "\""));
+			Event.OwnerNode = phrase;
+
+			if (!Event.Compile(ErrorMessage, needUpdate))
+			{
+				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + data.Text.ToString() + "\""));
+			}
+		}
+
+		for (auto& Condition : data.Predicate)
+		{
+			Condition.OwnerNode = phrase;
+
+			if (!Condition.Compile(ErrorMessage, needUpdate))
+			{
+				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + data.Text.ToString() + "\""));
+			}
 		}
 	}
 
-	for (auto& Condition : Node->Data.CustomConditions)
-	{
-		Condition.OwnerNode = phrase;
-
-		if (!Condition.Compile(ErrorMessage, needUpdate))
-		{
-			CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + Node->Data.Text.ToString() + "\""));
-		}
-	}
-
-	auto childs = Node->GetChildNodes();
+	auto childs = node->GetChildNodes();
 	childs.Sort([](auto& a, auto& b)
 	{
-		return a.NodePosX < b.NodePosX;
+		return a.GetOrder() < b.GetOrder();
 	});
 
 	bool first = true;
@@ -635,7 +653,7 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 
 	for (auto& child : childs)
 	{
-		auto childPhrase = Cast<UPhraseNode>(child);
+		auto childPhrase = Cast<UDialogPhraseEdGraphNode>(child);
 
 		if (childPhrase)
 		{
@@ -648,16 +666,16 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 			{
 				CompileLogResults.Error(TEXT("Invalid graph: Phrase cannot simultaneously refer to phrases of different types"));
 			}
-
-			phrase->Childs.Add(Compile(childPhrase));
 		}
+
+		node->CompileNode->Childs.Add(Compile(child));
 	}
 
 	if (needUpdate && PropertyEditor.IsValid())
 	{
 		for (auto& obj : PropertyEditor->GetSelectedObjects())
 		{
-			if (obj == Node)
+			if (obj == node)
 			{
 				auto selected = GraphEditor->GetSelectedNodes();
 				GraphEditor->ClearSelectionSet();
@@ -670,7 +688,7 @@ UDialogPhrase* FDialogAssetEditor::Compile(UPhraseNode* Node)
 		}
 	}
 
-	return phrase;
+	return node->CompileNode;
 }
 
 FDialogAssetEditor::~FDialogAssetEditor()

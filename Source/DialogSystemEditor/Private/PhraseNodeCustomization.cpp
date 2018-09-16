@@ -27,7 +27,7 @@ TSharedRef<IDetailCustomization> FPhraseNodeDetails::MakeInstance()
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void FPhraseNodeDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 {
-	auto DataProperty = DetailLayout.GetProperty(GET_MEMBER_NAME_CHECKED(UPhraseNode, Data));
+	auto DataProperty = DetailLayout.GetProperty(GET_MEMBER_NAME_CHECKED(UDialogPhraseEdGraphNode, Data));
 
 	uint32 DataPropertyCount;
 	DataProperty->GetNumChildren(DataPropertyCount);

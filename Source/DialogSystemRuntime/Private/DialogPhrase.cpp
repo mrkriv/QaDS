@@ -15,10 +15,10 @@ void UDialogNode::Invoke(class UDialogProcessor* Implementer)
 
 bool UDialogNode::Check(UDialogProcessor* Implementer)
 {
-	return false;
+	return true;
 }
 
-void UDialogPhrase::Invoke(UDialogProcessor* Implementer)
+void UDialogPhraseNode::Invoke(UDialogProcessor* Implementer)
 {
 	auto storyKeyManager = UStoryKeyManager::GetStoryKeyManager();
 
@@ -30,11 +30,11 @@ void UDialogPhrase::Invoke(UDialogProcessor* Implementer)
 	
 	storyKeyManager->AddKey(Data.UID, EStoryKeyTypes::DialogPhrases);
 
-	for (auto& Event : Data.CustomEvents)
+	for (auto& Event : Data.Action)
 		Event.Invoke(Implementer);
 }
 
-bool UDialogPhrase::Check(UDialogProcessor* Implementer)
+bool UDialogPhraseNode::Check(UDialogProcessor* Implementer)
 {
 	auto storyKeyManager = UStoryKeyManager::GetStoryKeyManager();
 
@@ -50,7 +50,7 @@ bool UDialogPhrase::Check(UDialogProcessor* Implementer)
 			return false;
 	}
 
-	for (auto& Conditions : Data.CustomConditions)
+	for (auto& Conditions : Data.Predicate)
 	{
 		if (!Conditions.InvokeCheck(Implementer))
 			return false;

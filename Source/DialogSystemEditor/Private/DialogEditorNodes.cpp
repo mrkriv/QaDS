@@ -8,13 +8,15 @@
 #include "DialogSettings.h"
 #include "DialogAsset.h"
 
-const FString FPinDataTypes::PinType_Root = "root";
-
-//UDialogNodeEditorBase...........................................................................................
-
-TArray<UDialogNodeEditorBase*> UDialogNodeEditorBase::GetChildNodes()
+//UDdialogEdGraphNode...........................................................................................
+UDdialogEdGraphNode::UDdialogEdGraphNode(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
-	TArray<UDialogNodeEditorBase*> ChildNodes;
+}
+
+TArray<UDdialogEdGraphNode*> UDdialogEdGraphNode::GetChildNodes()
+{
+	TArray<UDdialogEdGraphNode*> ChildNodes;
 
 	for (auto Pin : Pins)
 	{
@@ -24,14 +26,14 @@ TArray<UDialogNodeEditorBase*> UDialogNodeEditorBase::GetChildNodes()
 		for (int i = 0; i < Pin->LinkedTo.Num(); i++)
 		{
 			if (Pin->LinkedTo[i])
-				ChildNodes.Add((UDialogNodeEditorBase*)Pin->LinkedTo[i]->GetOwningNode());
+				ChildNodes.Add((UDdialogEdGraphNode*)Pin->LinkedTo[i]->GetOwningNode());
 		}
 	}
 
 	return ChildNodes;
 }
 
-void UDialogNodeEditorBase::PostEditChangeProperty(struct FPropertyChangedEvent& e)
+void UDdialogEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 {
 	if (PropertyObserver.IsValid())
 	{
@@ -42,26 +44,31 @@ void UDialogNodeEditorBase::PostEditChangeProperty(struct FPropertyChangedEvent&
 	Super::PostEditChangeProperty(e);
 }
 
+int UDdialogEdGraphNode::GetOrder() const
+{
+	return 0;
+}
+
 //PhraseNode..........................................................................................................
 
-UPhraseNode::UPhraseNode(const FObjectInitializer& ObjectInitializer)
+UDialogPhraseEdGraphNode::UDialogPhraseEdGraphNode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	Data.Source = EDialogPhraseSource::NPC;
 }
 
-void UPhraseNode::AllocateDefaultPins()
+void UDialogPhraseEdGraphNode::AllocateDefaultPins()
 {
 	InputPin = CreatePin(EGPD_Input, NAME_None, FName(""));
 	OutputPin = CreatePin(EGPD_Output, NAME_None, FName(""));
 }
 
-FText UPhraseNode::GetTooltipText() const
+FText UDialogPhraseEdGraphNode::GetTooltipText() const
 {
 	return FText::FromString("Dialog Phrase");
 }
 
-FText UPhraseNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
+FText UDialogPhraseEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
 	if (Data.Text.IsEmpty())
 		return FText::FromString("Phrase");
@@ -69,40 +76,57 @@ FText UPhraseNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 	return Data.Text;
 }
 
-void UPhraseNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
+void UDialogPhraseEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 {
-	UDialogNodeEditorBase::PostEditChangeProperty(e);
+	UDdialogEdGraphNode::PostEditChangeProperty(e);
 }
 
-UPhrasePlayerNode::UPhrasePlayerNode(const FObjectInitializer& ObjectInitializer)
+//UDialogSubGraphEdGraphNode...........................................................................................
+
+UDialogSubGraphEdGraphNode::UDialogSubGraphEdGraphNode(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+}
+
+//UDialogElseIfEdGraphNode...........................................................................................
+
+UDialogElseIfEdGraphNode::UDialogElseIfEdGraphNode(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+}
+
+//UDialogRootEdGraphNode...........................................................................................
+
+UDialogPhraseEdGraphNode_Player::UDialogPhraseEdGraphNode_Player(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	Data.Source = EDialogPhraseSource::Player;
 }
 
-//URootNode...........................................................................................
+//UDialogRootEdGraphNode...........................................................................................
 
-URootNode::URootNode(const FObjectInitializer& ObjectInitializer)
+UDialogRootEdGraphNode::UDialogRootEdGraphNode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 }
 
-void URootNode::AllocateDefaultPins()
+void UDialogRootEdGraphNode::AllocateDefaultPins()
 {
+	Pins.Reset();
 	OutputPin = CreatePin(EGPD_Output, NAME_None, FName("Start"));
 }
 
-FText URootNode::GetTooltipText() const
+FText UDialogRootEdGraphNode::GetTooltipText() const
 {
 	return FText::FromString("Dialog Start Node");
 }
 
-FText URootNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
+FText UDialogRootEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
 	return FText::FromString(TEXT("Start ") + Cast<UDialogAsset>(GetGraph()->GetOuter())->Name.ToString());
 }
 
-bool URootNode::CanUserDeleteNode() const
+bool UDialogRootEdGraphNode::CanUserDeleteNode() const
 {
 	return false;
 }

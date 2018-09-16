@@ -100,31 +100,29 @@ UDialogGraphSchema::UDialogGraphSchema(const FObjectInitializer& ObjectInitializ
 
 void UDialogGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& ContextMenuBuilder) const
 {
-	FFormatNamedArguments Args;
-	const FName AttrName("Attributes");
-	Args.Add(TEXT("Attribute"), FText::FromName(AttrName));
-
-	const UEdGraphPin* FromPin = ContextMenuBuilder.FromPin;
-	const UEdGraph* Graph = ContextMenuBuilder.CurrentGraph;
-
-	TArray<TSharedPtr<FEdGraphSchemaAction>> Actions;
+	auto FromPin = ContextMenuBuilder.FromPin;
+	auto Graph = ContextMenuBuilder.CurrentGraph;
+	auto OwnerOfTemp = ContextMenuBuilder.OwnerOfTemporaries;
 
 	bool rootFound = false;
 	for (auto node : Graph->Nodes)
 	{
-		if (Cast<URootNode>(node))
+		if (Cast<UDialogRootEdGraphNode>(node))
 		{
 			rootFound = true;
 			break;
 		}
 	}
 
-	if (!rootFound)
-		DialogSchemaUtils::AddAction<URootNode>(TEXT("Create Root Node"), TEXT(""), Actions, ContextMenuBuilder.OwnerOfTemporaries);
+	TArray<TSharedPtr<FEdGraphSchemaAction>> Actions;
 
-	DialogSchemaUtils::AddAction<UPhrasePlayerNode>(TEXT("Add Player Phrase"), TEXT("Add dialog phrase node"), Actions, ContextMenuBuilder.OwnerOfTemporaries);
-	DialogSchemaUtils::AddAction<UPhraseNode>(TEXT("Add NPC Phrase"), TEXT("Add dialog phrase node"), Actions, ContextMenuBuilder.OwnerOfTemporaries);
-	//DialogSchemaUtils::AddAction<UWaitNode>(TEXT("Wait"), TEXT("Add wait node"), Actions, ContextMenuBuilder.OwnerOfTemporaries);
+	if (!rootFound)
+		DialogSchemaUtils::AddAction<UDialogRootEdGraphNode>(TEXT("Create Root Node"), TEXT(""), Actions, OwnerOfTemp);
+
+	DialogSchemaUtils::AddAction<UDialogPhraseEdGraphNode_Player>(TEXT("Add Player Phrase"), TEXT("Add dialog phrase node"), Actions, OwnerOfTemp);
+	DialogSchemaUtils::AddAction<UDialogPhraseEdGraphNode>(TEXT("Add NPC Phrase"), TEXT("Add dialog phrase node"), Actions, OwnerOfTemp);
+	DialogSchemaUtils::AddAction<UDialogElseIfEdGraphNode>(TEXT("Add ElseIf"), TEXT("Add else-if node"), Actions, OwnerOfTemp);
+	DialogSchemaUtils::AddAction<UDialogSubGraphEdGraphNode>(TEXT("Add Sub Dialog"), TEXT("Add sub dialog node"), Actions, OwnerOfTemp);
 
 	for (TSharedPtr<FEdGraphSchemaAction> Action : Actions)
 		ContextMenuBuilder.AddAction(Action);
@@ -132,8 +130,8 @@ void UDialogGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Contex
 
 const FPinConnectionResponse UDialogGraphSchema::CanCreateConnection(const UEdGraphPin* A, const UEdGraphPin* B) const
 {
-	UDialogNodeEditorBase* ABase = Cast<UDialogNodeEditorBase>(A->GetOwningNode());
-	UDialogNodeEditorBase* BBase = Cast<UDialogNodeEditorBase>(B->GetOwningNode());
+	UDdialogEdGraphNode* ABase = Cast<UDdialogEdGraphNode>(A->GetOwningNode());
+	UDdialogEdGraphNode* BBase = Cast<UDdialogEdGraphNode>(B->GetOwningNode());
 
 	if (A->Direction == B->Direction)
 		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Not allowed"));
@@ -170,7 +168,7 @@ void UDialogGraphSchema::GetContextMenuActions(const UEdGraph* CurrentGraph, con
 	MenuBuilder->AddMenuEntry(FGenericCommands::Get().Paste);
 	MenuBuilder->AddMenuEntry(FGenericCommands::Get().SelectAll);
 
-	if(!Cast<URootNode>(InGraphNode))
+	if(!Cast<UDialogRootEdGraphNode>(InGraphNode))
 		MenuBuilder->AddMenuEntry(FGenericCommands::Get().Duplicate);
 
 	if (InGraphPin)
