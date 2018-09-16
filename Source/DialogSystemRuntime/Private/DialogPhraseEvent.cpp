@@ -221,7 +221,7 @@ FString FDialogPhraseEvent::ToString() const
 	return TEXT("None");
 }
 
-bool FDialogPhraseCondition::InvokeCheck(class UDialogProcessor* DialogProcessor)
+bool FDialogPhraseCondition::InvokeCheck(class UDialogProcessor* DialogProcessor) const
 {
 	auto obj = GetObject(DialogProcessor);
 
@@ -251,7 +251,7 @@ FString FDialogPhraseCondition::ToString() const
 }
 
 // Copy from ScriptCore.cpp UObject::CallFunctionByNameWithArguments
-bool FDialogPhraseCondition::CallCheckFunction(UObject* Executor, const TCHAR* Str, bool& checkResult)
+bool FDialogPhraseCondition::CallCheckFunction(UObject* Executor, const TCHAR* Str, bool& checkResult) const
 {
 	FString MsgStr;
 	if (!FParse::Token(Str, MsgStr, true))

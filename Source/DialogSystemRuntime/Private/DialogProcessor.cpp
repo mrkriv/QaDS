@@ -4,6 +4,7 @@
 #include "DialogScript.h"
 #include "DialogPhrase.h"
 #include "DialogAsset.h"
+#include "StoryInformationManager.h"
 #include "Runtime/Engine/Public/TimerManager.h"
 #include "Runtime/Engine/Classes/Sound/SoundBase.h"
 #include "Runtime/Engine/Classes/Components/AudioComponent.h"
@@ -23,21 +24,29 @@ UDialogProcessor* UDialogProcessor::CreateDialogProcessor(UDialogAsset* DialogAs
 		return NULL;
 	}
 
+	if (InNPC == NULL)
+	{
+		UE_LOG(DialogModuleLog, Error, TEXT("NPC is null"));
+		return NULL;
+	}
+
 	auto impl = NewObject<UDialogProcessor>(InNPC->GetWorld());
 	impl->NPC = InNPC;
 	impl->Asset = DialogAsset;
-
-	if (DialogAsset->DialogScriptClass != NULL)
-	{
-		impl->DialogScript = InNPC->GetWorld()->SpawnActor<ADialogScript>(DialogAsset->DialogScriptClass, FTransform());
-		impl->DialogScript->Implementer = impl;
-	}
 
 	return impl;
 }
 
 void UDialogProcessor::StartDialog()
 {
+	StoryKeyManager = UStoryKeyManager::GetStoryKeyManager();
+
+	if (Asset->DialogScriptClass != NULL && NPC != NULL)
+	{
+		DialogScript = NPC->GetWorld()->SpawnActor<ADialogScript>(Asset->DialogScriptClass, FTransform());
+		DialogScript->Implementer = this;
+	}
+
 	SetCurrentNode(Asset->RootNode);
 }
 
@@ -52,7 +61,7 @@ void UDialogProcessor::SetCurrentNode(UDialogNode* node)
 	for (auto phraseNode : CurrentNode->Childs)
 	{
 		auto phrase = Cast<UDialogPhraseNode>(phraseNode);
-		if (phrase && phrase->Check(this))
+		if (phrase && CheckNode(phrase))
 		{
 			if (!found)
 			{
@@ -87,11 +96,62 @@ void UDialogProcessor::SetCurrentNode(UDialogNode* node)
 	}
 }
 
+bool UDialogProcessor::CheckNode(UDialogNode* node)
+{
+	if (node->IsA(UDialogPhraseNode::StaticClass()))
+	{
+		auto phraseNode = Cast<UDialogPhraseNode>(node);
+
+		for (auto key : phraseNode->Data.CheckHasKeys)
+		{
+			if (StoryKeyManager->DontHasKey(key))
+				return false;
+		}
+
+		for (auto key : phraseNode->Data.CheckDontHasKeys)
+		{
+			if (StoryKeyManager->HasKey(key))
+				return false;
+		}
+
+		for (auto& Conditions : phraseNode->Data.Predicate)
+		{
+			if (!Conditions.InvokeCheck(this))
+				return false;
+		}
+	}
+
+	return true;
+}
+
+bool UDialogProcessor::CheckCondition(const FDialogElseIfCondition& condition)
+{
+	for (auto key : condition.CheckHasKeys)
+	{
+		if (StoryKeyManager->DontHasKey(key))
+			return false;
+	}
+
+	for (auto key : condition.CheckDontHasKeys)
+	{
+		if (StoryKeyManager->HasKey(key))
+			return false;
+	}
+
+	for (auto& predicate : condition.Predicate)
+	{
+		if (!predicate.InvokeCheck(this))
+			return false;
+	}
+
+	return true;
+}
+
 void UDialogProcessor::InvokeNode(UDialogNode* node)
 {
 	for (auto child : node->Childs)
 	{
-		if (child->Check(this))
+		if (CheckNode(child))
 		{
 			SetCurrentNode(child);
 			return;
@@ -101,10 +161,52 @@ void UDialogProcessor::InvokeNode(UDialogNode* node)
 
 void UDialogProcessor::InvokeNode(UDialogElseIfNode* node)
 {
+	auto storyKeyManager = UStoryKeyManager::GetStoryKeyManager();
+
+	for (auto conditions : node->Conditions)
+	{
+		if (!CheckCondition(conditions))
+			continue;
+
+		for (auto nextNode : conditions.NextNode)
+		{
+			if (CheckNode(nextNode))
+			{
+				SetCurrentNode(nextNode);
+			}
+		}
+		break;
+	}
+
+	EndDialog();
 }
 
 void UDialogProcessor::InvokeNode(UDialogSubGraphNode* node)
 {
+	if (node->TargetDialog == NULL)
+	{
+		UE_LOG(DialogModuleLog, Error, TEXT("Sub dialog is empty in dialog %s"), *Asset->GetPathName());
+		return;
+	}
+
+	if (node->TargetDialog->RootNode == NULL)
+	{
+		UE_LOG(DialogModuleLog, Error, TEXT("Sub dialog %s have not root node"), *node->TargetDialog->GetPathName());
+		return;
+	}
+
+	Asset = node->TargetDialog;
+	if (Asset->DialogScriptClass == NULL)
+	{
+		DialogScript = NULL;
+	}
+	else if(DialogScript == NULL || !DialogScript->IsA(Asset->DialogScriptClass))
+	{
+		DialogScript = NPC->GetWorld()->SpawnActor<ADialogScript>(Asset->DialogScriptClass, FTransform());
+		DialogScript->Implementer = this;
+	}
+
+	SetCurrentNode(Asset->RootNode);
 }
 
 void UDialogProcessor::InvokeNode(UDialogPhraseNode* node)
@@ -112,7 +214,19 @@ void UDialogProcessor::InvokeNode(UDialogPhraseNode* node)
 	if (NextTimerHandle.IsValid() && NPC != NULL)
 		NPC->GetWorldTimerManager().ClearTimer(NextTimerHandle);
 
-	node->Invoke(this);
+	auto storyKeyManager = UStoryKeyManager::GetStoryKeyManager();
+
+	for (auto key : node->Data.GiveKeys)
+		storyKeyManager->AddKey(key);
+
+	for (auto key : node->Data.RemoveKeys)
+		storyKeyManager->RemoveKey(key);
+
+	for (auto& Event : node->Data.Action)
+		Event.Invoke(this);
+
+
+	storyKeyManager->AddKey(node->Data.UID, EStoryKeyTypes::DialogPhrases);
 
 	if (node->Data.Source == EDialogPhraseSource::Player)
 	{

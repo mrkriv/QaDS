@@ -75,6 +75,39 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseInfo
 	TArray<FDialogPhraseEvent> Action;
 };
 
+UCLASS()
+class DIALOGSYSTEMRUNTIME_API UDialogNode : public UObject
+{
+	GENERATED_BODY()
+public:
+
+	UPROPERTY()
+	TArray<UDialogNode*> Childs;
+
+	UPROPERTY()
+	class UDialogAsset* OwnerDialog;
+};
+
+UCLASS()
+class DIALOGSYSTEMRUNTIME_API UDialogPhraseNode : public UDialogNode
+{
+	GENERATED_BODY()
+public:
+
+	UPROPERTY(BlueprintReadOnly)
+	FDialogPhraseInfo Data;
+};
+
+UCLASS()
+class DIALOGSYSTEMRUNTIME_API UDialogSubGraphNode : public UDialogNode
+{
+	GENERATED_BODY()
+public:
+
+	UPROPERTY()
+	class UDialogAsset* TargetDialog;
+};
+
 USTRUCT(BlueprintType)
 struct DIALOGSYSTEMRUNTIME_API FDialogElseIfCondition
 {
@@ -88,45 +121,9 @@ struct DIALOGSYSTEMRUNTIME_API FDialogElseIfCondition
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
 	TArray<FDialogPhraseCondition> Predicate;
-};
-
-UCLASS()
-class DIALOGSYSTEMRUNTIME_API UDialogNode : public UObject
-{
-	GENERATED_BODY()
-public:
 
 	UPROPERTY()
-	TArray<UDialogNode*> Childs;
-
-	UPROPERTY()
-	class UDialogAsset* OwnerDialog;
-
-	virtual void Invoke(class UDialogProcessor* Implementer);
-	virtual bool Check(class UDialogProcessor* Implementer);
-};
-
-UCLASS()
-class DIALOGSYSTEMRUNTIME_API UDialogPhraseNode : public UDialogNode
-{
-	GENERATED_BODY()
-public:
-
-	UPROPERTY(BlueprintReadOnly)
-	FDialogPhraseInfo Data;
-
-	void Invoke(class UDialogProcessor* Implementer) override;
-	bool Check(class UDialogProcessor* Implementer) override;
-};
-
-UCLASS()
-class DIALOGSYSTEMRUNTIME_API UDialogSubGraphNode : public UDialogNode
-{
-	GENERATED_BODY()
-public:
-
-	UPROPERTY()
-	class UDialogAsset* TargetDialog;
+	TArray<UDialogNode*> NextNode;
 };
 
 UCLASS()

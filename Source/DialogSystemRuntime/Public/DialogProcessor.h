@@ -15,10 +15,12 @@ class UDialogSubGraphNode;
 class UDialogElseIfNode;
 class ADialogScript;
 class UDialogAsset;
+class UStoryKeyManager;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDialogEndSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangePhraseVariantSignature, const TArray<FDialogPhraseShortInfo>&, Variants);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDialogPhraseSignature, FDialogPhraseInfo, Phrase);
+
 
 UCLASS(BlueprintType)
 class DIALOGSYSTEMRUNTIME_API UDialogProcessor : public UObject
@@ -40,6 +42,8 @@ private:
 	void InvokeNode(UDialogPhraseNode* node);
 	void InvokeNode(UDialogSubGraphNode* node);
 	void InvokeNode(UDialogElseIfNode* node);
+	bool CheckNode(UDialogNode* node);
+	bool CheckCondition(const FDialogElseIfCondition& condition);
 
 	void EndDialog();
 
@@ -47,11 +51,14 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UDialogAsset* Asset;
 
-	UPROPERTY(BlueprintReadWrite)
-	AActor* NPC;
-
 	UPROPERTY(BlueprintReadOnly)
 	ADialogScript* DialogScript;
+
+	UPROPERTY(BlueprintReadOnly)
+	UStoryKeyManager* StoryKeyManager;
+
+	UPROPERTY(BlueprintReadWrite)
+	AActor* NPC;
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FChangePhraseVariantSignature OnChangePhraseVariant;
@@ -74,5 +81,5 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Dialog")
 	void Next(FName PhraseUID);
 
-	void OnNextTimer();
+	void OnNextTimer(); 
 };

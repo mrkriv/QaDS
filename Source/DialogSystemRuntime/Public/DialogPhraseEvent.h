@@ -66,10 +66,10 @@ public:
 	bool InvertCondition;
 
 	virtual bool Compile(FString& ErrorMessage, bool& needUpdate) override;
-	virtual bool InvokeCheck(class UDialogProcessor* Implementer);
+	virtual bool InvokeCheck(class UDialogProcessor* Implementer) const;
 	virtual FString ToString() const override;
 	virtual ~FDialogPhraseCondition() {}
 
 private:
-	bool CallCheckFunction(UObject* Executor, const TCHAR* Str, bool& checkResult);
+	bool CallCheckFunction(UObject* Executor, const TCHAR* Str, bool& checkResult) const;
 };
