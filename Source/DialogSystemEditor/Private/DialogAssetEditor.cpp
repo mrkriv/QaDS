@@ -405,7 +405,7 @@ void FDialogAssetEditor::PasteNodesHere(const FVector2D& Location)
 		auto phraseNode = Cast<UDialogPhraseEdGraphNode>(Node);
 		if (phraseNode != NULL)
 		{
-			phraseNode->CompilePhrase = NULL;
+			phraseNode->CompileNode = NULL;
 		}
 	}
 
@@ -533,7 +533,7 @@ void FDialogAssetEditor::CreateNodesFromPhrase(UDdialogEdGraphNode* owner, UDial
 	auto location = FVector2D(owner->OutputPin->LinkedTo.Num() * 400, level * 250);
 
 	auto node = FDialogSchemaAction_NewNode::SpawnNodeFromTemplate<UDialogPhraseEdGraphNode>(owner->GetGraph(), NewObject<UDialogPhraseEdGraphNode>(), location, false);
-	node->CompilePhrase = dialogPhrase;
+	node->CompileNode = dialogPhrase;
 	node->Data = dialogPhrase->Data;
 
 	node->InputPin->MakeLinkTo(owner->OutputPin);

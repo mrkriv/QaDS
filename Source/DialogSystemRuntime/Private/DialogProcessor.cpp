@@ -3,6 +3,7 @@
 #include "DialogProcessor.h"
 #include "DialogScript.h"
 #include "DialogPhrase.h"
+#include "DialogAsset.h"
 #include "Runtime/Engine/Public/TimerManager.h"
 #include "Runtime/Engine/Classes/Sound/SoundBase.h"
 #include "Runtime/Engine/Classes/Components/AudioComponent.h"
@@ -68,9 +69,42 @@ void UDialogProcessor::SetCurrentNode(UDialogNode* node)
 		}
 	}
 
-	auto phraseNode = Cast<UDialogPhraseNode>(node);
-	if (phraseNode != NULL)
-		InvokeNode(phraseNode);
+	if (node->IsA(UDialogPhraseNode::StaticClass()))
+	{
+		InvokeNode(Cast<UDialogPhraseNode>(node));
+	}
+	else if (node->IsA(UDialogSubGraphNode::StaticClass()))
+	{
+		InvokeNode(Cast<UDialogSubGraphNode>(node));
+	}
+	else if (node->IsA(UDialogElseIfNode::StaticClass()))
+	{
+		InvokeNode(Cast<UDialogElseIfNode>(node));
+	}
+	else
+	{
+		InvokeNode(node);
+	}
+}
+
+void UDialogProcessor::InvokeNode(UDialogNode* node)
+{
+	for (auto child : node->Childs)
+	{
+		if (child->Check(this))
+		{
+			SetCurrentNode(child);
+			return;
+		}
+	}
+}
+
+void UDialogProcessor::InvokeNode(UDialogElseIfNode* node)
+{
+}
+
+void UDialogProcessor::InvokeNode(UDialogSubGraphNode* node)
+{
 }
 
 void UDialogProcessor::InvokeNode(UDialogPhraseNode* node)

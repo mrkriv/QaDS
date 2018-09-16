@@ -45,9 +45,6 @@ class DIALOGSYSTEMEDITOR_API UDialogPhraseEdGraphNode : public UDdialogEdGraphNo
 {
 	GENERATED_UCLASS_BODY()
 
-	UPROPERTY()
-	UDialogPhraseNode* CompilePhrase;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FDialogPhraseInfo Data;
 

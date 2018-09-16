@@ -31,7 +31,7 @@ void FDialogSystemEditorModule::StartupModule()
 	
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseCondition", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseEvent", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
-	PropertyModule.RegisterCustomClassLayout("DialogPhraseNode", FOnGetDetailCustomizationInstance::CreateStatic(&FPhraseNodeDetails::MakeInstance));
+	PropertyModule.RegisterCustomClassLayout("DialogPhraseEdGraphNode", FOnGetDetailCustomizationInstance::CreateStatic(&FPhraseNodeDetails::MakeInstance));
 
 	SettingsModule.RegisterSettings("Project", "Plugins", "Dialog",
 		LOCTEXT("RuntimeSettingsName", "Dialog Editor"),

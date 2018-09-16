@@ -2,14 +2,19 @@
 #pragma once
 
 #include "Engine/EngineTypes.h"
-#include "UObject/NoExportTypes.h"
 #include "DialogPhrase.h"
-#include "DialogAsset.h"
+#include "UObject/NoExportTypes.h"
 #include "DialogProcessor.generated.h"
 
 class UDialogRootEdGraphNode;
 class UDialogPhraseEdGraphNode;
 class UDdialogEdGraphNode;
+class UDialogNode;
+class UDialogPhraseNode;
+class UDialogSubGraphNode;
+class UDialogElseIfNode;
+class ADialogScript;
+class UDialogAsset;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDialogEndSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FChangePhraseVariantSignature, const TArray<FDialogPhraseShortInfo>&, Variants);
@@ -31,7 +36,11 @@ private:
 	void DelayNext();
 	float GetPhraseTime();
 	void SetCurrentNode(UDialogNode* node);
+	void InvokeNode(UDialogNode* node);
 	void InvokeNode(UDialogPhraseNode* node);
+	void InvokeNode(UDialogSubGraphNode* node);
+	void InvokeNode(UDialogElseIfNode* node);
+
 	void EndDialog();
 
 public:
@@ -42,7 +51,7 @@ public:
 	AActor* NPC;
 
 	UPROPERTY(BlueprintReadOnly)
-	class ADialogScript* DialogScript;
+	ADialogScript* DialogScript;
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FChangePhraseVariantSignature OnChangePhraseVariant;

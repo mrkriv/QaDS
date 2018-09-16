@@ -7,6 +7,8 @@
 #include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
 #include "StoryInformationManager.h"
 #include "DialogProcessor.h"
+#include "DialogPhrase.h"
+#include "DialogAsset.h"
 #include "DialogPhraseEvent.h"
 
 #define ERROR(Message, ...) ErrorMessage =  FString::Printf(TEXT(Message), ##__VA_ARGS__); return false
