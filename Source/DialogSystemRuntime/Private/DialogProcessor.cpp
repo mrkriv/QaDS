@@ -222,7 +222,7 @@ void UDialogProcessor::InvokeNode(UDialogPhraseNode* node)
 	for (auto& Event : node->Data.Action)
 		Event.Invoke(this);
 
-	StoryKeyManager->AddKey(node->Data.UID);
+	//StoryKeyManager->AddKey(node->Data.UID);
 
 	if (node->Data.Source == EDialogPhraseSource::Player)
 	{

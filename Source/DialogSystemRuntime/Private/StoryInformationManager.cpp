@@ -28,6 +28,8 @@ bool UStoryKeyManager::AddKey(FName Key)
 		return false;
 
 	Database.Add(Key);
+	OnKeyAdd.Broadcast(Key);
+	OnKeyAddBP.Broadcast(Key);
 
 	UE_LOG(DialogModuleLog, Log, TEXT("Add key '%s' to storage"), *Key.ToString());
 	return true;
@@ -37,6 +39,9 @@ bool UStoryKeyManager::RemoveKey(FName Key)
 {
 	if (!Database.Remove(Key))
 		return false;
+
+	OnKeyRemove.Broadcast(Key);
+	OnKeyRemoveBP.Broadcast(Key);
 
 	UE_LOG(DialogModuleLog, Log, TEXT("Remove key '%s' from storage"), *Key.ToString());
 	return true;
@@ -50,11 +55,17 @@ TArray<FName> UStoryKeyManager::GetKeys() const
 void UStoryKeyManager::SetKeys(const TSet<FName>& keys)
 {
 	Database = keys;
+	OnKeysLoaded.Broadcast(Database.Array());
+	OnKeysLoadedBP.Broadcast(Database.Array());
+
 	UE_LOG(DialogModuleLog, Log, TEXT("Load %d keys to storage"), keys.Num());
 }
 
 void UStoryKeyManager::Clear()
 {
 	Database.Reset();
+	OnKeysLoaded.Broadcast(Database.Array());
+	OnKeysLoadedBP.Broadcast(Database.Array());
+
 	UE_LOG(DialogModuleLog, Log, TEXT("Clear storage"));
 }

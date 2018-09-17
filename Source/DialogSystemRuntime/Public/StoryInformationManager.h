@@ -5,6 +5,11 @@
 #include "Components/ActorComponent.h"
 #include "StoryInformationManager.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FStoryKeyChangeSignature, const FName&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FStoryKeysChangeSignature, const TArray<FName>&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStoryKeyChangeSignatureBP, const FName&, StoreKey);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStoryKeysChangeSignatureBP, const TArray<FName>&, StoreKeys);
+
 UCLASS()
 class DIALOGSYSTEMRUNTIME_API UStoryKeyManager : public UObject
 {
@@ -13,6 +18,19 @@ class DIALOGSYSTEMRUNTIME_API UStoryKeyManager : public UObject
 	TSet<FName> Database;
 
 public:
+
+	FStoryKeyChangeSignature OnKeyAdd;
+	FStoryKeyChangeSignature OnKeyRemove;
+	FStoryKeysChangeSignature OnKeysLoaded;
+
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay|StoryKey")
+	FStoryKeyChangeSignatureBP OnKeyAddBP;
+
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay|StoryKey")
+	FStoryKeyChangeSignatureBP OnKeyRemoveBP;
+
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay|StoryKey")
+	FStoryKeysChangeSignatureBP OnKeysLoadedBP;
 
 	UFUNCTION(BlueprintPure, Category = "Gameplay|StoryKey")
 	static UStoryKeyManager* GetStoryKeyManager();
