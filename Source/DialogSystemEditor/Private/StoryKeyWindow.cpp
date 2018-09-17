@@ -23,7 +23,6 @@
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SStoryKeyWindow::Construct(const FArguments& InArgs)
 {
-	keyManager = UStoryKeyManager::GetStoryKeyManager();
 	ChildSlot
 	[
 		SNew(SBorder)
@@ -46,6 +45,7 @@ void SStoryKeyWindow::Construct(const FArguments& InArgs)
 						.OnTextChanged(this, &SStoryKeyWindow::HandleSearch)
 					]
 					+ SHorizontalBox::Slot()
+					.Padding(4.0f, 0.0f, 0.0f, 0.0f)
 					.AutoWidth()
 					[
 						SNew(SButton)
@@ -68,8 +68,7 @@ void SStoryKeyWindow::Construct(const FArguments& InArgs)
 					.ListItemsSource(&keys)
 					.OnGenerateRow(this, &SStoryKeyWindow::HandleGenerateRow)
 					.OnSelectionChanged(this, &SStoryKeyWindow::HandleSelectKey)
-					.SelectionMode(ESelectionMode::Single)
-					
+					.SelectionMode(ESelectionMode::Single)					
 				]
 				+ SVerticalBox::Slot()
 				.AutoHeight()
@@ -82,6 +81,7 @@ void SStoryKeyWindow::Construct(const FArguments& InArgs)
 						.HintText(FText::FromString("Enter key name"))
 					]
 					+ SHorizontalBox::Slot()
+					.Padding(4.0f, 0.0f, 0.0f, 0.0f)
 					.AutoWidth()
 					[
 						SNew(SButton)
@@ -99,8 +99,6 @@ void SStoryKeyWindow::Construct(const FArguments& InArgs)
 			]
 		]
 	];
-
-	UpdateKeys();
 }
 
 TSharedRef<ITableRow> SStoryKeyWindow::HandleGenerateRow(TSharedPtr<FString> Item, const TSharedRef<STableViewBase>& OwnerTable)
@@ -113,17 +111,28 @@ TSharedRef<ITableRow> SStoryKeyWindow::HandleGenerateRow(TSharedPtr<FString> Ite
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
+void SStoryKeyWindow::Tick(const FGeometry& AllottedGeometry, double InCurrentTime, float DeltaTime)
+{
+	SCompoundWidget::Tick(AllottedGeometry, InCurrentTime, DeltaTime);
+
+	auto newKeyManager = UStoryKeyManager::GetStoryKeyManager();
+	if (newKeyManager != NULL && newKeyManager != keyManager)
+	{
+		keyManager = newKeyManager;
+		keyManager->OnKeyAdd.AddSP(this, &SStoryKeyWindow::OnStorageKeyAdd);
+		keyManager->OnKeyRemove.AddSP(this, &SStoryKeyWindow::OnStorageKeyRemove);
+		keyManager->OnKeysLoaded.AddSP(this, &SStoryKeyWindow::OnStorageKeysLoaded);
+
+		UpdateKeys();
+	}
+}
+
 void SStoryKeyWindow::HandleSelectKey(TSharedPtr<FString> NewSelection, ESelectInfo::Type SelectInfo)
 {
 	if (NewSelection.IsValid())
 	{
 		editKeyTextBox->SetText(FText::FromString(*NewSelection));
 	}
-}
-
-void SStoryKeyWindow::HandleSearch(const FText& Text)
-{
-	UpdateKeys();
 }
 
 void SStoryKeyWindow::UpdateKeys()
@@ -170,12 +179,7 @@ FReply SStoryKeyWindow::HandleAddKeyButton()
 	auto key = editKeyTextBox->GetText().ToString();
 	if (keyManager->AddKey(*key))
 	{
-		UpdateKeys();
 		editKeyTextBox->SetText(FText());
-		//keys.Add(MakeShareable(new FString(*key)));
-		//keyListView->RebuildList();
-
-		LogInfo("Add " + key);
 	}
 	else
 	{
@@ -190,15 +194,7 @@ FReply SStoryKeyWindow::HandleRemoveKeyButton()
 	auto key = editKeyTextBox->GetText().ToString();
 	if (keyManager->RemoveKey(*key))
 	{
-		UpdateKeys();
 		editKeyTextBox->SetText(FText());
-		//keys.RemoveAll([key](const TSharedPtr<FString>& x)
-		//{
-		//	return key == x->ToString();
-		//});
-		//keyListView->RebuildList();
-
-		LogInfo("Remove " + key);
 	}
 	else
 	{
@@ -206,6 +202,29 @@ FReply SStoryKeyWindow::HandleRemoveKeyButton()
 	}
 
 	return FReply::Handled();
+}
+
+void SStoryKeyWindow::HandleSearch(const FText& Text)
+{
+	UpdateKeys();
+}
+
+void SStoryKeyWindow::OnStorageKeyAdd(const FName& StoreKey)
+{
+	LogInfo("Add key: " + StoreKey.ToString());
+	UpdateKeys();
+}
+
+void SStoryKeyWindow::OnStorageKeyRemove(const FName& StoreKey)
+{
+	LogInfo("Remove key: " + StoreKey.ToString());
+	UpdateKeys();
+}
+
+void SStoryKeyWindow::OnStorageKeysLoaded(const TArray<FName>& StoreKeys)
+{
+	LogInfo("Loaded keys");
+	UpdateKeys();
 }
 
 void SStoryKeyWindow::LogInfo(const FString& message)
