@@ -1,4 +1,3 @@
-// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #include "ImportWindow.h"
 #include "DialogStalkerInporterModule.h"
 #include "Widgets/SBoxPanel.h"

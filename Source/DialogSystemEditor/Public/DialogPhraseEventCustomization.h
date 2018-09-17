@@ -1,6 +1,4 @@
-// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #pragma once
-
 
 #include "DialogPhrase.h"
 #include "Editor/PropertyEditor/Public/IPropertyTypeCustomization.h"

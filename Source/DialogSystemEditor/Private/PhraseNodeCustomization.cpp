@@ -1,4 +1,3 @@
-// Copyright 2017-2018 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "UObject/UnrealType.h"
 #include "Widgets/Input/SButton.h"

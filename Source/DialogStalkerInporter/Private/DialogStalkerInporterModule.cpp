@@ -1,4 +1,3 @@
-// Copyright 2017-2018 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogStalkerInporterModule.h"
 #include "ImportWindow.h"
 #include "Editor/WorkspaceMenuStructure/Public/WorkspaceMenuStructure.h"

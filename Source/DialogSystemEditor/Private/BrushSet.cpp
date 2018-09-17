@@ -1,4 +1,3 @@
-// Copyright 2017-2018 Krivosheya Mikhail. All Rights Reserved.
 #include "DialogSystemEditor.h"
 #include "BrushSet.h"
 #include "Engine/Texture2D.h"
