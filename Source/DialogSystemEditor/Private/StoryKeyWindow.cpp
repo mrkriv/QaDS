@@ -18,22 +18,6 @@
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
-EStoryKeyTypes TypesFromString(const FString typeName)
-{
-	if (typeName == "General") {
-		return EStoryKeyTypes::General;
-	}
-	else if (typeName == "DialogPhrases") {
-		return EStoryKeyTypes::DialogPhrases;
-	}
-	else if (typeName == "Task") {
-		return EStoryKeyTypes::Task;
-	}
-	else {
-		return EStoryKeyTypes::General;
-	}
-}
-
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SStoryKeyWindow::Construct(const FArguments& InArgs)
 {
@@ -80,12 +64,6 @@ void SStoryKeyWindow::Construct(const FArguments& InArgs)
 				[
 					SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot()
-					.AutoWidth()
-					[
-						SAssignNew(findTypeComboBox, STextComboBox)
-						.OptionsSource(&typeNames)
-					]
-					+ SHorizontalBox::Slot()
 					.FillWidth(1.0f)
 					[
 					  	SAssignNew(findTextBox, SEditableTextBox)
@@ -102,12 +80,6 @@ void SStoryKeyWindow::Construct(const FArguments& InArgs)
 				.AutoHeight()
 				[
 					SNew(SHorizontalBox)
-					+ SHorizontalBox::Slot()
-					.AutoWidth()
-					[
-						SAssignNew(editTypeComboBox, STextComboBox)
-						.OptionsSource(&typeNames)
-					]
 					+ SHorizontalBox::Slot()
 					.FillWidth(1.0f)
 					[
@@ -150,10 +122,8 @@ FReply SStoryKeyWindow::HandleExportButton()
 
 FReply SStoryKeyWindow::HandleAddKeyButton()
 {
-	auto type = TypesFromString(*editTypeComboBox->GetSelectedItem());
 	auto key = editKeyTextBox->GetText().ToString();
-
-	if (keyManager->AddKey(*key, type))
+	if (keyManager->AddKey(*key))
 	{
 		FSlateNotificationManager::Get().AddNotification(FNotificationInfo(FText::FromString("Add " + key)));
 	}
@@ -163,10 +133,8 @@ FReply SStoryKeyWindow::HandleAddKeyButton()
 
 FReply SStoryKeyWindow::HandleRemoveKeyButton()
 {
-	auto type = TypesFromString(*editTypeComboBox->GetSelectedItem());
 	auto key = editKeyTextBox->GetText().ToString();
-
-	if (keyManager->RemoveKey(*key, type))
+	if (keyManager->RemoveKey(*key))
 	{
 		FSlateNotificationManager::Get().AddNotification(FNotificationInfo(FText::FromString("Remove " + key)));
 	}

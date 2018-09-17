@@ -20,9 +20,7 @@ public:
 
 private:
 	TSharedPtr<SEditableTextBox> findTextBox;
-	TSharedPtr<STextComboBox> findTypeComboBox;
 	TSharedPtr<SEditableTextBox> editKeyTextBox;
-	TSharedPtr<STextComboBox> editTypeComboBox;
 
 	TArray<TSharedPtr<FString>> typeNames;
 	class UStoryKeyManager* keyManager;

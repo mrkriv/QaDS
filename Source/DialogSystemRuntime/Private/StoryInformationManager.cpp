@@ -4,90 +4,57 @@
 #include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
 #include "StoryInformationManager.h"
 
-const FString GetTypeName(EStoryKeyTypes type)
-{
-	auto EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EStoryKeyTypes"), true);
-
-	if (!EnumPtr)
-		return "Invalid";
-
-#if WITH_EDITOR
-	return EnumPtr->GetDisplayNameTextByIndex((int32)type).ToString();
-#else
-	return EnumPtr->GetEnumName((int32)type);
-#endif
-}
-
 UStoryKeyManager* UStoryKeyManager::GetStoryKeyManager()
 {
-	for (TObjectIterator<UStoryKeyManager> Itr; Itr; ++Itr)
+	for (TObjectIterator<UStoryKeyManager> Itr; Itr;)
 		return *Itr;
 
 	return NewObject<UStoryKeyManager>();
 }
 
-UStoryKeyManager::UStoryKeyManager()
+bool UStoryKeyManager::HasKey(FName Key) const
 {
-	Database.Add(EStoryKeyTypes::General, TSet<FName>());
-	Database.Add(EStoryKeyTypes::DialogPhrases, TSet<FName>());
-	Database.Add(EStoryKeyTypes::Task, TSet<FName>());
+	return Database.Contains(Key);
 }
 
-bool UStoryKeyManager::HasKey(FName Key, EStoryKeyTypes Type)
+bool UStoryKeyManager::DontHasKey(FName Key) const
 {
-	return Database[Type].Contains(Key);
+	return !Database.Contains(Key);
 }
 
-bool UStoryKeyManager::DontHasKey(FName Key, EStoryKeyTypes Type)
+bool UStoryKeyManager::AddKey(FName Key)
 {
-	return !Database[Type].Contains(Key);
-}
-
-bool UStoryKeyManager::AddKey(FName Key, EStoryKeyTypes Type)
-{
-	if (Database[Type].Contains(Key))
+	if (Database.Contains(Key))
 		return false;
 
-	Database[Type].Add(Key);
+	Database.Add(Key);
 
-	auto typeName = GetTypeName(Type);
-	UE_LOG(DialogModuleLog, Log, TEXT("Add key '%s' to storage %s"), *Key.ToString(), *typeName);
-
+	UE_LOG(DialogModuleLog, Log, TEXT("Add key '%s' to storage"), *Key.ToString());
 	return true;
 }
 
-bool UStoryKeyManager::RemoveKey(FName Key, EStoryKeyTypes Type)
+bool UStoryKeyManager::RemoveKey(FName Key)
 {
-	if (!Database[Type].Remove(Key))
+	if (!Database.Remove(Key))
 		return false;
 
-	auto typeName = GetTypeName(Type);
-	UE_LOG(DialogModuleLog, Log, TEXT("Remove key '%s' from storage %s"), *Key.ToString(), *typeName);
-
+	UE_LOG(DialogModuleLog, Log, TEXT("Remove key '%s' from storage"), *Key.ToString());
 	return true;
 }
 
-TMap<EStoryKeyTypes, TSet<FName>> UStoryKeyManager::GetKeys() const
+TArray<FName> UStoryKeyManager::GetKeys() const
 {
-	return Database;
+	return Database.Array();
 }
 
-TArray<FName> UStoryKeyManager::GetKeys(EStoryKeyTypes Type) const
+void UStoryKeyManager::SetKeys(const TSet<FName>& keys)
 {
-	return Database[Type].Array();
+	Database = keys;
+	UE_LOG(DialogModuleLog, Log, TEXT("Load %d keys to storage"), keys.Num());
 }
 
-void UStoryKeyManager::ClearType(EStoryKeyTypes Type)
+void UStoryKeyManager::Clear()
 {
-	auto typeName = GetTypeName(Type);
-	UE_LOG(DialogModuleLog, Log, TEXT("Reset storage: '%s'"), *typeName);
-
-	Database[Type].Reset();
-}
-
-void UStoryKeyManager::ClearAll()
-{
-	ClearType(EStoryKeyTypes::General);
-	ClearType(EStoryKeyTypes::DialogPhrases);
-	ClearType(EStoryKeyTypes::Task);
+	Database.Reset();
+	UE_LOG(DialogModuleLog, Log, TEXT("Clear storage"));
 }

@@ -162,8 +162,6 @@ void UDialogProcessor::InvokeNode(UDialogNode* node)
 
 void UDialogProcessor::InvokeNode(UDialogElseIfNode* node)
 {
-	auto storyKeyManager = UStoryKeyManager::GetStoryKeyManager();
-
 	for (auto conditions : node->Conditions)
 	{
 		if (!CheckCondition(conditions))
@@ -214,20 +212,17 @@ void UDialogProcessor::InvokeNode(UDialogPhraseNode* node)
 {
 	if (NextTimerHandle.IsValid() && NPC != NULL)
 		NPC->GetWorldTimerManager().ClearTimer(NextTimerHandle);
-
-	auto storyKeyManager = UStoryKeyManager::GetStoryKeyManager();
-
+	
 	for (auto key : node->Data.GiveKeys)
-		storyKeyManager->AddKey(key);
+		StoryKeyManager->AddKey(key);
 
 	for (auto key : node->Data.RemoveKeys)
-		storyKeyManager->RemoveKey(key);
+		StoryKeyManager->RemoveKey(key);
 
 	for (auto& Event : node->Data.Action)
 		Event.Invoke(this);
 
-
-	storyKeyManager->AddKey(node->Data.UID, EStoryKeyTypes::DialogPhrases);
+	StoryKeyManager->AddKey(node->Data.UID);
 
 	if (node->Data.Source == EDialogPhraseSource::Player)
 	{
