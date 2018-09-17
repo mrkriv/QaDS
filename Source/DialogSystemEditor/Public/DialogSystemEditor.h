@@ -5,7 +5,7 @@
 #include "ModuleManager.h"
 #include "Developer/AssetTools/Public/AssetTypeCategories.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(DialogModuleLog, All, All)
+DECLARE_LOG_CATEGORY_EXTERN(DialogModuleLog, All, Warning)
 
 class FDialogSystemEditorModule : public IModuleInterface
 {
@@ -14,4 +14,7 @@ public:
 
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+
+private:
+	TSharedRef<class SDockTab> SpawnStoryKeyTab(const class FSpawnTabArgs&);
 };

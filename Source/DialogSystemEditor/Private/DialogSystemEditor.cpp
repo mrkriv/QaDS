@@ -2,6 +2,8 @@
 #include "DialogSystemEditor.h"
 #include "Developer/AssetTools/Public/AssetTypeCategories.h"
 #include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
+#include "Editor/WorkspaceMenuStructure/Public/WorkspaceMenuStructure.h"
+#include "Editor/WorkspaceMenuStructure/Public/WorkspaceMenuStructureModule.h"
 #include "DialogNodeFactory.h"
 #include "DialogPhraseEventCustomization.h"
 #include "PhraseNodeCustomization.h"
@@ -11,6 +13,7 @@
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "DialogSettings.h"
 #include "DialogScript.h"
+#include "StoryKeyWindow.h"
 #include "BrushSet.h"
 
 DEFINE_LOG_CATEGORY(DialogModuleLog)
@@ -41,6 +44,13 @@ void FDialogSystemEditorModule::StartupModule()
 
 	TSharedPtr<FGraphPanelNodeFactory> GraphPanelNodeFactory = MakeShareable(new FDialogNodeFactory);
 	FEdGraphUtilities::RegisterVisualNodeFactory(GraphPanelNodeFactory);
+
+	auto& MenuStructure = WorkspaceMenu::GetMenuStructure();
+	auto developerCategory = MenuStructure.GetDeveloperToolsMiscCategory();
+	auto& SpawnerEntry = FGlobalTabmanager::Get()->RegisterNomadTabSpawner("StoryKeyWindow", FOnSpawnTab::CreateRaw(this, &FDialogSystemEditorModule::SpawnStoryKeyTab))
+		.SetDisplayName(LOCTEXT("Story Key", "Open story key window"));
+
+	SpawnerEntry.SetGroup(developerCategory);
 }
 
 
@@ -68,6 +78,16 @@ void FDialogSystemEditorModule::ShutdownModule()
 		auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 		AssetTools.UnregisterAssetTypeActions(MakeShareable(new FDialogAssetTypeActions(AssetCategory)));
 	}
+}
+
+TSharedRef<SDockTab> FDialogSystemEditorModule::SpawnStoryKeyTab(const FSpawnTabArgs&)
+{
+	TSharedRef<SDockTab> tab = SNew(SDockTab)
+		.TabRole(ETabRole::NomadTab);
+
+	tab->SetContent(SNew(SStoryKeyWindow));
+
+	return tab;
 }
 
 #undef LOCTEXT_NAMESPACE
