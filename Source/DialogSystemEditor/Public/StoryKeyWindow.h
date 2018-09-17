@@ -18,16 +18,17 @@ public:
 	FReply HandleExportButton();
 	FReply HandleAddKeyButton();
 	FReply HandleRemoveKeyButton();
-	void HandleSelectKey(TSharedPtr<FName> NewSelection, ESelectInfo::Type SelectInfo);
-	TSharedRef<ITableRow> HandleGenerateRow(TSharedPtr<FName> Item, const TSharedRef<STableViewBase>& OwnerTable);
+	void HandleSearch(const FText& Text);
+	void HandleSelectKey(TSharedPtr<FString> NewSelection, ESelectInfo::Type SelectInfo);
+	TSharedRef<ITableRow> HandleGenerateRow(TSharedPtr<FString> Item, const TSharedRef<STableViewBase>& OwnerTable);
 
 private:
 	class UStoryKeyManager* keyManager;
-	TArray<TSharedPtr<FName>> keys;
+	TArray<TSharedPtr<FString>> keys;
 
 	TSharedPtr<SSearchBox> searchBox;
 	TSharedPtr<SEditableTextBox> editKeyTextBox;
-	TSharedPtr<SListView<TSharedPtr<FName>>> keyListView;
+	TSharedPtr<SListView<TSharedPtr<FString>>> keyListView;
 
 	void LogInfo(const FString& message);
 };

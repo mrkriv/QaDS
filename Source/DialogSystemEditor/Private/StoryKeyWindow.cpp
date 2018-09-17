@@ -24,8 +24,6 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SStoryKeyWindow::Construct(const FArguments& InArgs)
 {
 	keyManager = UStoryKeyManager::GetStoryKeyManager();
-	UpdateKeys();
-
 	ChildSlot
 	[
 		SNew(SBorder)
@@ -45,6 +43,7 @@ void SStoryKeyWindow::Construct(const FArguments& InArgs)
 					.FillWidth(1.0f)
 					[
 					  	SAssignNew(searchBox, SSearchBox)
+						.OnTextChanged(this, &SStoryKeyWindow::HandleSearch)
 					]
 					+ SHorizontalBox::Slot()
 					.AutoWidth()
@@ -64,7 +63,7 @@ void SStoryKeyWindow::Construct(const FArguments& InArgs)
 				+ SVerticalBox::Slot()
 				.Padding(0.0f, 4.0f, 0.0f, 4.0f)
 				[
-					SAssignNew(keyListView, SListView<TSharedPtr<FName>>)
+					SAssignNew(keyListView, SListView<TSharedPtr<FString>>)
 					.ItemHeight(16.0f)
 					.ListItemsSource(&keys)
 					.OnGenerateRow(this, &SStoryKeyWindow::HandleGenerateRow)
@@ -100,40 +99,56 @@ void SStoryKeyWindow::Construct(const FArguments& InArgs)
 			]
 		]
 	];
+
+	UpdateKeys();
 }
 
-TSharedRef<ITableRow> SStoryKeyWindow::HandleGenerateRow(TSharedPtr<FName> Item, const TSharedRef<STableViewBase>& OwnerTable)
+TSharedRef<ITableRow> SStoryKeyWindow::HandleGenerateRow(TSharedPtr<FString> Item, const TSharedRef<STableViewBase>& OwnerTable)
 {
-	return SNew(STableRow<TSharedPtr<FName>>, OwnerTable)
+	return SNew(STableRow<TSharedPtr<FString>>, OwnerTable)
 	[
-		SNew(STextBlock).Text(FText::FromName(*Item))
+		SNew(STextBlock).Text(FText::FromString(*Item))
 	];
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SStoryKeyWindow::HandleSelectKey(TSharedPtr<FName> NewSelection, ESelectInfo::Type SelectInfo)
+void SStoryKeyWindow::HandleSelectKey(TSharedPtr<FString> NewSelection, ESelectInfo::Type SelectInfo)
 {
 	if (NewSelection.IsValid())
 	{
-		editKeyTextBox->SetText(FText::FromName(*NewSelection));
+		editKeyTextBox->SetText(FText::FromString(*NewSelection));
 	}
+}
+
+void SStoryKeyWindow::HandleSearch(const FText& Text)
+{
+	UpdateKeys();
 }
 
 void SStoryKeyWindow::UpdateKeys()
 {
 	keys.Reset();
 
+	auto filter = searchBox->GetText().ToString();
 	auto keysRaw = keyManager->GetKeys();
-	keysRaw.Sort([](const FName& a, const FName& b) 
+
+	keysRaw.Sort([](const FName& a, const FName& b)
 	{
 		return a.Compare(b);
 	});
 
 	for (auto key : keysRaw)
 	{
-		keys.Add(MakeShareable(new FName(key)));
+		auto keyStr = key.ToString();
+
+		if (filter.IsEmpty() || keyStr.Contains(filter))
+		{
+			keys.Add(MakeShareable(new FString(keyStr)));
+		}
 	}
+	
+	keyListView->RebuildList();
 }
 
 FReply SStoryKeyWindow::HandleImportButton()
@@ -155,9 +170,10 @@ FReply SStoryKeyWindow::HandleAddKeyButton()
 	auto key = editKeyTextBox->GetText().ToString();
 	if (keyManager->AddKey(*key))
 	{
-		keys.Add(MakeShareable(new FName(*key)));
-		keyListView->RebuildList();
-		editKeyTextBox->SetText("");
+		UpdateKeys();
+		editKeyTextBox->SetText(FText());
+		//keys.Add(MakeShareable(new FString(*key)));
+		//keyListView->RebuildList();
 
 		LogInfo("Add " + key);
 	}
@@ -174,12 +190,13 @@ FReply SStoryKeyWindow::HandleRemoveKeyButton()
 	auto key = editKeyTextBox->GetText().ToString();
 	if (keyManager->RemoveKey(*key))
 	{
-		keys.RemoveAll([key](const TSharedPtr<FName>& x)
-		{
-			return key == x->ToString();
-		});
-		keyListView->RebuildList();
-		editKeyTextBox->SetText("");
+		UpdateKeys();
+		editKeyTextBox->SetText(FText());
+		//keys.RemoveAll([key](const TSharedPtr<FString>& x)
+		//{
+		//	return key == x->ToString();
+		//});
+		//keyListView->RebuildList();
 
 		LogInfo("Remove " + key);
 	}
