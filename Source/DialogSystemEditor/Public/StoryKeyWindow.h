@@ -1,4 +1,3 @@
-// Copyright 2017 Krivosheya Mikhail. All Rights Reserved.
 #pragma once
 
 #include "CoreMinimal.h"
@@ -21,11 +20,11 @@ public:
 	void HandleSearch(const FText& Text);
 	void HandleSelectKey(TSharedPtr<FString> NewSelection, ESelectInfo::Type SelectInfo);
 	TSharedRef<ITableRow> HandleGenerateRow(TSharedPtr<FString> Item, const TSharedRef<STableViewBase>& OwnerTable);
-	virtual void Tick(const FGeometry& AllottedGeometry, double InCurrentTime, float DeltaTime) override;
 
 	void OnStorageKeyAdd(const FName& StoreKey);
 	void OnStorageKeyRemove(const FName& StoreKey);
-	void OnStorageKeysLoaded(const TArray<FName>& StoreKeys);	
+	void OnStorageKeysLoaded(const TArray<FName>& StoreKeys);
+	virtual void Tick(const FGeometry& AllottedGeometry, double InCurrentTime, float DeltaTime) override;	
 
 private:
 	class UStoryKeyManager* keyManager;

@@ -146,9 +146,9 @@ TArray<FString> SImportWindow::GetFilesInDir(FString path, FString mask)
 FReply SImportWindow::HandleImportButton()
 {
 	auto basePath = gamedataPathTextBox->GetText().ToString();
-	auto gameplayPath = basePath / "configs" / "gameplay";
+	auto gameplayPath = basePath / "config" / "gameplay";
 
-	LoadLocalize(basePath / "configs" / "text" / localNameTextBox->GetText().ToString());
+	LoadLocalize(basePath / "config" / "text" / localNameTextBox->GetText().ToString());
 
 	auto dialogs = GetFilesInDir(gameplayPath, "dialogs*.xml");
 	auto idMask = dialogIdMaskTextBox->GetText().ToString();
@@ -167,7 +167,7 @@ FReply SImportWindow::HandleImportButton()
 				continue;
 
 			auto id = node->GetAttribute("id");
-			if (!idMask.IsEmpty() && id.Contains(idMask))
+			if (!idMask.IsEmpty() && !id.Contains(idMask))
 				continue;
 
 			auto asset = CreateDialogAsset(dialogFile, id);
