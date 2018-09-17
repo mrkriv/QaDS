@@ -12,16 +12,22 @@ public:
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
+	void UpdateKeys();
 
 	FReply HandleImportButton();
 	FReply HandleExportButton();
 	FReply HandleAddKeyButton();
 	FReply HandleRemoveKeyButton();
+	void HandleSelectKey(TSharedPtr<FName> NewSelection, ESelectInfo::Type SelectInfo);
+	TSharedRef<ITableRow> HandleGenerateRow(TSharedPtr<FName> Item, const TSharedRef<STableViewBase>& OwnerTable);
 
 private:
-	TSharedPtr<SEditableTextBox> findTextBox;
-	TSharedPtr<SEditableTextBox> editKeyTextBox;
-
-	TArray<TSharedPtr<FString>> typeNames;
 	class UStoryKeyManager* keyManager;
+	TArray<TSharedPtr<FName>> keys;
+
+	TSharedPtr<SSearchBox> searchBox;
+	TSharedPtr<SEditableTextBox> editKeyTextBox;
+	TSharedPtr<SListView<TSharedPtr<FName>>> keyListView;
+
+	void LogInfo(const FString& message);
 };

@@ -11,7 +11,9 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/STextComboBox.h"
+#include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Input/SEditableTextBox.h"
+#include "Widgets/Views/SListView.h"
 #include "StoryInformationManager.h"
 #include "FileManager.h"
 
@@ -22,10 +24,7 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SStoryKeyWindow::Construct(const FArguments& InArgs)
 {
 	keyManager = UStoryKeyManager::GetStoryKeyManager();
-
-	typeNames.Add(MakeShareable(new FString("General")));
-	typeNames.Add(MakeShareable(new FString("DialogPhrases")));
-	typeNames.Add(MakeShareable(new FString("Task")));
+	UpdateKeys();
 
 	ChildSlot
 	[
@@ -39,10 +38,14 @@ void SStoryKeyWindow::Construct(const FArguments& InArgs)
 			[
 				SNew(SVerticalBox)
 				+ SVerticalBox::Slot()
-				.Padding(4.0f, 2.0f, 4.0f, 2.0f)
 				.AutoHeight()
 				[
 					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					.FillWidth(1.0f)
+					[
+					  	SAssignNew(searchBox, SSearchBox)
+					]
 					+ SHorizontalBox::Slot()
 					.AutoWidth()
 					[
@@ -59,24 +62,17 @@ void SStoryKeyWindow::Construct(const FArguments& InArgs)
 					]
 				]
 				+ SVerticalBox::Slot()
-				.Padding(4.0f, 2.0f, 4.0f, 2.0f)
-				.AutoHeight()
+				.Padding(0.0f, 4.0f, 0.0f, 4.0f)
 				[
-					SNew(SHorizontalBox)
-					+ SHorizontalBox::Slot()
-					.FillWidth(1.0f)
-					[
-					  	SAssignNew(findTextBox, SEditableTextBox)
-						.HintText(FText::FromString("Find key"))
-					]
+					SAssignNew(keyListView, SListView<TSharedPtr<FName>>)
+					.ItemHeight(16.0f)
+					.ListItemsSource(&keys)
+					.OnGenerateRow(this, &SStoryKeyWindow::HandleGenerateRow)
+					.OnSelectionChanged(this, &SStoryKeyWindow::HandleSelectKey)
+					.SelectionMode(ESelectionMode::Single)
+					
 				]
 				+ SVerticalBox::Slot()
-				.Padding(4.0f, 2.0f, 4.0f, 2.0f)
-				[
-					SNew(SHorizontalBox)
-				]
-				+ SVerticalBox::Slot()
-				.Padding(4.0f, 2.0f, 4.0f, 2.0f)
 				.AutoHeight()
 				[
 					SNew(SHorizontalBox)
@@ -106,17 +102,51 @@ void SStoryKeyWindow::Construct(const FArguments& InArgs)
 	];
 }
 
+TSharedRef<ITableRow> SStoryKeyWindow::HandleGenerateRow(TSharedPtr<FName> Item, const TSharedRef<STableViewBase>& OwnerTable)
+{
+	return SNew(STableRow<TSharedPtr<FName>>, OwnerTable)
+	[
+		SNew(STextBlock).Text(FText::FromName(*Item))
+	];
+}
+
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
+void SStoryKeyWindow::HandleSelectKey(TSharedPtr<FName> NewSelection, ESelectInfo::Type SelectInfo)
+{
+	if (NewSelection.IsValid())
+	{
+		editKeyTextBox->SetText(FText::FromName(*NewSelection));
+	}
+}
+
+void SStoryKeyWindow::UpdateKeys()
+{
+	keys.Reset();
+
+	auto keysRaw = keyManager->GetKeys();
+	keysRaw.Sort([](const FName& a, const FName& b) 
+	{
+		return a.Compare(b);
+	});
+
+	for (auto key : keysRaw)
+	{
+		keys.Add(MakeShareable(new FName(key)));
+	}
+}
 
 FReply SStoryKeyWindow::HandleImportButton()
 {
-	FSlateNotificationManager::Get().AddNotification(FNotificationInfo(FText::FromString("Import successful")));
+	LogInfo("Import successful");
+	UpdateKeys();
+
 	return FReply::Handled();
 }
 
 FReply SStoryKeyWindow::HandleExportButton()
 {
-	FSlateNotificationManager::Get().AddNotification(FNotificationInfo(FText::FromString("Export successful")));
+	LogInfo("Export successful");
 	return FReply::Handled();
 }
 
@@ -125,7 +155,15 @@ FReply SStoryKeyWindow::HandleAddKeyButton()
 	auto key = editKeyTextBox->GetText().ToString();
 	if (keyManager->AddKey(*key))
 	{
-		FSlateNotificationManager::Get().AddNotification(FNotificationInfo(FText::FromString("Add " + key)));
+		keys.Add(MakeShareable(new FName(*key)));
+		keyListView->RebuildList();
+		editKeyTextBox->SetText("");
+
+		LogInfo("Add " + key);
+	}
+	else
+	{
+		LogInfo("Already contains");
 	}
 
 	return FReply::Handled();
@@ -136,8 +174,24 @@ FReply SStoryKeyWindow::HandleRemoveKeyButton()
 	auto key = editKeyTextBox->GetText().ToString();
 	if (keyManager->RemoveKey(*key))
 	{
-		FSlateNotificationManager::Get().AddNotification(FNotificationInfo(FText::FromString("Remove " + key)));
+		keys.RemoveAll([key](const TSharedPtr<FName>& x)
+		{
+			return key == x->ToString();
+		});
+		keyListView->RebuildList();
+		editKeyTextBox->SetText("");
+
+		LogInfo("Remove " + key);
+	}
+	else
+	{
+		LogInfo("Key not found");
 	}
 
 	return FReply::Handled();
+}
+
+void SStoryKeyWindow::LogInfo(const FString& message)
+{
+	FSlateNotificationManager::Get().AddNotification(FNotificationInfo(FText::FromString(message)));
 }
