@@ -1,5 +1,11 @@
 #include "DialogSystemEditor.h"
 #include "StoryKeyWindow.h"
+#include "StoryInformationManager.h"
+
+#include "FileManager.h"
+#include "FileHelper.h"
+#include "DesktopPlatformModule.h"
+
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/SOverlay.h"
 #include "Styling/CoreStyle.h"
@@ -13,8 +19,6 @@
 #include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Views/SListView.h"
-#include "StoryInformationManager.h"
-#include "FileManager.h"
 
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -56,7 +60,7 @@ void SStoryKeyWindow::Construct(const FArguments& InArgs)
 					[
 						SNew(SButton)
 						.Text(FText::FromString("Export"))
-						.OnClicked(this, &SStoryKeyWindow::HandleImportButton)
+						.OnClicked(this, &SStoryKeyWindow::HandleExportButton)
 					]
 				]
 				+ SVerticalBox::Slot()
@@ -159,17 +163,72 @@ void SStoryKeyWindow::UpdateKeys()
 	keyListView->RebuildList();
 }
 
-FReply SStoryKeyWindow::HandleImportButton()
+FReply SStoryKeyWindow::HandleExportButton()
 {
-	LogInfo("Import successful");
-	UpdateKeys();
+	TArray<FString> Filenames;
+	bool isSaved = FDesktopPlatformModule::Get()->SaveFileDialog(
+		FSlateApplication::Get().FindBestParentWindowHandleForDialogs(AsShared()),
+		"Choose save location",
+		FPaths::ProjectUserDir(),
+		TEXT(""),
+		TEXT("Text|*.txt|All|*.*"),
+		EFileDialogFlags::None,
+		Filenames
+	);
+
+	if (isSaved)
+	{
+		FString text;
+		for (auto key : keyManager->GetKeys())
+		{
+			text += key.ToString() + "\n";
+		}
+		
+		text.RemoveFromEnd("\n");
+
+		FFileHelper::SaveStringToFile(text, *Filenames[0]);
+
+		LogInfo("Export successful");
+	}
 
 	return FReply::Handled();
 }
 
-FReply SStoryKeyWindow::HandleExportButton()
+FReply SStoryKeyWindow::HandleImportButton()
 {
-	LogInfo("Export successful");
+	TArray<FString> Filenames;
+	bool isOpen = FDesktopPlatformModule::Get()->OpenFileDialog(
+		FSlateApplication::Get().FindBestParentWindowHandleForDialogs(AsShared()),
+		"Choose file",
+		FPaths::ProjectUserDir(),
+		TEXT("Text|*.txt|All|*.*"),
+		TEXT(""),
+		EFileDialogFlags::None,
+		Filenames
+	);
+
+	if (isOpen)
+	{
+		TArray<FString> newKeys;
+		TSet<FName> keysSet;
+		FFileHelper::LoadFileToStringArray(newKeys, *Filenames[0]);
+
+		for (auto key : newKeys)
+		{
+			keysSet.Add(*key);
+		}
+
+		if (keysSet.Num() > 0)
+		{
+			keyManager->SetKeys(keysSet);
+			LogInfo("Import successful");
+		}
+		else
+		{
+			LogInfo("Storage is empty");
+		}
+	}
+
 	return FReply::Handled();
 }
 

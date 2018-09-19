@@ -22,6 +22,7 @@ public class DialogSystemEditor : ModuleRules
             new string[]
             {
                 "Core",
+                "TargetPlatform",
             }
         );
 
@@ -42,6 +43,7 @@ public class DialogSystemEditor : ModuleRules
                 "BlueprintGraph",
                 "Projects",
                 "ApplicationCore",
+                "DesktopPlatform",
 
                 "DialogSystemRuntime",
             }
