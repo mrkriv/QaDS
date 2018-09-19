@@ -48,7 +48,7 @@ void FPhraseNodeDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 
 		auto& categoty = DetailLayout.EditCategory(FName(*prop->GetMetaData("Category")));
 
-		/*if (name == "Text")
+		if (name == "Text")
 		{
 			FText Text;
 			prop->GetValue(Text);
@@ -72,20 +72,22 @@ void FPhraseNodeDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 					[
 						SNew(SMultiLineEditableTextBox)
 						.Text(Text)
+						.AutoWrapText(true)
+						.SelectAllTextOnCommit(false)
 						.SelectAllTextWhenFocused(false)
 						.ClearKeyboardFocusOnCommit(true)
+						.OnKeyCharHandler(this, &FPhraseNodeDetails::OnKeyCharHandler)
+						.OnKeyDownHandler(this, &FPhraseNodeDetails::OnKeyDownHandler)
 						.OnTextCommitted_Lambda([prop](const FText& NewText, ETextCommit::Type Type) 
 						{
 							prop->SetValue(NewText);
 						})
-						.SelectAllTextOnCommit(false)
-						.AutoWrapText(true)
-						.ModiferKeyForNewLine(EModifierKey::Shift)
+						.ModiferKeyForNewLine(EModifierKey::None)
 					]
 				]
 			];
 		}
-		else*/ if (name == "PhraseManualTime" && isAutoTime)
+		else if (name == "PhraseManualTime" && isAutoTime)
 		{
 			continue;
 		}
@@ -96,5 +98,16 @@ void FPhraseNodeDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 	}
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
+
+FReply FPhraseNodeDetails::OnKeyDownHandler(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
+{
+	return FReply::Unhandled();
+}
+
+FReply FPhraseNodeDetails::OnKeyCharHandler(const FGeometry& MyGeometry, const FCharacterEvent& InCharacterEvent)
+{
+	return FReply::Unhandled();
+}
 
 #undef LOCTEXT_NAMESPACE
