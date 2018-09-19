@@ -31,13 +31,15 @@ private:
 	void DelayNext();
 	float GetPhraseTime();
 	void SetCurrentNode(UDialogNode* node);
+	bool CheckNode(UDialogNode* node);
+	bool CheckCondition(const FDialogElseIfCondition& condition);
+	TArray<UDialogPhraseNode*> GetNextPhraseNode(UDialogNode* node);
+
 	void InvokeNode(UDialogNode* node);
 	void InvokeNode(UDialogPhraseNode* node);
 	void InvokeNode(UDialogSubGraphNode* node);
 	void InvokeNode(UDialogElseIfNode* node);
-	bool CheckNode(UDialogNode* node);
-	bool CheckCondition(const FDialogElseIfCondition& condition);
-
+	
 	void EndDialog();
 
 public:

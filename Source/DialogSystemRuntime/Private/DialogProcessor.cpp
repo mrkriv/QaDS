@@ -52,29 +52,21 @@ void UDialogProcessor::StartDialog()
 
 void UDialogProcessor::SetCurrentNode(UDialogNode* node)
 {
-	bool found = false;
 	IsPlayerNext = false;
-
-	NextNodes.Reset();
 	CurrentNode = node;
+	NextNodes.Reset();
 
-	for (auto phraseNode : CurrentNode->Childs)
+	for (auto childNode : CurrentNode->Childs)
 	{
-		auto phrase = Cast<UDialogPhraseNode>(phraseNode);
-		if (phrase && CheckNode(phrase))
-		{
-			if (!found)
-			{
-				IsPlayerNext = phrase->Data.Source == EDialogPhraseSource::Player;
-			}
-			else if (IsPlayerNext != (phrase->Data.Source == EDialogPhraseSource::Player))
-			{
-				UE_LOG(DialogModuleLog, Error, TEXT("Invalid graph: Phrase cannot simultaneously refer to phrases of different types"));
-				return;
-			}
+		if (!CheckNode(childNode))
+			continue;
 
-			NextNodes.Add(phrase);
-			found = true;
+		NextNodes.Append(GetNextPhraseNode(childNode));
+
+		auto phrase = Cast<UDialogPhraseNode>(childNode);
+		if (phrase)
+		{
+			IsPlayerNext = phrase->Data.Source == EDialogPhraseSource::Player;
 		}
 	}
 
@@ -251,6 +243,52 @@ void UDialogProcessor::InvokeNode(UDialogPhraseNode* node)
 	{
 		DelayNext();
 	}
+}
+
+//todo:: use OOP, this is trash
+TArray<UDialogPhraseNode*> UDialogProcessor::GetNextPhraseNode(UDialogNode* node)
+{
+	TArray<UDialogPhraseNode*> result;
+
+	if (node->IsA(UDialogPhraseNode::StaticClass()))
+	{
+		result.Add(Cast<UDialogPhraseNode>(node));
+	}
+	else if (node->IsA(UDialogSubGraphNode::StaticClass()))
+	{
+		auto subGraphNode = Cast<UDialogSubGraphNode>(node);
+
+		if (subGraphNode->TargetDialog != NULL && subGraphNode->TargetDialog->RootNode != NULL)
+		{
+			result.Append(GetNextPhraseNode(subGraphNode->TargetDialog->RootNode));
+		}
+	}
+	else if (node->IsA(UDialogElseIfNode::StaticClass()))
+	{
+		auto elseIfNode = Cast<UDialogElseIfNode>(node);
+
+		for (auto cond : elseIfNode->Conditions)
+		{
+			if (CheckCondition(cond))
+			{
+				for (auto next : cond.NextNode)
+				{
+					result.Append(GetNextPhraseNode(next));
+				}
+			}
+		}
+		return GetNextPhraseNode(Cast<UDialogElseIfNode>(node));
+	}
+	else 
+	{
+		for (auto child : node->Childs)
+		{
+			if (CheckNode(child))
+				result.Append(GetNextPhraseNode(child));
+		}
+	}
+
+	return result;
 }
 
 void UDialogProcessor::Next(FName PhraseUID)

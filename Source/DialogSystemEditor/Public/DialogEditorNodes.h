@@ -15,8 +15,9 @@ public:
 UCLASS()
 class DIALOGSYSTEMEDITOR_API UDdialogEdGraphNode : public UEdGraphNode
 {
-	GENERATED_UCLASS_BODY()
-		
+	GENERATED_BODY()
+
+public:
 	UEdGraphPin* InputPin;
 	UEdGraphPin* OutputPin;
 
@@ -33,24 +34,25 @@ class DIALOGSYSTEMEDITOR_API UDdialogEdGraphNode : public UEdGraphNode
 UCLASS()
 class DIALOGSYSTEMEDITOR_API UDialogRootEdGraphNode : public UDdialogEdGraphNode
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
 
+public:
 	virtual void AllocateDefaultPins() override;
 	virtual bool CanUserDeleteNode() const override;
-	virtual FText GetTooltipText() const override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };
 
 UCLASS()
 class DIALOGSYSTEMEDITOR_API UDialogPhraseEdGraphNode : public UDdialogEdGraphNode
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
 
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FDialogPhraseInfo Data;
 
+	UDialogPhraseEdGraphNode();
 	virtual void AllocateDefaultPins() override;
-	virtual FText GetTooltipText() const override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
 };
@@ -58,18 +60,34 @@ class DIALOGSYSTEMEDITOR_API UDialogPhraseEdGraphNode : public UDdialogEdGraphNo
 UCLASS()
 class DIALOGSYSTEMEDITOR_API UDialogPhraseEdGraphNode_Player : public UDialogPhraseEdGraphNode
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
+
+public:
+	UDialogPhraseEdGraphNode_Player();
 };
 
 UCLASS()
 class DIALOGSYSTEMEDITOR_API UDialogSubGraphEdGraphNode : public UDdialogEdGraphNode
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UDialogAsset* TargetDialog;
+
+	virtual void AllocateDefaultPins() override;
+	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };
 
 UCLASS()
 class DIALOGSYSTEMEDITOR_API UDialogElseIfEdGraphNode : public UDdialogEdGraphNode
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FDialogElseIfCondition> Conditions;
+
+	virtual void AllocateDefaultPins() override;
+	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };

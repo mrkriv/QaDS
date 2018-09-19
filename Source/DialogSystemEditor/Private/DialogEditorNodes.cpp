@@ -9,11 +9,6 @@
 #include "DialogNodes.h"
 
 //UDdialogEdGraphNode...........................................................................................
-UDdialogEdGraphNode::UDdialogEdGraphNode(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
-{
-}
-
 TArray<UDdialogEdGraphNode*> UDdialogEdGraphNode::GetChildNodes()
 {
 	TArray<UDdialogEdGraphNode*> ChildNodes;
@@ -73,22 +68,15 @@ int UDdialogEdGraphNode::GetOrder() const
 }
 
 //PhraseNode..........................................................................................................
-
-UDialogPhraseEdGraphNode::UDialogPhraseEdGraphNode(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+UDialogPhraseEdGraphNode::UDialogPhraseEdGraphNode()
 {
 	Data.Source = EDialogPhraseSource::NPC;
 }
 
 void UDialogPhraseEdGraphNode::AllocateDefaultPins()
 {
-	InputPin = CreatePin(EGPD_Input, NAME_None, FName(""));
-	OutputPin = CreatePin(EGPD_Output, NAME_None, FName(""));
-}
-
-FText UDialogPhraseEdGraphNode::GetTooltipText() const
-{
-	return FText::FromString("Dialog Phrase");
+	InputPin = CreatePin(EGPD_Input, NAME_None, FName("Input"));
+	OutputPin = CreatePin(EGPD_Output, NAME_None, FName("Output"));
 }
 
 FText UDialogPhraseEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
@@ -105,43 +93,46 @@ void UDialogPhraseEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEve
 }
 
 //UDialogSubGraphEdGraphNode...........................................................................................
-
-UDialogSubGraphEdGraphNode::UDialogSubGraphEdGraphNode(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+void UDialogSubGraphEdGraphNode::AllocateDefaultPins()
 {
+	Pins.Reset();
+	InputPin = CreatePin(EGPD_Input, NAME_None, FName("Input"));
+}
+
+FText UDialogSubGraphEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
+{
+	if (TargetDialog != NULL)
+		return FText::FromName(TargetDialog->GetFName());
+
+	return FText::FromString("Asset is not set!");
 }
 
 //UDialogElseIfEdGraphNode...........................................................................................
 
-UDialogElseIfEdGraphNode::UDialogElseIfEdGraphNode(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+void UDialogElseIfEdGraphNode::AllocateDefaultPins()
 {
+	Pins.Reset();
+	InputPin = CreatePin(EGPD_Input, NAME_None, FName("Input"));
+	OutputPin = CreatePin(EGPD_Output, NAME_None, FName("Default"));
+}
+
+FText UDialogElseIfEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
+{
+	return FText::FromString("Else-if");
 }
 
 //UDialogRootEdGraphNode...........................................................................................
 
-UDialogPhraseEdGraphNode_Player::UDialogPhraseEdGraphNode_Player(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+UDialogPhraseEdGraphNode_Player::UDialogPhraseEdGraphNode_Player()
 {
 	Data.Source = EDialogPhraseSource::Player;
 }
 
 //UDialogRootEdGraphNode...........................................................................................
-
-UDialogRootEdGraphNode::UDialogRootEdGraphNode(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
-{
-}
-
 void UDialogRootEdGraphNode::AllocateDefaultPins()
 {
 	Pins.Reset();
 	OutputPin = CreatePin(EGPD_Output, NAME_None, FName("Start"));
-}
-
-FText UDialogRootEdGraphNode::GetTooltipText() const
-{
-	return FText::FromString("Dialog Start Node");
 }
 
 FText UDialogRootEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const

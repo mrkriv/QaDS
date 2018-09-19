@@ -84,7 +84,8 @@ private:
 	TSharedRef<SDockTab> SpawnTab_Viewport(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnTab_CompilerResults(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& Args);
-	
+
+	UEdGraph* CreateGraphFromAsset();
 	void OnGraphChanged(const FEdGraphEditAction& Action);
 	void OnPropertyChanged(const FPropertyChangedEvent& Event);
 	void BuildToolbar(FToolBarBuilder &builder);
@@ -107,9 +108,6 @@ private:
 
 	void OnSelectedNodesChanged(const TSet<UObject*>& NewSelection);
 	void OnNodeDoubleClicked(UEdGraphNode* Node);
-
-	UEdGraph* CreateUpdateGraph();
-	void CreateNodesFromPhrase(UDdialogEdGraphNode* owner, UDialogNode* phrase, int level);
 
 	void CompileExecute();
 	void ResetCompilePhrase(UDdialogEdGraphNode* Node);
