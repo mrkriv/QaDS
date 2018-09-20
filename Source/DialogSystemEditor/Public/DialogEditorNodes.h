@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EdGraph/EdGraphNode.h"
-#include "DialogPhrase.h"
+#include "DialogNodes.h"
 #include "DialogEditorNodes.generated.h"
 
 class UEdGraphPin;

@@ -20,29 +20,14 @@ class DIALOGSYSTEMRUNTIME_API UDialogProcessor : public UObject
 {
 	GENERATED_BODY()
 
-private:
 	UPROPERTY()
 	UDialogNode* CurrentNode;
 
+public:
 	FTimerHandle NextTimerHandle;
 	TArray<UDialogPhraseNode*> NextNodes;
 	bool IsPlayerNext;
 
-	void DelayNext();
-	float GetPhraseTime();
-	void SetCurrentNode(UDialogNode* node);
-	bool CheckNode(UDialogNode* node);
-	bool CheckCondition(const FDialogElseIfCondition& condition);
-	TArray<UDialogPhraseNode*> GetNextPhraseNode(UDialogNode* node);
-
-	void InvokeNode(UDialogNode* node);
-	void InvokeNode(UDialogPhraseNode* node);
-	void InvokeNode(UDialogSubGraphNode* node);
-	void InvokeNode(UDialogElseIfNode* node);
-	
-	void EndDialog();
-
-public:
 	UPROPERTY(BlueprintReadOnly)
 	UDialogAsset* Asset;
 
@@ -68,13 +53,24 @@ public:
 	FDialogEndSignature OnEndDialog;
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Dialog")
+	void SetDialogAsset(UDialogAsset* NewDialogAsset);
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|Dialog")
 	static UDialogProcessor* CreateDialogProcessor(UDialogAsset* DialogAsset, AActor* InNPC);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Dialog")
 	void StartDialog();
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Dialog")
+	void EndDialog();
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|Dialog")
 	void Next(FName PhraseUID);
 
-	void OnNextTimer(); 
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|Dialog")
+	void SetCurrentNode(UDialogNode* node);
+
+	float GetPhraseDuration();
+	void OnTimerTick();
+	void DelayNext();
 };

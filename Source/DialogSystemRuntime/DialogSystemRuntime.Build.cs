@@ -8,15 +8,17 @@ public class DialogSystemRuntime : ModuleRules
         PublicIncludePaths.AddRange(
             new string[] {
                 "DialogSystemRuntime/Public",
+                "DialogSystemRuntime/Public/DialogNodes",
             }
-            );
+        );
 
 
         PrivateIncludePaths.AddRange(
             new string[] {
                 "DialogSystemRuntime/Private",
+                "DialogSystemRuntime/Private/DialogNodes",
             }
-            );
+        );
 
 
         PublicDependencyModuleNames.AddRange(
@@ -24,7 +26,7 @@ public class DialogSystemRuntime : ModuleRules
             {
                 "Core",
             }
-            );
+        );
 
 
         PrivateDependencyModuleNames.AddRange(
@@ -35,13 +37,13 @@ public class DialogSystemRuntime : ModuleRules
                 "Slate",
                 "SlateCore",
             }
-            );
+        );
 
 
         DynamicallyLoadedModuleNames.AddRange(
             new string[]
             {
             }
-            );
+        );
     }
 }

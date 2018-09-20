@@ -6,7 +6,6 @@
 #include "DialogEditorNodes.h"
 #include "DialogSettings.h"
 #include "DialogAsset.h"
-#include "DialogNodes.h"
 
 //UDdialogEdGraphNode...........................................................................................
 TArray<UDdialogEdGraphNode*> UDdialogEdGraphNode::GetChildNodes()

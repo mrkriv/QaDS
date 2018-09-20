@@ -80,21 +80,3 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseInfo
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Activate")
 	TArray<FDialogPhraseEvent> Action;
 };
-
-USTRUCT(BlueprintType)
-struct DIALOGSYSTEMRUNTIME_API FDialogElseIfCondition
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
-	TArray<FName> CheckHasKeys;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
-	TArray<FName> CheckDontHasKeys;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
-	TArray<FDialogPhraseCondition> Predicate;
-
-	UPROPERTY()
-	TArray<UDialogNode*> NextNode;
-};
