@@ -16,7 +16,7 @@ void UDialogPhraseNode::Invoke(UDialogProcessor* processor)
 		Event.Invoke(processor);
 
 	//StoryKeyManager->AddKey(Data.UID);
-
+	
 	if (Data.Source == EDialogPhraseSource::Player)
 	{
 		processor->OnShowPlayerPhrase.Broadcast(Data);

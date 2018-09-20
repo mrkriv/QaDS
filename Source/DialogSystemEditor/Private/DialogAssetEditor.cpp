@@ -619,7 +619,7 @@ UDialogNode* FDialogAssetEditor::Compile(UDdialogEdGraphNode* node)
 	else if (subGraphNode != NULL)
 	{
 		auto compileNode = NewObject<UDialogSubGraphNode>((UObject*)EditedAsset);
-		compileNode->TargetDialog = subGraphNode->TargetDialog;
+		compileNode->TargetDialogAsset = subGraphNode->TargetDialogAsset;
 		node->CompileNode = compileNode;
 	}
 	else if (elseIfNode != NULL)

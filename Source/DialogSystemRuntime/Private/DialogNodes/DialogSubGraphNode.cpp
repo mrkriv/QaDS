@@ -7,6 +7,9 @@
 void UDialogSubGraphNode::Invoke(UDialogProcessor* processor)
 {
 	if (TargetDialog == NULL)
+		TargetDialog = TargetDialogAsset.Get();
+
+	if (TargetDialog == NULL)
 	{
 		UE_LOG(DialogModuleLog, Error, TEXT("Sub dialog is empty in dialog %s"), *processor->Asset->GetPathName());
 		return;
@@ -30,6 +33,9 @@ bool UDialogSubGraphNode::Check(UDialogProcessor* processor)
 TArray<UDialogPhraseNode*> UDialogSubGraphNode::GetNextPhrases(UDialogProcessor* processor)
 {
 	TArray<UDialogPhraseNode*> result;
+
+	if (TargetDialog == NULL)
+		TargetDialog = TargetDialogAsset.Get();
 
 	if (TargetDialog != NULL && TargetDialog->RootNode != NULL)
 	{

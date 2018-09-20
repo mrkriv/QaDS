@@ -73,7 +73,7 @@ class DIALOGSYSTEMEDITOR_API UDialogSubGraphEdGraphNode : public UDdialogEdGraph
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UDialogAsset* TargetDialog;
+	TAssetPtr<class UDialogAsset> TargetDialogAsset;
 
 	virtual void AllocateDefaultPins() override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;

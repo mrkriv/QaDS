@@ -100,8 +100,8 @@ void UDialogSubGraphEdGraphNode::AllocateDefaultPins()
 
 FText UDialogSubGraphEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
-	if (TargetDialog != NULL)
-		return FText::FromName(TargetDialog->GetFName());
+	if (TargetDialogAsset != NULL)
+		return FText::FromString(TargetDialogAsset.GetAssetName());
 
 	return FText::FromString("Asset is not set!");
 }
