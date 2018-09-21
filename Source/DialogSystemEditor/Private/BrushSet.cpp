@@ -11,17 +11,17 @@ TSharedPtr<FSlateStyleSet> FBrushSet::NodeStyleInstance = NULL;
 
 void FBrushSet::Register()
 {
-	if ( !NodeStyleInstance.IsValid() )
+	if (!NodeStyleInstance.IsValid())
 	{
 		NodeStyleInstance = Create();
-		FSlateStyleRegistry::RegisterSlateStyle( *NodeStyleInstance );
+		FSlateStyleRegistry::RegisterSlateStyle(*NodeStyleInstance);
 	}
 }
 
 void FBrushSet::Unregister()
 {
-	FSlateStyleRegistry::UnRegisterSlateStyle( *NodeStyleInstance );
-	ensure( NodeStyleInstance.IsUnique() );
+	FSlateStyleRegistry::UnRegisterSlateStyle(*NodeStyleInstance);
+	ensure(NodeStyleInstance.IsUnique());
 	NodeStyleInstance.Reset();
 }
 
@@ -29,9 +29,7 @@ TSharedRef<FSlateStyleSet> FBrushSet::Create()
 {
 	TSharedPtr<FSlateStyleSet>  StyleSet = MakeShareable(new FSlateStyleSet("DialogSystem"));
 
-	auto dir = FPaths::ConvertRelativePathToFull(
-		IPluginManager::Get().FindPlugin(TEXT("DialogSystem"))->GetBaseDir() / "Resources/Icons");
-
+	auto dir = FPaths::ConvertRelativePathToFull(IPluginManager::Get().FindPlugin(TEXT("DialogSystem"))->GetBaseDir() / "Resources" / "Icons");
 	auto find_mask = dir / TEXT("*.png");
 
 	TArray<FString> Files;
@@ -65,4 +63,3 @@ const ISlateStyle& FBrushSet::Get()
 {
 	return *NodeStyleInstance;
 }
-

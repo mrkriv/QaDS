@@ -3,7 +3,7 @@
 #include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
 #include "Editor/WorkspaceMenuStructure/Public/WorkspaceMenuStructure.h"
 #include "Editor/WorkspaceMenuStructure/Public/WorkspaceMenuStructureModule.h"
-#include "DialogNodeFactory.h"
+#include "DialogEditorNodeFactory.h"
 #include "DialogPhraseEventCustomization.h"
 #include "PhraseNodeCustomization.h"
 #include "DialogAssetTypeActions.h"
@@ -41,7 +41,7 @@ void FDialogSystemEditorModule::StartupModule()
 		UDialogSettings::StaticClass()->GetDefaultObject()
 	);
 
-	TSharedPtr<FGraphPanelNodeFactory> GraphPanelNodeFactory = MakeShareable(new FDialogNodeFactory);
+	TSharedPtr<FGraphPanelNodeFactory> GraphPanelNodeFactory = MakeShareable(new FDialogEditorNodeFactory);
 	FEdGraphUtilities::RegisterVisualNodeFactory(GraphPanelNodeFactory);
 
 	auto& MenuStructure = WorkspaceMenu::GetMenuStructure();
