@@ -3,17 +3,26 @@
 #include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
 #include "Editor/WorkspaceMenuStructure/Public/WorkspaceMenuStructure.h"
 #include "Editor/WorkspaceMenuStructure/Public/WorkspaceMenuStructureModule.h"
+#include "ISettingsModule.h"
+#include "ThumbnailRendering/ThumbnailManager.h"
+#include "BrushSet.h"
+
+#include "StoryKeyWindow.h"
+
 #include "DialogEditorNodeFactory.h"
 #include "DialogPhraseEventCustomization.h"
 #include "PhraseNodeCustomization.h"
 #include "DialogAssetTypeActions.h"
 #include "DialogAssetEditor.h"
-#include "ISettingsModule.h"
-#include "ThumbnailRendering/ThumbnailManager.h"
 #include "DialogSettings.h"
 #include "DialogScript.h"
-#include "StoryKeyWindow.h"
-#include "BrushSet.h"
+
+//#include "QuestEditorNodeFactory.h"
+//#include "QuestPhraseEventCustomization.h"
+//#include "PhraseNodeCustomization.h"
+#include "QuestAssetTypeActions.h"
+//#include "QuestAssetEditor.h"
+#include "QuestScript.h"
 
 DEFINE_LOG_CATEGORY(DialogModuleLog)
 
@@ -25,16 +34,16 @@ void FDialogSystemEditorModule::StartupModule()
 	FDialogCommands::Register();
 
 	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	auto& SettingsModule = FModuleManager::LoadModuleChecked<ISettingsModule>("Settings");
-	auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
 	AssetCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Gameplay")), LOCTEXT("GameplayAssetCategory", "Gameplay"));
 	AssetTools.RegisterAssetTypeActions(MakeShareable(new FDialogAssetTypeActions(AssetCategory)));
+	AssetTools.RegisterAssetTypeActions(MakeShareable(new FQuestAssetTypeActions(AssetCategory)));
 	
+	auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseCondition", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseEvent", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
 	PropertyModule.RegisterCustomClassLayout("DialogPhraseEdGraphNode", FOnGetDetailCustomizationInstance::CreateStatic(&FPhraseNodeDetails::MakeInstance));
 
+	auto& SettingsModule = FModuleManager::LoadModuleChecked<ISettingsModule>("Settings");
 	SettingsModule.RegisterSettings("Project", "Plugins", "Dialog",
 		LOCTEXT("RuntimeSettingsName", "Dialog Editor"),
 		LOCTEXT("RuntimeSettingsDescription", "Dialog editor settings"),
@@ -76,6 +85,7 @@ void FDialogSystemEditorModule::ShutdownModule()
 	{
 		auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 		AssetTools.UnregisterAssetTypeActions(MakeShareable(new FDialogAssetTypeActions(AssetCategory)));
+		AssetTools.UnregisterAssetTypeActions(MakeShareable(new FQuestAssetTypeActions(AssetCategory)));
 	}
 }
 

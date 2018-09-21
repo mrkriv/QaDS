@@ -43,6 +43,12 @@ TSharedRef<FSlateStyleSet> FBrushSet::Create()
 	StyleSet->Set("ClassIcon.DialogScript", ImageBrush("DialogScript_16", 16.0f));
 	StyleSet->Set("ClassThumbnail.DialogScript", ImageBrush("DialogScript_128", 64.0f));
 
+	StyleSet->Set("ClassIcon.QuestAsset", ImageBrush("QuestAsset_16", 16.0f));
+	StyleSet->Set("ClassThumbnail.QuestAsset", ImageBrush("QuestAsset_128", 64.0f));
+
+	StyleSet->Set("ClassIcon.QuestScript", ImageBrush("QuestScript_16", 16.0f));
+	StyleSet->Set("ClassThumbnail.QuestScript", ImageBrush("QuestScript_128", 64.0f));
+
 #undef ImageBrush
 
 	for (auto file : Files)
