@@ -10,21 +10,23 @@ class UDialogRootEdGraphNode;
 
 class DIALOGSYSTEMEDITOR_API FDialogAssetEditor : public FQaDSAssetEditor
 {
+	UDialogAsset* EditedAsset;
+
 public:
 	void InitDialogAssetEditor(const EToolkitMode::Type Mode, const TSharedPtr< class IToolkitHost >& InitToolkitHost, UDialogAsset* Object);
 	void BuildToolbar(FToolBarBuilder &builder);
 
 protected:
-	UDialogAsset* EditedAsset;
-
 	UObject* GetEditedAsset() const override;
-	void CompileExecute() override;
 	FName GetEditorName() const override;
+	
 	virtual FString ExportToXml() override;
 	virtual void ImportFromXml(FXmlFile* xml) override;
 
 	UEdGraph* CreateGraphFromAsset();
 	UDialogRootEdGraphNode* GetRootNode();
+
+	void CompileExecute() override;
 	void ResetCompilePhrase(UDialogEdGraphNode* Node);
 	UDialogNode* Compile(UDialogEdGraphNode* Node);
 };

@@ -6,22 +6,7 @@
 #include "EdGraph/EdGraph.h"
 #include "QaDSSettings.h"
 #include "DialogAsset.h"
-#include "XmlFile.h"
-
-FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FString> values);
-FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<UDialogEdGraphNode*> values);
-FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FName> values);
-FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FDialogPhraseEvent> values);
-FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FDialogPhraseCondition> values);
-FString Serealize(FString tab, const FDialogPhraseEvent& value);
-FString Serealize(FString tab, const FDialogPhraseCondition& value);
-
-void DeserealizeArray(FXmlNode* tag, TArray<FString>& outValues);
-void DeserealizeArray(FXmlNode* tag, TArray<FName>& outValues);
-void DeserealizeArray(FXmlNode* tag, TArray<FDialogPhraseEvent>& outValues);
-void DeserealizeArray(FXmlNode* tag, TArray<FDialogPhraseCondition>& outValues);
-void Deserealize(FXmlNode* tag, FDialogPhraseEvent& outValue);
-void Deserealize(FXmlNode* tag, FDialogPhraseCondition& outValue);
+#include "XmlSerealizeHelper.h"
 
 //UDialogEdGraphNode...........................................................................................
 TArray<UDialogEdGraphNode*> UDialogEdGraphNode::GetChildNodes() const
@@ -46,17 +31,6 @@ TArray<UDialogEdGraphNode*> UDialogEdGraphNode::GetChildNodes() const
 void UDialogEdGraphNode::ResetCompile()
 {
 	CompileNode = NULL;
-}
-
-void UDialogEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
-{
-	if (PropertyObserver.IsValid())
-	{
-		FName PropertyName = (e.Property != NULL) ? e.Property->GetFName() : NAME_None;
-		PropertyObserver->OnPropertyChanged(this, PropertyName);
-	}
-
-	Super::PostEditChangeProperty(e);
 }
 
 int UDialogEdGraphNode::GetOrder() const
@@ -96,7 +70,7 @@ FString UDialogEdGraphNode::SaveToXml(int tabLevel) const
 	xml += tab + "<class>" + GetClass()->GetFName().ToString() + "</class>\n";
 	xml += tab + "<x>" + FString::FromInt(NodePosX) + "</x>\n";
 	xml += tab + "<y>" + FString::FromInt(NodePosY) + "</y>\n";
-	xml += SerealizeArray(tab, "links", "link", GetChildNodes());
+	xml += FXmlSerealizeHelper::SerealizeArray(tab, "links", "link", GetChildNodes());
 
 	return xml;
 }
@@ -158,12 +132,12 @@ FString UDialogPhraseEdGraphNode::SaveToXml(int tabLevel) const
 	if (!Data.AutoTime)
 		xml += tab + "<time>" + FString::SanitizeFloat(Data.PhraseManualTime) + "</time>\n";
 
-	xml += SerealizeArray(tab, "give_keys", "key", Data.GiveKeys);
-	xml += SerealizeArray(tab, "remove_keys", "key", Data.RemoveKeys);
-	xml += SerealizeArray(tab, "check_has_keys", "key", Data.CheckHasKeys);
-	xml += SerealizeArray(tab, "check_dont_has_keys", "key", Data.CheckDontHasKeys);
-	xml += SerealizeArray(tab, "actions", "action", Data.Action);
-	xml += SerealizeArray(tab, "predicates", "predicate", Data.Predicate);
+	xml += FXmlSerealizeHelper::SerealizeArray(tab, "give_keys", "key", Data.GiveKeys);
+	xml += FXmlSerealizeHelper::SerealizeArray(tab, "remove_keys", "key", Data.RemoveKeys);
+	xml += FXmlSerealizeHelper::SerealizeArray(tab, "check_has_keys", "key", Data.CheckHasKeys);
+	xml += FXmlSerealizeHelper::SerealizeArray(tab, "check_dont_has_keys", "key", Data.CheckDontHasKeys);
+	xml += FXmlSerealizeHelper::SerealizeArray(tab, "actions", "action", Data.Action);
+	xml += FXmlSerealizeHelper::SerealizeArray(tab, "predicates", "predicate", Data.Predicate);
 
 	return xml;
 }
@@ -187,12 +161,12 @@ void UDialogPhraseEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, 
 		Data.PhraseManualTime = FCString::Atof(*timeTag->GetContent());
 	}
 
-	DeserealizeArray(xmlNode->FindChildNode("give_keys"), Data.GiveKeys);
-	DeserealizeArray(xmlNode->FindChildNode("remove_keys"), Data.RemoveKeys);
-	DeserealizeArray(xmlNode->FindChildNode("check_has_keys"), Data.CheckHasKeys);
-	DeserealizeArray(xmlNode->FindChildNode("check_dont_has_keys"), Data.CheckDontHasKeys);
-	DeserealizeArray(xmlNode->FindChildNode("actions"), Data.Action);
-	DeserealizeArray(xmlNode->FindChildNode("predicates"), Data.Predicate);
+	FXmlSerealizeHelper::DeserealizeArray(xmlNode->FindChildNode("give_keys"), Data.GiveKeys);
+	FXmlSerealizeHelper::DeserealizeArray(xmlNode->FindChildNode("remove_keys"), Data.RemoveKeys);
+	FXmlSerealizeHelper::DeserealizeArray(xmlNode->FindChildNode("check_has_keys"), Data.CheckHasKeys);
+	FXmlSerealizeHelper::DeserealizeArray(xmlNode->FindChildNode("check_dont_has_keys"), Data.CheckDontHasKeys);
+	FXmlSerealizeHelper::DeserealizeArray(xmlNode->FindChildNode("actions"), Data.Action);
+	FXmlSerealizeHelper::DeserealizeArray(xmlNode->FindChildNode("predicates"), Data.Predicate);
 }
 
 void UDialogPhraseEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
@@ -300,184 +274,4 @@ FText UDialogRootEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 bool UDialogRootEdGraphNode::CanUserDeleteNode() const
 {
 	return false;
-}
-
-
-/*		Serealize and Deserealize from XML		*/
-
-FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FString> values)
-{
-	if (values.Num() == 0)
-		return "";
-
-	FString xml = tab + "<" + tag + ">\n";
-	for (auto& value : values)
-	{
-		xml += tab + "\t<" + itemTag + ">" + value + "</" + itemTag + ">\n";
-	}
-	xml += tab + "</" + tag + ">\n";
-
-	return xml;
-}
-
-FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<UDialogEdGraphNode*> values)
-{
-	TArray<FString> newValues;
-
-	for (auto value : values)
-		newValues.Add(value->NodeGuid.ToString());
-
-	return SerealizeArray(tab, tag, itemTag, newValues);
-}
-
-FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FName> values)
-{
-	TArray<FString> newValues;
-
-	for (auto& value : values)
-		newValues.Add(value.ToString());
-
-	return SerealizeArray(tab, tag, itemTag, newValues);
-}
-
-FString Serealize(FString tab, const FDialogPhraseEvent& value)
-{
-	FString xml = "";
-	xml += tab + "\t<type>" + FString::FromInt((uint8)value.CallType) + "</type>\n";
-	xml += tab + "\t<event>" + value.EventName.ToString() + "</event>\n";
-	xml += tab + "\t<tag>" + value.FindTag + "</tag>\n";
-	xml += tab + "\t<command>" + value.Command + "</command>\n";
-
-	if (value.ObjectClass != NULL)
-		xml += tab + "\t<class>" + value.ObjectClass->GetFullName() + "</class>\n";
-
-	xml += SerealizeArray(tab + "\n", "params", "param", value.Parameters);
-
-	return xml;
-}
-
-FString Serealize(FString tab, const FDialogPhraseCondition& value)
-{
-	FString xml = "";
-	xml += tab + "\t<invert>" + (value.InvertCondition ? "true" : "false") + "</invert>\n";
-	xml += Serealize(tab, (FDialogPhraseEvent)value);
-
-	return xml;
-}
-
-FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FDialogPhraseEvent> values)
-{
-	TArray<FString> newValues;
-
-	for (auto& value : values)
-	{
-		newValues.Add("\n" + Serealize(tab + '\t', value) + tab + '\t');
-	}
-
-	return SerealizeArray(tab, tag, itemTag, newValues);
-}
-
-FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FDialogPhraseCondition> values)
-{
-	TArray<FString> newValues;
-
-	for (auto& value : values)
-	{
-		newValues.Add("\n" + Serealize(tab + '\t', value) + tab + '\t');
-	}
-
-	return SerealizeArray(tab, tag, itemTag, newValues);
-}
-
-void DeserealizeArray(FXmlNode* tag, TArray<FString>& outValues)
-{
-	outValues.Reset();
-
-	if (tag == NULL)
-		return;
-
-	for (auto childTag : tag->GetChildrenNodes())
-	{
-		outValues.Add(childTag->GetContent());
-	}
-}
-
-void DeserealizeArray(FXmlNode* tag, TArray<FName>& outValues)
-{
-	outValues.Reset();
-
-	if (tag == NULL)
-		return;
-
-	for (auto childTag : tag->GetChildrenNodes())
-	{
-		outValues.Add(*childTag->GetContent());
-	}
-}
-
-void DeserealizeArray(FXmlNode* tag, TArray<FDialogPhraseEvent>& outValues)
-{
-	outValues.Reset();
-
-	if (tag == NULL)
-		return;
-
-	for (auto childTag : tag->GetChildrenNodes())
-	{
-		FDialogPhraseEvent out;
-		Deserealize(childTag, out);
-		outValues.Add(out);
-	}
-}
-
-void DeserealizeArray(FXmlNode* tag, TArray<FDialogPhraseCondition>& outValues)
-{
-	outValues.Reset();
-
-	if (tag == NULL)
-		return;
-
-	for (auto childTag : tag->GetChildrenNodes())
-	{
-		FDialogPhraseCondition out;
-		Deserealize(childTag, out);
-		outValues.Add(out);
-	}
-}
-
-void Deserealize(FXmlNode* tag, FDialogPhraseEvent& outValue)
-{
-	auto typeTag = tag->FindChildNode("type");
-	if (typeTag != NULL)
-		outValue.CallType = (EDialogPhraseEventCallType)FCString::Atoi(*typeTag->GetContent());
-
-	auto eventTag = tag->FindChildNode("event");
-	if (eventTag != NULL)
-		outValue.EventName = *eventTag->GetContent();
-
-	auto tagTag = tag->FindChildNode("tag");
-	if (tagTag != NULL)
-		outValue.FindTag = tagTag->GetContent();
-
-	auto commandTag = tag->FindChildNode("command");
-	if (commandTag != NULL)
-		outValue.Command = commandTag->GetContent();
-
-	auto classTag = tag->FindChildNode("command");
-	if (classTag != NULL)
-	{
-		auto objClass = FindObject<UClass>(ANY_PACKAGE, *classTag->GetContent());
-		outValue.ObjectClass = objClass;
-	}
-
-	DeserealizeArray(tag->FindChildNode("params"), outValue.Parameters);
-}
-
-void Deserealize(FXmlNode* tag, FDialogPhraseCondition& outValue)
-{
-	Deserealize(tag, (FDialogPhraseEvent&)outValue);
-
-	auto invertTag = tag->FindChildNode("invert");
-	if (invertTag != NULL)
-		outValue.InvertCondition = invertTag->GetContent().ToLower() == "true";
 }

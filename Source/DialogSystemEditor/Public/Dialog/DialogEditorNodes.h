@@ -2,26 +2,11 @@
 
 #include "EdGraph/EdGraphNode.h"
 #include "DialogNodes.h"
+#include "QaDSEdGraphNode.h"
 #include "DialogEditorNodes.generated.h"
 
 class UEdGraphPin;
 class FXmlNode;
-
-class DIALOGSYSTEMEDITOR_API FNodePropertyObserver
-{
-public:
-	virtual void OnPropertyChanged(class UEdGraphNode* Sender, const FName& PropertyName) = 0;
-};
-
-UCLASS()
-class DIALOGSYSTEMEDITOR_API UQaDSEdGraphNode : public UEdGraphNode
-{
-	GENERATED_BODY()
-
-public:
-	virtual void ResetCompile() {}
-	TSharedPtr<FNodePropertyObserver> PropertyObserver;
-};
 
 UCLASS()
 class DIALOGSYSTEMEDITOR_API UDialogEdGraphNode : public UQaDSEdGraphNode
@@ -40,7 +25,6 @@ public:
 	virtual int GetOrder() const;
 	virtual FString SaveToXml(int tabLevel) const;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById);
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
 };
 
 UCLASS()
