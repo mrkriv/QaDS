@@ -20,6 +20,12 @@
 #include "DialogEditorNodes.h"
 #include "HAL/PlatformApplicationMisc.h"
 
+#include "Framework/Application/SlateApplication.h"
+#include "FileManager.h"
+#include "FileHelper.h"
+#include "DesktopPlatformModule.h"
+#include "XmlFile.h"
+
 #define LOCTEXT_NAMESPACE "DialogGraph"
 
 const FName DialogEditorAppName(TEXT("DialogEditorApp"));
@@ -31,6 +37,9 @@ const FName FDialogAssetEditorTabs::CompilerResultsID(TEXT("CompilerResults"));
 void FDialogCommands::RegisterCommands()
 {
 	UI_COMMAND(Compile, "Compile", "Compile this dialog graph", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(Find, "Find", "Open find dialog", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(Import, "Import", "Imoprt graph from file", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(Export, "Export", "Export graph to file", EUserInterfaceActionType::Button, FInputChord());
 }
 
 FName FDialogAssetEditor::GetToolkitFName() const
@@ -106,6 +115,9 @@ void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, co
 	ToolkitCommands = MakeShareable(new FUICommandList);
 	ToolkitCommands->Append(FPlayWorldCommands::GlobalPlayWorldActions.ToSharedRef());
 	ToolkitCommands->MapAction(FDialogCommands::Get().Compile, FExecuteAction::CreateSP(this, &FDialogAssetEditor::CompileExecute));
+	ToolkitCommands->MapAction(FDialogCommands::Get().Find, FExecuteAction::CreateSP(this, &FDialogAssetEditor::OpenFindWindow));
+	ToolkitCommands->MapAction(FDialogCommands::Get().Import, FExecuteAction::CreateSP(this, &FDialogAssetEditor::ImportExecute));
+	ToolkitCommands->MapAction(FDialogCommands::Get().Export, FExecuteAction::CreateSP(this, &FDialogAssetEditor::ExportExecute));
 	
 	ToolbarExtender = MakeShareable(new FExtender);
 	ToolbarExtender->AddToolBarExtension("Asset", EExtensionHook::After, ToolkitCommands, FToolBarExtensionDelegate::CreateRaw(this, &FDialogAssetEditor::BuildToolbar));
@@ -119,12 +131,18 @@ void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, co
 
 void FDialogAssetEditor::BuildToolbar(FToolBarBuilder &builder)
 {
-	FSlateIcon IconBrushCompile = FSlateIcon(FEditorStyle::GetStyleSetName(), "AssetEditor.ReimportAsset", "AssetEditor.ReimportAsset.Small");
-	FSlateIcon IconBrushKeys = FSlateIcon(FEditorStyle::GetStyleSetName(), "FullBlueprintEditor.EditClassDefaults", "FullBlueprintEditor.EditClassDefaults.Small");
-	FSlateIcon IconBrushKeyManager = FSlateIcon(FEditorStyle::GetStyleSetName(), "FullBlueprintEditor.EditClassDefaults", "FullBlueprintEditor.EditClassDefaults.Small");
+	auto iconCompile = FSlateIcon(FEditorStyle::GetStyleSetName(), "AssetEditor.ReimportAsset", "AssetEditor.ReimportAsset.Small");
+	auto iconFind = FSlateIcon(FEditorStyle::GetStyleSetName(), "Kismet.Tabs.FindResults");
+	auto iconExport = FSlateIcon(FEditorStyle::GetStyleSetName(), "");
+	auto iconImport = FSlateIcon(FEditorStyle::GetStyleSetName(), "");
 
 	builder.AddSeparator();
-	builder.AddToolBarButton(FDialogCommands::Get().Compile, NAME_None, FText::FromString("Compile"), FText::FromString("Compile this dialog"), IconBrushCompile, NAME_None);
+	builder.AddToolBarButton(FDialogCommands::Get().Compile, NAME_None, FText::FromString("Compile"), FText::FromString("Compile this dialog"), iconCompile, NAME_None);
+	builder.AddSeparator(); 
+	builder.AddToolBarButton(FDialogCommands::Get().Find, NAME_None, FText::FromString("Find"), FText::FromString("Open find dialog"), iconFind, NAME_None);
+	builder.AddSeparator(); 
+	builder.AddToolBarButton(FDialogCommands::Get().Export, NAME_None, FText::FromString("Export"), FText::FromString("Export graph to file"), iconImport, NAME_None);
+	builder.AddToolBarButton(FDialogCommands::Get().Import, NAME_None, FText::FromString("Import"), FText::FromString("Imoprt graph from file"), iconExport, NAME_None);
 	builder.AddSeparator();
 
 	FPlayWorldCommands::BuildToolbar(builder);
@@ -269,6 +287,94 @@ void FDialogAssetEditor::OnSelectedNodesChanged(const TSet<UObject*>& NewSelecti
 
 	if(PropertyEditor.IsValid())
 		PropertyEditor->SetObjects(SelectedObjects);
+}
+
+void FDialogAssetEditor::OpenFindWindow()
+{
+}
+
+void FDialogAssetEditor::ExportExecute()
+{
+	TArray<FString> Filenames;
+	bool isSaved = FDesktopPlatformModule::Get()->SaveFileDialog(
+		FSlateApplication::Get().FindBestParentWindowHandleForDialogs(NULL),
+		"Choose save location",
+		FPaths::ProjectUserDir(),
+		TEXT(""),
+		TEXT("XML|*.xml"),
+		EFileDialogFlags::None,
+		Filenames
+	);
+
+	if (isSaved)
+	{
+		FString xml = "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>\n";
+		xml += "<nodes>\n";
+
+		for (auto graphNode : GraphEditor->GetCurrentGraph()->Nodes)
+		{
+			xml += "\t<node>\n";
+			xml += Cast<UDdialogEdGraphNode>(graphNode)->SaveToXml(2);
+			xml += "\t</node>\n";
+		}
+		xml += "</nodes>";
+
+		FFileHelper::SaveStringToFile(xml, *Filenames[0]);
+	}
+}
+
+void FDialogAssetEditor::ImportExecute()
+{
+	TArray<FString> Filenames;
+	bool isOpen = FDesktopPlatformModule::Get()->OpenFileDialog(
+		FSlateApplication::Get().FindBestParentWindowHandleForDialogs(NULL),
+		"Choose file",
+		FPaths::ProjectUserDir(),
+		TEXT("XML|*.xml"),
+		TEXT(""),
+		EFileDialogFlags::None,
+		Filenames
+	);
+
+	if (isOpen)
+	{
+		FXmlFile xml(*Filenames[0]);
+
+		TMap<UDdialogEdGraphNode*, FXmlNode*> xmlByNode;
+		TMap<FString, UDdialogEdGraphNode*> nodesById;
+
+		for (auto nodeTag : xml.GetRootNode()->GetChildrenNodes())
+		{
+			auto idTag = nodeTag->FindChildNode("id");
+			auto classTag = nodeTag->FindChildNode("class");
+
+			if (idTag == NULL || classTag == NULL)
+				continue;
+
+			auto nodeClass = FindObject<UClass>(ANY_PACKAGE, *classTag->GetContent());
+
+			auto nodeTemplate = NewObject< UDdialogEdGraphNode>(EditedAsset, nodeClass);
+			auto node = FDialogSchemaAction_NewNode::SpawnNodeFromTemplate<UDdialogEdGraphNode>(EditedAsset->UpdateGraph, nodeTemplate, FVector2D::ZeroVector, false);
+			node->AllocateDefaultPins();
+
+			FGuid::Parse(idTag->GetContent(), node->NodeGuid);
+
+			nodesById.Add(idTag->GetContent(), node);
+			xmlByNode.Add(node, nodeTag);
+		}
+
+		if (xmlByNode.Num() == 0)
+			return;
+
+		auto graph = GraphEditor->GetCurrentGraph();
+		graph->Nodes.Reset();
+
+		for (auto kpv : xmlByNode)
+		{
+			kpv.Key->LoadInXml(kpv.Value, nodesById);
+			graph->Nodes.Add(kpv.Key);
+		}
+	}
 }
 
 void FDialogAssetEditor::OnNodeDoubleClicked(class UEdGraphNode* Node)

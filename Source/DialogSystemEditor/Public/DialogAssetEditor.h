@@ -29,6 +29,9 @@ private:
 struct DIALOGSYSTEMEDITOR_API FDialogCommands : public TCommands<FDialogCommands>
 {
 	TSharedPtr<FUICommandInfo> Compile;
+	TSharedPtr<FUICommandInfo> Find;
+	TSharedPtr<FUICommandInfo> Import;
+	TSharedPtr<FUICommandInfo> Export;
 
 	FDialogCommands()
 		: TCommands<FDialogCommands>(TEXT("Dialog Graph Commands"), FText::FromString("Dialog Graph Commands"), NAME_None, FEditorStyle::GetStyleSetName())
@@ -86,6 +89,8 @@ private:
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& Args);
 
 	UEdGraph* CreateGraphFromAsset();
+	UDialogRootEdGraphNode* GetRootNode();
+
 	void OnGraphChanged(const FEdGraphEditAction& Action);
 	void OnPropertyChanged(const FPropertyChangedEvent& Event);
 	void BuildToolbar(FToolBarBuilder &builder);
@@ -109,8 +114,11 @@ private:
 	void OnSelectedNodesChanged(const TSet<UObject*>& NewSelection);
 	void OnNodeDoubleClicked(UEdGraphNode* Node);
 
+	void OpenFindWindow();
+	void ImportExecute();
+	void ExportExecute();
 	void CompileExecute();
+
 	void ResetCompilePhrase(UDdialogEdGraphNode* Node);
 	UDialogNode* Compile(UDdialogEdGraphNode* Node);
-	UDialogRootEdGraphNode* GetRootNode();
 };

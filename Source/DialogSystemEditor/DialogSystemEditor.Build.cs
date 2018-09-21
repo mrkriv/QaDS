@@ -44,6 +44,7 @@ public class DialogSystemEditor : ModuleRules
                 "Projects",
                 "ApplicationCore",
                 "DesktopPlatform",
+                "XmlParser",
 
                 "DialogSystemRuntime",
             }

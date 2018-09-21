@@ -5,12 +5,12 @@
 #include "FileManager.h"
 #include "FileHelper.h"
 #include "DesktopPlatformModule.h"
+#include "Framework/Application/SlateApplication.h"
 
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/SOverlay.h"
 #include "Styling/CoreStyle.h"
 #include "SlateOptMacros.h"
-#include "Framework/Application/SlateApplication.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Layout/SBox.h"

@@ -5,6 +5,7 @@
 #include "DialogEditorNodes.generated.h"
 
 class UEdGraphPin;
+class FXmlNode;
 
 class DIALOGSYSTEMEDITOR_API FNodePropertyObserver
 {
@@ -24,8 +25,10 @@ public:
 	UPROPERTY()
 	UDialogNode* CompileNode;
 
-	TArray<UDdialogEdGraphNode*> GetChildNodes();
+	TArray<UDdialogEdGraphNode*> GetChildNodes() const;
 	virtual int GetOrder() const;
+	virtual FString SaveToXml(int tabLevel) const;
+	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDdialogEdGraphNode*>& nodeById);
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
 
 	TSharedPtr<FNodePropertyObserver> PropertyObserver;
@@ -38,7 +41,9 @@ class DIALOGSYSTEMEDITOR_API UDialogRootEdGraphNode : public UDdialogEdGraphNode
 
 public:
 	virtual void AllocateDefaultPins() override;
+	virtual FString SaveToXml(int tabLevel) const override;
 	virtual bool CanUserDeleteNode() const override;
+	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDdialogEdGraphNode*>& nodeById) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };
 
@@ -53,7 +58,9 @@ public:
 
 	UDialogPhraseEdGraphNode();
 	virtual void AllocateDefaultPins() override;
+	virtual FString SaveToXml(int tabLevel) const override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
+	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDdialogEdGraphNode*>& nodeById) override;
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
 };
 
@@ -76,6 +83,8 @@ public:
 	TAssetPtr<class UDialogAsset> TargetDialogAsset;
 
 	virtual void AllocateDefaultPins() override;
+	virtual FString SaveToXml(int tabLevel) const override;
+	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDdialogEdGraphNode*>& nodeById) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };
 
@@ -89,5 +98,7 @@ public:
 	TArray<FDialogElseIfCondition> Conditions;
 
 	virtual void AllocateDefaultPins() override;
+	virtual FString SaveToXml(int tabLevel) const override;
+	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDdialogEdGraphNode*>& nodeById) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };
