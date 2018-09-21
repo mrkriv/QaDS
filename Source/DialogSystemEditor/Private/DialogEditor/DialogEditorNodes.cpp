@@ -9,7 +9,7 @@
 #include "XmlFile.h"
 
 FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FString> values);
-FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<UDdialogEdGraphNode*> values);
+FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<UDialogEdGraphNode*> values);
 FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FName> values);
 FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FDialogPhraseEvent> values);
 FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FDialogPhraseCondition> values);
@@ -23,10 +23,10 @@ void DeserealizeArray(FXmlNode* tag, TArray<FDialogPhraseCondition>& outValues);
 void Deserealize(FXmlNode* tag, FDialogPhraseEvent& outValue);
 void Deserealize(FXmlNode* tag, FDialogPhraseCondition& outValue);
 
-//UDdialogEdGraphNode...........................................................................................
-TArray<UDdialogEdGraphNode*> UDdialogEdGraphNode::GetChildNodes() const
+//UDialogEdGraphNode...........................................................................................
+TArray<UDialogEdGraphNode*> UDialogEdGraphNode::GetChildNodes() const
 {
-	TArray<UDdialogEdGraphNode*> ChildNodes;
+	TArray<UDialogEdGraphNode*> ChildNodes;
 
 	for (auto Pin : Pins)
 	{
@@ -36,14 +36,14 @@ TArray<UDdialogEdGraphNode*> UDdialogEdGraphNode::GetChildNodes() const
 		for (int i = 0; i < Pin->LinkedTo.Num(); i++)
 		{
 			if (Pin->LinkedTo[i])
-				ChildNodes.Add((UDdialogEdGraphNode*)Pin->LinkedTo[i]->GetOwningNode());
+				ChildNodes.Add((UDialogEdGraphNode*)Pin->LinkedTo[i]->GetOwningNode());
 		}
 	}
 
 	return ChildNodes;
 }
 
-void UDdialogEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
+void UDialogEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 {
 	if (PropertyObserver.IsValid())
 	{
@@ -54,17 +54,17 @@ void UDdialogEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEvent& e
 	Super::PostEditChangeProperty(e);
 }
 
-int UDdialogEdGraphNode::GetOrder() const
+int UDialogEdGraphNode::GetOrder() const
 {
 	auto inputPin = Pins.FindByPredicate([](const UEdGraphPin* pin) {return pin->Direction == EGPD_Input; });
 
 	if(inputPin == NULL || (*inputPin)->LinkedTo.Num() == 0)
 		return 0;
 	
-	auto bigOwner = (UDdialogEdGraphNode*)(*inputPin)->LinkedTo[0]->GetOwningNode();
+	auto bigOwner = (UDialogEdGraphNode*)(*inputPin)->LinkedTo[0]->GetOwningNode();
 	for(auto ownerPin : (*inputPin)->LinkedTo)
 	{
-		auto owner = (UDdialogEdGraphNode*)ownerPin->GetOwningNode();
+		auto owner = (UDialogEdGraphNode*)ownerPin->GetOwningNode();
 
 		if (owner != NULL && owner->GetChildNodes().Num() > bigOwner->GetChildNodes().Num())
 		{
@@ -82,7 +82,7 @@ int UDdialogEdGraphNode::GetOrder() const
 	return lessCount + 1;
 }
 
-FString UDdialogEdGraphNode::SaveToXml(int tabLevel) const
+FString UDialogEdGraphNode::SaveToXml(int tabLevel) const
 {
 	FString tab(tabLevel, TEXT("\t\t\t\t\t\t\t\t\t\t\t"));
 	FString xml;
@@ -96,7 +96,7 @@ FString UDdialogEdGraphNode::SaveToXml(int tabLevel) const
 	return xml;
 }
 
-void UDdialogEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDdialogEdGraphNode*>& nodeById)
+void UDialogEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById)
 {
 	auto xTag = xmlNode->FindChildNode("x");
 	if (xTag != NULL)
@@ -163,7 +163,7 @@ FString UDialogPhraseEdGraphNode::SaveToXml(int tabLevel) const
 	return xml;
 }
 
-void UDialogPhraseEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDdialogEdGraphNode*>& nodeById)
+void UDialogPhraseEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById)
 {
 	Super::LoadInXml(xmlNode, nodeById);
 
@@ -192,7 +192,7 @@ void UDialogPhraseEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, 
 
 void UDialogPhraseEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 {
-	UDdialogEdGraphNode::PostEditChangeProperty(e);
+	UDialogEdGraphNode::PostEditChangeProperty(e);
 }
 
 //UDialogSubGraphEdGraphNode...........................................................................................
@@ -212,7 +212,7 @@ FString UDialogSubGraphEdGraphNode::SaveToXml(int tabLevel) const
 	return xml;
 }
 
-void UDialogSubGraphEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDdialogEdGraphNode*>& nodeById)
+void UDialogSubGraphEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById)
 {
 	Super::LoadInXml(xmlNode, nodeById);
 
@@ -246,7 +246,7 @@ FString UDialogElseIfEdGraphNode::SaveToXml(int tabLevel) const
 	return xml;
 }
 
-void UDialogElseIfEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDdialogEdGraphNode*>& nodeById)
+void UDialogElseIfEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById)
 {
 	auto xTag = xmlNode->FindChildNode("x");
 	if (xTag != NULL)
@@ -280,7 +280,7 @@ FString UDialogRootEdGraphNode::SaveToXml(int tabLevel) const
 	return xml;
 }
 
-void UDialogRootEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDdialogEdGraphNode*>& nodeById)
+void UDialogRootEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById)
 {
 	auto xTag = xmlNode->FindChildNode("x");
 	if (xTag != NULL)
@@ -315,7 +315,7 @@ FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FString
 	return xml;
 }
 
-FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<UDdialogEdGraphNode*> values)
+FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<UDialogEdGraphNode*> values)
 {
 	TArray<FString> newValues;
 

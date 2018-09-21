@@ -28,8 +28,8 @@ TSharedPtr<class SGraphNode> FDialogEditorNodeFactory::CreateNode(UEdGraphNode* 
 		SNode = SNew(SGraphNode_ElseIf, Cast<UDialogElseIfEdGraphNode>(Node));
 	}
 
-	if (Node != NULL && Node->IsA(UDdialogEdGraphNode::StaticClass()))
-		Cast<UDdialogEdGraphNode>(Node)->PropertyObserver = SNode;
+	if (Node != NULL && Node->IsA(UDialogEdGraphNode::StaticClass()))
+		Cast<UDialogEdGraphNode>(Node)->PropertyObserver = SNode;
 
 	return SNode;
 }

@@ -129,8 +129,8 @@ void UDialogGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Contex
 
 const FPinConnectionResponse UDialogGraphSchema::CanCreateConnection(const UEdGraphPin* A, const UEdGraphPin* B) const
 {
-	UDdialogEdGraphNode* ABase = Cast<UDdialogEdGraphNode>(A->GetOwningNode());
-	UDdialogEdGraphNode* BBase = Cast<UDdialogEdGraphNode>(B->GetOwningNode());
+	UDialogEdGraphNode* ABase = Cast<UDialogEdGraphNode>(A->GetOwningNode());
+	UDialogEdGraphNode* BBase = Cast<UDialogEdGraphNode>(B->GetOwningNode());
 
 	if (A->Direction == B->Direction)
 		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Not allowed"));

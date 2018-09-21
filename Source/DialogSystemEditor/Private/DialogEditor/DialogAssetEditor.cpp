@@ -314,7 +314,7 @@ void FDialogAssetEditor::ExportExecute()
 		for (auto graphNode : GraphEditor->GetCurrentGraph()->Nodes)
 		{
 			xml += "\t<node>\n";
-			xml += Cast<UDdialogEdGraphNode>(graphNode)->SaveToXml(2);
+			xml += Cast<UDialogEdGraphNode>(graphNode)->SaveToXml(2);
 			xml += "\t</node>\n";
 		}
 		xml += "</nodes>";
@@ -340,8 +340,8 @@ void FDialogAssetEditor::ImportExecute()
 	{
 		FXmlFile xml(*Filenames[0]);
 
-		TMap<UDdialogEdGraphNode*, FXmlNode*> xmlByNode;
-		TMap<FString, UDdialogEdGraphNode*> nodesById;
+		TMap<UDialogEdGraphNode*, FXmlNode*> xmlByNode;
+		TMap<FString, UDialogEdGraphNode*> nodesById;
 
 		for (auto nodeTag : xml.GetRootNode()->GetChildrenNodes())
 		{
@@ -353,8 +353,8 @@ void FDialogAssetEditor::ImportExecute()
 
 			auto nodeClass = FindObject<UClass>(ANY_PACKAGE, *classTag->GetContent());
 
-			auto nodeTemplate = NewObject< UDdialogEdGraphNode>(EditedAsset, nodeClass);
-			auto node = FDialogSchemaAction_NewNode::SpawnNodeFromTemplate<UDdialogEdGraphNode>(EditedAsset->UpdateGraph, nodeTemplate, FVector2D::ZeroVector, false);
+			auto nodeTemplate = NewObject< UDialogEdGraphNode>(EditedAsset, nodeClass);
+			auto node = FDialogSchemaAction_NewNode::SpawnNodeFromTemplate<UDialogEdGraphNode>(EditedAsset->UpdateGraph, nodeTemplate, FVector2D::ZeroVector, false);
 			node->AllocateDefaultPins();
 
 			FGuid::Parse(idTag->GetContent(), node->NodeGuid);
@@ -663,7 +663,7 @@ void FDialogAssetEditor::CompileExecute()
 	CompilerResultsListing->AddMessages(CompileLogResults.Messages);
 }
 
-void FDialogAssetEditor::ResetCompilePhrase(UDdialogEdGraphNode* Node)
+void FDialogAssetEditor::ResetCompilePhrase(UDialogEdGraphNode* Node)
 {
 	if (Node->CompileNode == NULL)
 		return;
@@ -672,13 +672,13 @@ void FDialogAssetEditor::ResetCompilePhrase(UDdialogEdGraphNode* Node)
 
 	for (auto& child : Node->GetChildNodes())
 	{
-		auto childPhrase = Cast<UDdialogEdGraphNode>(child);
+		auto childPhrase = Cast<UDialogEdGraphNode>(child);
 		if (childPhrase)
 			ResetCompilePhrase(childPhrase);
 	}
 }
 
-UDialogNode* FDialogAssetEditor::Compile(UDdialogEdGraphNode* node)
+UDialogNode* FDialogAssetEditor::Compile(UDialogEdGraphNode* node)
 {
 	if (node->CompileNode != NULL)
 		return node->CompileNode;

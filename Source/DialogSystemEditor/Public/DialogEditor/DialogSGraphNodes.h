@@ -26,7 +26,7 @@ class SGraphNode_DialogNodeBase : public SGraphNode, public FNodePropertyObserve
 	SLATE_BEGIN_ARGS(SGraphNode_DialogNodeBase) { }
 	SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs, UDdialogEdGraphNode* InNode);
+	void Construct(const FArguments& InArgs, UDialogEdGraphNode* InNode);
 
 	virtual void UpdateGraphNode() override;
 	virtual void CreatePinWidgets() override;

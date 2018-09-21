@@ -46,7 +46,7 @@ class UEdGraphNode;
 class SGraphEditor;
 
 class UDialogPhraseNode;
-class UDdialogEdGraphNode;
+class UDialogEdGraphNode;
 class UDialogRootEdGraphNode;
 
 class DIALOGSYSTEMEDITOR_API FDialogAssetEditor : public FAssetEditorToolkit, public FNotifyHook
@@ -119,6 +119,6 @@ private:
 	void ExportExecute();
 	void CompileExecute();
 
-	void ResetCompilePhrase(UDdialogEdGraphNode* Node);
-	UDialogNode* Compile(UDdialogEdGraphNode* Node);
+	void ResetCompilePhrase(UDialogEdGraphNode* Node);
+	UDialogNode* Compile(UDialogEdGraphNode* Node);
 };

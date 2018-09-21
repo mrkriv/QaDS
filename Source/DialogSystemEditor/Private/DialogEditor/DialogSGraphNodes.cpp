@@ -52,7 +52,7 @@ FSlateColor SDialogOutputPin::GetPinColor() const
 
 //DialogNodeBase............................................................................................................
 
-void SGraphNode_DialogNodeBase::Construct(const FArguments& InArgs, UDdialogEdGraphNode* InNode)
+void SGraphNode_DialogNodeBase::Construct(const FArguments& InArgs, UDialogEdGraphNode* InNode)
 {
 	SetCursor(EMouseCursor::CardinalCross);
 	GraphNode = InNode;
@@ -323,7 +323,7 @@ void SGraphNode_DialogNodeBase::Tick(const FGeometry& AllottedGeometry, double I
 {
 	SGraphNode::Tick(AllottedGeometry, InCurrentTime, DeltaTime);
 
-	auto order = CastChecked<UDdialogEdGraphNode>(GraphNode)->GetOrder();
+	auto order = CastChecked<UDialogEdGraphNode>(GraphNode)->GetOrder();
 
 	//OrderDisplayBorder->SetVisibility(order > 0 ? EVisibility::Visible : EVisibility::Collapsed);
 	OrderDisplayText->SetText(FText::AsNumber(order));
