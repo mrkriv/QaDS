@@ -14,7 +14,7 @@
 #include "PhraseNodeCustomization.h"
 #include "DialogAssetTypeActions.h"
 #include "DialogAssetEditor.h"
-#include "DialogSettings.h"
+#include "QaDSSettings.h"
 #include "DialogScript.h"
 
 //#include "QuestEditorNodeFactory.h"
@@ -47,7 +47,7 @@ void FDialogSystemEditorModule::StartupModule()
 	SettingsModule.RegisterSettings("Project", "Plugins", "Dialog",
 		LOCTEXT("RuntimeSettingsName", "Dialog Editor"),
 		LOCTEXT("RuntimeSettingsDescription", "Dialog editor settings"),
-		UDialogSettings::StaticClass()->GetDefaultObject()
+		UQaDSSettings::StaticClass()->GetDefaultObject()
 	);
 
 	TSharedPtr<FGraphPanelNodeFactory> GraphPanelNodeFactory = MakeShareable(new FDialogEditorNodeFactory);

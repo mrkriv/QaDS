@@ -1,10 +1,10 @@
 #include "DialogSystemEditor.h"
+#include "DialogEditorNodes.h"
 #include "EdGraph/EdGraphPin.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "StoryInformationManager.h"
 #include "EdGraph/EdGraph.h"
-#include "DialogEditorNodes.h"
-#include "DialogSettings.h"
+#include "QaDSSettings.h"
 #include "DialogAsset.h"
 #include "XmlFile.h"
 
@@ -41,6 +41,11 @@ TArray<UDialogEdGraphNode*> UDialogEdGraphNode::GetChildNodes() const
 	}
 
 	return ChildNodes;
+}
+
+void UDialogEdGraphNode::ResetCompile()
+{
+	CompileNode = NULL;
 }
 
 void UDialogEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)

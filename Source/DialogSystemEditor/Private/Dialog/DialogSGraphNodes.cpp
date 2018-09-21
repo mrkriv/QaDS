@@ -4,7 +4,7 @@
 #include "AssetThumbnail.h"
 #include "AssetRegistryModule.h"
 #include "DialogSGraphNodes.h"
-#include "DialogSettings.h"
+#include "QaDSSettings.h"
 #include "SNumericEntryBox.h"
 #include "GraphEditor.h"
 #include "BrushSet.h"

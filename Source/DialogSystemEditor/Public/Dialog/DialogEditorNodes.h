@@ -14,7 +14,17 @@ public:
 };
 
 UCLASS()
-class DIALOGSYSTEMEDITOR_API UDialogEdGraphNode : public UEdGraphNode
+class DIALOGSYSTEMEDITOR_API UQaDSEdGraphNode : public UEdGraphNode
+{
+	GENERATED_BODY()
+
+public:
+	virtual void ResetCompile() {}
+	TSharedPtr<FNodePropertyObserver> PropertyObserver;
+};
+
+UCLASS()
+class DIALOGSYSTEMEDITOR_API UDialogEdGraphNode : public UQaDSEdGraphNode
 {
 	GENERATED_BODY()
 
@@ -26,12 +36,11 @@ public:
 	UDialogNode* CompileNode;
 
 	TArray<UDialogEdGraphNode*> GetChildNodes() const;
+	virtual void ResetCompile() override;
 	virtual int GetOrder() const;
 	virtual FString SaveToXml(int tabLevel) const;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById);
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
-
-	TSharedPtr<FNodePropertyObserver> PropertyObserver;
 };
 
 UCLASS()

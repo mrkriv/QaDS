@@ -7,66 +7,47 @@
 #include "Runtime/CoreUObject/Public/Misc/NotifyHook.h"
 #include "GraphEditor.h"
 #include "IDetailsView.h"
-#include "DialogAsset.h"
 #include "SlateBasics.h"
 #include "Commands.h"
 #include "EditorStyle.h"
 #include "Runtime/Core/Public/Logging/TokenizedMessage.h"
 #include "Widgets/Views/STableViewBase.h"
 #include "Widgets/Views/STableRow.h"
-#include "DialogEditorNodes.h"
 
-struct DIALOGSYSTEMEDITOR_API FDialogAssetEditorTabs
+class UEdGraph;
+class UEdGraphNode;
+class SGraphEditor;
+class FXmlFile;
+
+struct DIALOGSYSTEMEDITOR_API FQaDSAssetEditorTabs
 {
 	static const FName DetailsID;
 	static const FName CompilerResultsID;
 	static const FName GraphEditorID;
 	
 private:
-	FDialogAssetEditorTabs() {}
+	FQaDSAssetEditorTabs() {}
 };
 
-struct DIALOGSYSTEMEDITOR_API FDialogCommands : public TCommands<FDialogCommands>
+class DIALOGSYSTEMEDITOR_API FQaDSAssetEditor : public FAssetEditorToolkit, public FNotifyHook
 {
-	TSharedPtr<FUICommandInfo> Compile;
-	TSharedPtr<FUICommandInfo> Find;
-	TSharedPtr<FUICommandInfo> Import;
-	TSharedPtr<FUICommandInfo> Export;
+	UObject* EditedAsset;
 
-	FDialogCommands()
-		: TCommands<FDialogCommands>(TEXT("Dialog Graph Commands"), FText::FromString("Dialog Graph Commands"), NAME_None, FEditorStyle::GetStyleSetName())
-	{
-	}
-
-	virtual void RegisterCommands() override;
-};
-
-class UEdGraph;
-class UEdGraphNode;
-class SGraphEditor;
-
-class UDialogPhraseNode;
-class UDialogEdGraphNode;
-class UDialogRootEdGraphNode;
-
-class DIALOGSYSTEMEDITOR_API FDialogAssetEditor : public FAssetEditorToolkit, public FNotifyHook
-{
 public:
+	~FQaDSAssetEditor();
 
-	~FDialogAssetEditor();
-
-	// IToolkit interface
 	virtual void RegisterTabSpawners(const TSharedRef<FTabManager>& InTabManager) override;
 	virtual void UnregisterTabSpawners(const TSharedRef<FTabManager>& InTabManager) override;
-	// FAssetEditorToolkit
-
 	virtual FName GetToolkitFName() const override;
 	virtual FText GetBaseToolkitName() const override;
 	virtual FLinearColor GetWorldCentricTabColorScale() const override;
 	virtual FString GetWorldCentricTabPrefix() const override;
-	void InitDialogAssetEditor(const EToolkitMode::Type Mode, const TSharedPtr< class IToolkitHost >& InitToolkitHost, UDialogAsset* Object);
 
-private:
+protected:
+	virtual void CompileExecute() = 0;
+	virtual UObject* GetEditedAsset() const = 0;
+	virtual FString ExportToXml();
+	virtual void ImportFromXml(FXmlFile* xml);
 
 	TSharedPtr<class IMessageLogListing> CompilerResultsListing;
 	TSharedPtr<SGraphEditor> GraphEditor;
@@ -77,7 +58,6 @@ private:
 	TSharedPtr<SDockTab> CompilerResultsTab;
 	TSharedPtr<SDockTab> KeysTab;
 	TSharedPtr<SDockTab> KeyManagerTab;
-	UDialogAsset* EditedAsset;
 	FDelegateHandle OnGraphChangedDelegateHandle;
 	FDelegateHandle OnPropertyChangedDelegateHandle;
 	FCompilerResultsLog CompileLogResults;
@@ -88,12 +68,8 @@ private:
 	TSharedRef<SDockTab> SpawnTab_CompilerResults(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& Args);
 
-	UEdGraph* CreateGraphFromAsset();
-	UDialogRootEdGraphNode* GetRootNode();
-
 	void OnGraphChanged(const FEdGraphEditAction& Action);
 	void OnPropertyChanged(const FPropertyChangedEvent& Event);
-	void BuildToolbar(FToolBarBuilder &builder);
 	void SelectAllNodes();
 	bool CanSelectAllNodes() const;
 	void DeleteSelectedNodes();
@@ -110,15 +86,10 @@ private:
 	void DuplicateNodes();
 	bool CanDuplicateNodes() const;
 	void DeleteSelectedDuplicatableNodes();
-
 	void OnSelectedNodesChanged(const TSet<UObject*>& NewSelection);
 	void OnNodeDoubleClicked(UEdGraphNode* Node);
 
 	void OpenFindWindow();
 	void ImportExecute();
 	void ExportExecute();
-	void CompileExecute();
-
-	void ResetCompilePhrase(UDialogEdGraphNode* Node);
-	UDialogNode* Compile(UDialogEdGraphNode* Node);
 };
