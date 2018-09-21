@@ -7,16 +7,14 @@ public class DialogSystemRuntime : ModuleRules
 
         PublicIncludePaths.AddRange(
             new string[] {
-                "DialogSystemRuntime/Public",
-                "DialogSystemRuntime/Public/DialogNodes",
+                "DialogSystemRuntime/Public"
             }
         );
 
 
         PrivateIncludePaths.AddRange(
             new string[] {
-                "DialogSystemRuntime/Private",
-                "DialogSystemRuntime/Private/DialogNodes",
+                "DialogSystemRuntime/Private"
             }
         );
 
