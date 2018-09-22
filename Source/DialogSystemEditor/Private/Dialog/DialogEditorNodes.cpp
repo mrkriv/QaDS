@@ -7,99 +7,7 @@
 #include "QaDSSettings.h"
 #include "DialogAsset.h"
 #include "XmlSerealizeHelper.h"
-
-//UDialogEdGraphNode...........................................................................................
-TArray<UDialogEdGraphNode*> UDialogEdGraphNode::GetChildNodes() const
-{
-	TArray<UDialogEdGraphNode*> ChildNodes;
-
-	for (auto Pin : Pins)
-	{
-		if (Pin->Direction != EGPD_Output)
-			continue;
-
-		for (int i = 0; i < Pin->LinkedTo.Num(); i++)
-		{
-			if (Pin->LinkedTo[i])
-				ChildNodes.Add((UDialogEdGraphNode*)Pin->LinkedTo[i]->GetOwningNode());
-		}
-	}
-
-	return ChildNodes;
-}
-
-void UDialogEdGraphNode::ResetCompile()
-{
-	CompileNode = NULL;
-}
-
-int UDialogEdGraphNode::GetOrder() const
-{
-	auto inputPin = Pins.FindByPredicate([](const UEdGraphPin* pin) {return pin->Direction == EGPD_Input; });
-
-	if(inputPin == NULL || (*inputPin)->LinkedTo.Num() == 0)
-		return 0;
-	
-	auto bigOwner = (UDialogEdGraphNode*)(*inputPin)->LinkedTo[0]->GetOwningNode();
-	for(auto ownerPin : (*inputPin)->LinkedTo)
-	{
-		auto owner = (UDialogEdGraphNode*)ownerPin->GetOwningNode();
-
-		if (owner != NULL && owner->GetChildNodes().Num() > bigOwner->GetChildNodes().Num())
-		{
-			bigOwner = owner;
-		}
-	}
-
-	auto lessCount = 0;
-	for (auto node : bigOwner->GetChildNodes())
-	{
-		if (node->NodePosX < NodePosX)
-			lessCount++;
-	}
-
-	return lessCount + 1;
-}
-
-FString UDialogEdGraphNode::SaveToXml(int tabLevel) const
-{
-	FString tab(tabLevel, TEXT("\t\t\t\t\t\t\t\t\t\t\t"));
-	FString xml;
-
-	xml += tab + "<id>" + NodeGuid.ToString() + "</id>\n";
-	xml += tab + "<class>" + GetClass()->GetFName().ToString() + "</class>\n";
-	xml += tab + "<x>" + FString::FromInt(NodePosX) + "</x>\n";
-	xml += tab + "<y>" + FString::FromInt(NodePosY) + "</y>\n";
-	xml += FXmlSerealizeHelper::SerealizeArray(tab, "links", "link", GetChildNodes());
-
-	return xml;
-}
-
-void UDialogEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById)
-{
-	auto xTag = xmlNode->FindChildNode("x");
-	if (xTag != NULL)
-		NodePosX = FCString::Atoi(*xTag->GetContent());
-
-	auto yTag = xmlNode->FindChildNode("y");
-	if (yTag != NULL)
-		NodePosY = FCString::Atoi(*yTag->GetContent());
-
-	auto linksTag = xmlNode->FindChildNode("links");
-	if (linksTag != NULL)
-	{
-		for (auto linkTag : linksTag->GetChildrenNodes())
-		{
-			auto id = linkTag->GetContent();
-			auto node = nodeById[id];
-
-			if (node != NULL && node->InputPin != NULL && OutputPin != NULL)
-			{
-				OutputPin->MakeLinkTo(node->InputPin);
-			}
-		}
-	}
-}
+#include "XmlFile.h"
 
 //PhraseNode..........................................................................................................
 UDialogPhraseEdGraphNode::UDialogPhraseEdGraphNode()
@@ -142,7 +50,7 @@ FString UDialogPhraseEdGraphNode::SaveToXml(int tabLevel) const
 	return xml;
 }
 
-void UDialogPhraseEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById)
+void UDialogPhraseEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
 	Super::LoadInXml(xmlNode, nodeById);
 
@@ -191,7 +99,7 @@ FString UDialogSubGraphEdGraphNode::SaveToXml(int tabLevel) const
 	return xml;
 }
 
-void UDialogSubGraphEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById)
+void UDialogSubGraphEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
 	Super::LoadInXml(xmlNode, nodeById);
 
@@ -225,7 +133,7 @@ FString UDialogElseIfEdGraphNode::SaveToXml(int tabLevel) const
 	return xml;
 }
 
-void UDialogElseIfEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById)
+void UDialogElseIfEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
 	auto xTag = xmlNode->FindChildNode("x");
 	if (xTag != NULL)
@@ -259,7 +167,7 @@ FString UDialogRootEdGraphNode::SaveToXml(int tabLevel) const
 	return xml;
 }
 
-void UDialogRootEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById)
+void UDialogRootEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
 	auto xTag = xmlNode->FindChildNode("x");
 	if (xTag != NULL)

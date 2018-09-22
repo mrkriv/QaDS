@@ -16,8 +16,8 @@
 #include "PropertyEditorModule.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "QaDSSettings.h"
-
-#include "DialogEditorNodes.h" //todo
+#include "QaDSEdGraphNode.h"
+#include "DialogGraphSchema.h"
 
 #include "Framework/Application/SlateApplication.h"
 #include "FileManager.h"
@@ -161,8 +161,7 @@ void FQaDSAssetEditor::OnSelectedNodesChanged(const TSet<UObject*>& NewSelection
 	TArray<UObject*> SelectedObjects;
 	for (UObject* Object : NewSelection)
 	{
-		if (!Cast<UDialogRootEdGraphNode>(Object))//todo
-			SelectedObjects.Add(Object);
+		SelectedObjects.Add(Object);
 	}
 
 	if(SelectedObjects.Num() == 0)
@@ -191,13 +190,20 @@ void FQaDSAssetEditor::ExportExecute()
 
 	if (isSaved)
 	{
-		FFileHelper::SaveStringToFile(ExportToXml(), *Filenames[0]);
-	}
-}
+		FString xml = "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>\n";
+		xml += "<nodes>\n";		
 
-FString FQaDSAssetEditor::ExportToXml()
-{
-	return "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>";
+		for (auto graphNode : GraphEditor->GetCurrentGraph()->Nodes)
+		{
+			xml += "\t<node>\n";
+			xml += Cast<UQaDSEdGraphNode>(graphNode)->SaveToXml(2);
+			xml += "\t</node>\n";
+		}
+
+		xml += "</nodes>";
+
+		FFileHelper::SaveStringToFile(xml, *Filenames[0]);
+	}
 }
 
 void FQaDSAssetEditor::ImportExecute()
@@ -216,12 +222,63 @@ void FQaDSAssetEditor::ImportExecute()
 	if (isOpen)
 	{
 		FXmlFile xml(*Filenames[0]);
-		ImportFromXml(&xml);
+
+		TMap<UQaDSEdGraphNode*, FXmlNode*> xmlByNode;
+		TMap<FString, UQaDSEdGraphNode*> nodesById;
+
+		for (auto nodeTag : xml.GetRootNode()->GetChildrenNodes())
+		{
+			auto idTag = nodeTag->FindChildNode("id");
+			auto classTag = nodeTag->FindChildNode("class");
+
+			if (idTag == NULL || classTag == NULL)
+				continue;
+
+			auto nodeClass = FindObject<UClass>(ANY_PACKAGE, *classTag->GetContent());
+
+			auto nodeTemplate = NewObject<UQaDSEdGraphNode>(EditedAsset, nodeClass);
+			auto node = FQaDSSchemaAction_NewNode::SpawnNodeFromTemplate<UQaDSEdGraphNode>(EdGraph, nodeTemplate, FVector2D::ZeroVector, false);
+			node->AllocateDefaultPins();
+
+			FGuid::Parse(idTag->GetContent(), node->NodeGuid);
+
+			nodesById.Add(idTag->GetContent(), node);
+			xmlByNode.Add(node, nodeTag);
+		}
+
+		if (xmlByNode.Num() == 0)
+			return;
+
+		auto graph = GraphEditor->GetCurrentGraph();
+		graph->Nodes.Reset();
+
+		for (auto kpv : xmlByNode)
+		{
+			kpv.Key->LoadInXml(kpv.Value, nodesById);
+			graph->Nodes.Add(kpv.Key);
+		}
 	}
 }
 
-void FQaDSAssetEditor::ImportFromXml(FXmlFile* xml)
+void FQaDSAssetEditor::CompileExecute()
 {
+	UE_LOG(DialogModuleLog, Log, TEXT("Compile dialog %s"), *EditedAsset->GetPathName());
+
+	CompileLogResults = FCompilerResultsLog();
+	CompileLogResults.BeginEvent(TEXT("Compile"));
+	CompileLogResults.SetSourcePath(EditedAsset->GetPathName());
+
+	CompileLogResults.Note(TEXT("Compile dialog"));
+
+	if (!CompilerResultsTab.IsValid())
+		CompilerResultsTab = TabManager->InvokeTab(FQaDSAssetEditorTabs::CompilerResultsID);
+
+	CompilerResultsListing->ClearMessages();
+
+	Compile();
+
+	CompileLogResults.EndEvent();
+	CompilerResultsListing->AddMessages(CompileLogResults.Messages);
 }
 
 void FQaDSAssetEditor::OnNodeDoubleClicked(class UEdGraphNode* Node)

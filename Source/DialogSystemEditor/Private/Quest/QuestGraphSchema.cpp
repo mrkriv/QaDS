@@ -7,6 +7,7 @@
 #include "GraphEditorActions.h"
 #include "RectConnectionDrawingPolicy.h"
 #include "QuestGraphSchema.h"
+#include "QaDSGraphSchema.h"
 #include "Runtime/Slate/Public/Framework/MultiBox/MultiBoxBuilder.h"
 #include "QuestEditorNodes.h"
 
@@ -21,7 +22,7 @@ void UQuestGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
 	bool rootFound = false;
 	for (auto node : Graph->Nodes)
 	{
-		if (Cast<UDialogRootEdGraphNode>(node)) //todo:: 
+		if (Cast<UQuestRootEdGraphNode>(node))
 		{
 			rootFound = true;
 			break;
@@ -31,10 +32,11 @@ void UQuestGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
 	TArray<TSharedPtr<FEdGraphSchemaAction>> Actions;
 
 	if (!rootFound)
-		DialogSchemaUtils::AddAction<UDialogRootEdGraphNode>(TEXT("Create Root Node"), TEXT(""), Actions, OwnerOfTemp);
+		QaDSSchemaUtils::AddAction<UQuestRootEdGraphNode>(TEXT("Create Root Node"), TEXT(""), Actions, OwnerOfTemp);
 
-	DialogSchemaUtils::AddAction<UDialogPhraseEdGraphNode_Player>(TEXT("Add Player Phrase"), TEXT("Add dialog phrase node"), Actions, OwnerOfTemp);
-	
+	QaDSSchemaUtils::AddAction<UQuestStageEdGraphNode>(TEXT("Add Stage"), TEXT(""), Actions, OwnerOfTemp);
+	QaDSSchemaUtils::AddAction<UQuestEndEdGraphNode>(TEXT("Add End Node"), TEXT(""), Actions, OwnerOfTemp);
+
 	for (TSharedPtr<FEdGraphSchemaAction> Action : Actions)
 		ContextMenuBuilder.AddAction(Action);
 }

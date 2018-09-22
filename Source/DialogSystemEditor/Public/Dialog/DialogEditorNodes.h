@@ -14,17 +14,10 @@ class DIALOGSYSTEMEDITOR_API UDialogEdGraphNode : public UQaDSEdGraphNode
 	GENERATED_BODY()
 
 public:
-	UEdGraphPin* InputPin;
-	UEdGraphPin* OutputPin;
-
 	UPROPERTY()
 	UDialogNode* CompileNode;
 
-	TArray<UDialogEdGraphNode*> GetChildNodes() const;
-	virtual void ResetCompile() override;
-	virtual int GetOrder() const;
-	virtual FString SaveToXml(int tabLevel) const;
-	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById);
+	virtual void ResetCompile() override { CompileNode = NULL; }
 };
 
 UCLASS()
@@ -36,7 +29,7 @@ public:
 	virtual void AllocateDefaultPins() override;
 	virtual FString SaveToXml(int tabLevel) const override;
 	virtual bool CanUserDeleteNode() const override;
-	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById) override;
+	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };
 
@@ -53,7 +46,7 @@ public:
 	virtual void AllocateDefaultPins() override;
 	virtual FString SaveToXml(int tabLevel) const override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
-	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById) override;
+	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
 };
 
@@ -77,7 +70,7 @@ public:
 
 	virtual void AllocateDefaultPins() override;
 	virtual FString SaveToXml(int tabLevel) const override;
-	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById) override;
+	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };
 
@@ -92,6 +85,6 @@ public:
 
 	virtual void AllocateDefaultPins() override;
 	virtual FString SaveToXml(int tabLevel) const override;
-	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UDialogEdGraphNode*>& nodeById) override;
+	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };

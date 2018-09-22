@@ -8,7 +8,7 @@ class DIALOGSYSTEMEDITOR_API FXmlSerealizeHelper
 {
 public:
 	static FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FString> values);
-	static FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<UDialogEdGraphNode*> values);
+	static FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<UQaDSEdGraphNode*> values);
 	static FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FName> values);
 	static FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FDialogPhraseEvent> values);
 	static FString SerealizeArray(FString tab, FString tag, FString itemTag, TArray<FDialogPhraseCondition> values);

@@ -17,7 +17,7 @@ FString FXmlSerealizeHelper::SerealizeArray(FString tab, FString tag, FString it
 	return xml;
 }
 
-FString FXmlSerealizeHelper::SerealizeArray(FString tab, FString tag, FString itemTag, TArray<UDialogEdGraphNode*> values)
+FString FXmlSerealizeHelper::SerealizeArray(FString tab, FString tag, FString itemTag, TArray<UQaDSEdGraphNode*> values)
 {
 	TArray<FString> newValues;
 

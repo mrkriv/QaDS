@@ -3,13 +3,9 @@
 #include "DialogSGraphNodes.h"
 #include "DialogEditorNodes.h"
 
-FDialogEditorNodeFactory::FDialogEditorNodeFactory()
-{
-}
-
 TSharedPtr<class SGraphNode> FDialogEditorNodeFactory::CreateNode(UEdGraphNode* Node) const
 {
-	TSharedPtr<SGraphNode_DialogNodeBase> SNode;
+	TSharedPtr<SGraphNode_QaDSNodeBase> SNode;
 
 	if (Node->IsA(UDialogPhraseEdGraphNode::StaticClass()))
 	{

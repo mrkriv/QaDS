@@ -42,13 +42,12 @@ public:
 	virtual FText GetBaseToolkitName() const override;
 	virtual FLinearColor GetWorldCentricTabColorScale() const override;
 	virtual FString GetWorldCentricTabPrefix() const override;
+	void OpenFindWindow();
+	void ImportExecute();
+	void ExportExecute();
+	void CompileExecute();
 
 protected:
-	virtual void CompileExecute() = 0;
-	virtual UObject* GetEditedAsset() const = 0;
-	virtual FString ExportToXml();
-	virtual void ImportFromXml(FXmlFile* xml);
-
 	TSharedPtr<class IMessageLogListing> CompilerResultsListing;
 	TSharedPtr<SGraphEditor> GraphEditor;
 	TSharedPtr<FUICommandList> GraphEditorCommands;
@@ -62,6 +61,7 @@ protected:
 	FDelegateHandle OnPropertyChangedDelegateHandle;
 	FCompilerResultsLog CompileLogResults;
 	bool bGraphStateChanged;
+	UEdGraph* EdGraph;
 
 	TSharedRef<SGraphEditor> CreateGraphEditorWidget(UEdGraph* InGraph);
 	TSharedRef<SDockTab> SpawnTab_Viewport(const FSpawnTabArgs& Args);
@@ -89,7 +89,6 @@ protected:
 	void OnSelectedNodesChanged(const TSet<UObject*>& NewSelection);
 	void OnNodeDoubleClicked(UEdGraphNode* Node);
 
-	void OpenFindWindow();
-	void ImportExecute();
-	void ExportExecute();
+	virtual void Compile() = 0;
+	virtual UObject* GetEditedAsset() const = 0;
 };

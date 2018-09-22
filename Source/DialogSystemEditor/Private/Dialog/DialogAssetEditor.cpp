@@ -16,7 +16,8 @@
 #include "HAL/PlatformApplicationMisc.h"
 #include "Kismet2/DebuggerCommands.h"
 #include "ScopedTransaction.h"
-#include "XmlFile.h"
+#include "DialogGraphSchema.h"
+#include "QaDSGraphSchema.h"
 
 #define LOCTEXT_NAMESPACE "DialogGraph"
 
@@ -49,6 +50,7 @@ void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, co
 		EditedAsset->UpdateGraph = CreateGraphFromAsset();
 	
 	GraphEditor = CreateGraphEditorWidget(EditedAsset->UpdateGraph);
+	EdGraph = EditedAsset->UpdateGraph;
 
 	const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout("DialogEditor_Layout")
 		->AddArea
@@ -117,8 +119,8 @@ void FDialogAssetEditor::BuildToolbar(FToolBarBuilder &builder)
 	builder.AddSeparator();
 	builder.AddToolBarButton(FDialogCommands::Get().Compile, NAME_None, FText::FromString("Compile"), FText::FromString("Compile this dialog"), iconCompile, NAME_None);
 	builder.AddSeparator(); 
-	builder.AddToolBarButton(FDialogCommands::Get().Find, NAME_None, FText::FromString("Find"), FText::FromString("Open find dialog"), iconFind, NAME_None);
-	builder.AddSeparator(); 
+	//builder.AddToolBarButton(FDialogCommands::Get().Find, NAME_None, FText::FromString("Find"), FText::FromString("Open find dialog"), iconFind, NAME_None);
+	//builder.AddSeparator(); 
 	builder.AddToolBarButton(FDialogCommands::Get().Export, NAME_None, FText::FromString("Export"), FText::FromString("Export graph to file"), iconImport, NAME_None);
 	builder.AddToolBarButton(FDialogCommands::Get().Import, NAME_None, FText::FromString("Import"), FText::FromString("Imoprt graph from file"), iconExport, NAME_None);
 	builder.AddSeparator();
@@ -126,65 +128,11 @@ void FDialogAssetEditor::BuildToolbar(FToolBarBuilder &builder)
 	FPlayWorldCommands::BuildToolbar(builder);
 }
 
-FString FDialogAssetEditor::ExportToXml()
-{
-	FString xml = "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>\n";
-	xml += "<nodes>\n";
-
-	for (auto graphNode : GraphEditor->GetCurrentGraph()->Nodes)
-	{
-		xml += "\t<node>\n";
-		xml += Cast<UDialogEdGraphNode>(graphNode)->SaveToXml(2);
-		xml += "\t</node>\n";
-	}
-	xml += "</nodes>";
-
-	return xml;
-}
-
-void FDialogAssetEditor::ImportFromXml(FXmlFile* xml)
-{
-	TMap<UDialogEdGraphNode*, FXmlNode*> xmlByNode;
-	TMap<FString, UDialogEdGraphNode*> nodesById;
-
-	for (auto nodeTag : xml->GetRootNode()->GetChildrenNodes())
-	{
-		auto idTag = nodeTag->FindChildNode("id");
-		auto classTag = nodeTag->FindChildNode("class");
-
-		if (idTag == NULL || classTag == NULL)
-			continue;
-
-		auto nodeClass = FindObject<UClass>(ANY_PACKAGE, *classTag->GetContent());
-
-		auto nodeTemplate = NewObject<UDialogEdGraphNode>(EditedAsset, nodeClass);
-		auto node = FDialogSchemaAction_NewNode::SpawnNodeFromTemplate<UDialogEdGraphNode>(EditedAsset->UpdateGraph, nodeTemplate, FVector2D::ZeroVector, false);
-		node->AllocateDefaultPins();
-
-		FGuid::Parse(idTag->GetContent(), node->NodeGuid);
-
-		nodesById.Add(idTag->GetContent(), node);
-		xmlByNode.Add(node, nodeTag);
-	}
-
-	if (xmlByNode.Num() == 0)
-		return;
-
-	auto graph = GraphEditor->GetCurrentGraph();
-	graph->Nodes.Reset();
-
-	for (auto kpv : xmlByNode)
-	{
-		kpv.Key->LoadInXml(kpv.Value, nodesById);
-		graph->Nodes.Add(kpv.Key);
-	}
-}
-
 UDialogRootEdGraphNode* FDialogAssetEditor::GetRootNode()
 {
 	for (auto node : GraphEditor->GetCurrentGraph()->Nodes)
 	{
-		if (UDialogRootEdGraphNode* root = Cast<UDialogRootEdGraphNode>(node))
+		if (auto root = Cast<UDialogRootEdGraphNode>(node))
 			return root;
 	}
 
@@ -196,47 +144,23 @@ UEdGraph* FDialogAssetEditor::CreateGraphFromAsset()
 	auto CustGraph = NewObject<UEdGraph>(EditedAsset, UEdGraph::StaticClass(), NAME_None, RF_Transactional);
 	CustGraph->Schema = UDialogGraphSchema::StaticClass();
 
-	auto root = FDialogSchemaAction_NewNode::SpawnNodeFromTemplate<UDialogRootEdGraphNode>(CustGraph, NewObject<UDialogRootEdGraphNode>(), FVector2D::ZeroVector, false);
+	auto root = FQaDSSchemaAction_NewNode::SpawnNodeFromTemplate<UDialogRootEdGraphNode>(CustGraph, NewObject<UDialogRootEdGraphNode>(), FVector2D::ZeroVector, false);
 	root->AllocateDefaultPins();
 
 	return CustGraph;
 }
 
-void FDialogAssetEditor::CompileExecute()
+void FDialogAssetEditor::Compile()
 {
-	UE_LOG(DialogModuleLog, Log, TEXT("Compile dialog %s"), *EditedAsset->GetPathName());
-
-	CompileLogResults = FCompilerResultsLog();
-	CompileLogResults.BeginEvent(TEXT("Compile"));
-	CompileLogResults.SetSourcePath(EditedAsset->GetPathName());
-
-	CompileLogResults.Note(TEXT("Compile dialog"));
-
-	if (!CompilerResultsTab.IsValid())
-		CompilerResultsTab = TabManager->InvokeTab(FQaDSAssetEditorTabs::CompilerResultsID);
-
-	CompilerResultsListing->ClearMessages();
-
 	auto rootNode = GetRootNode();
-
-	if (rootNode != NULL)
-	{
-		ResetCompilePhrase(rootNode);
-
-		auto rootPhrase = Compile(rootNode);
-
-		if (rootPhrase != NULL)
-		{
-			EditedAsset->RootNode = rootPhrase;
-		}
-		else
-			CompileLogResults.Error(TEXT("Root node not found"));
-	}
-	else
+	if (rootNode == NULL)
+	{		
 		CompileLogResults.Error(TEXT("Root node not found"));
+		return;
+	}
 
-	CompileLogResults.EndEvent();
-	CompilerResultsListing->AddMessages(CompileLogResults.Messages);
+	ResetCompilePhrase(rootNode);
+	EditedAsset->RootNode = Compile(rootNode);
 }
 
 void FDialogAssetEditor::ResetCompilePhrase(UDialogEdGraphNode* Node)
@@ -328,6 +252,7 @@ UDialogNode* FDialogAssetEditor::Compile(UDialogEdGraphNode* node)
 	for (auto& child : childs)
 	{
 		auto childPhrase = Cast<UDialogPhraseEdGraphNode>(child);
+		auto dialogPhrase = Cast<UDialogEdGraphNode>(child);
 
 		if (childPhrase)
 		{
@@ -342,7 +267,8 @@ UDialogNode* FDialogAssetEditor::Compile(UDialogEdGraphNode* node)
 			}
 		}
 
-		node->CompileNode->Childs.Add(Compile(child));
+		if (dialogPhrase != NULL)
+			node->CompileNode->Childs.Add(Compile(dialogPhrase));
 	}
 
 	if (needUpdate && PropertyEditor.IsValid())

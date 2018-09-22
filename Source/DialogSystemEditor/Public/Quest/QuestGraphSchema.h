@@ -10,7 +10,5 @@ class UQuestGraphSchema : public UDialogGraphSchema
 	GENERATED_BODY()
 
 public:
-	// Begin EdGraphSchema interface
 	virtual void GetGraphContextActions(FGraphContextMenuBuilder& ContextMenuBuilder) const override;
-	// End EdGraphSchema interface
 };

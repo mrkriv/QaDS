@@ -8,21 +8,17 @@
 #include "BrushSet.h"
 
 #include "StoryKeyWindow.h"
+#include "QaDSSettings.h"
 
 #include "DialogEditorNodeFactory.h"
 #include "DialogPhraseEventCustomization.h"
 #include "PhraseNodeCustomization.h"
 #include "DialogAssetTypeActions.h"
 #include "DialogAssetEditor.h"
-#include "QaDSSettings.h"
-#include "DialogScript.h"
 
-//#include "QuestEditorNodeFactory.h"
-//#include "QuestPhraseEventCustomization.h"
-//#include "PhraseNodeCustomization.h"
+#include "QuestEditorNodeFactory.h"
 #include "QuestAssetTypeActions.h"
-//#include "QuestAssetEditor.h"
-#include "QuestScript.h"
+#include "QuestAssetEditor.h"
 
 DEFINE_LOG_CATEGORY(DialogModuleLog)
 
@@ -32,6 +28,7 @@ void FDialogSystemEditorModule::StartupModule()
 {
 	FBrushSet::Register();
 	FDialogCommands::Register();
+	FQuestCommands::Register();
 
 	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	AssetCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Gameplay")), LOCTEXT("GameplayAssetCategory", "Gameplay"));
@@ -50,8 +47,8 @@ void FDialogSystemEditorModule::StartupModule()
 		UQaDSSettings::StaticClass()->GetDefaultObject()
 	);
 
-	TSharedPtr<FGraphPanelNodeFactory> GraphPanelNodeFactory = MakeShareable(new FDialogEditorNodeFactory);
-	FEdGraphUtilities::RegisterVisualNodeFactory(GraphPanelNodeFactory);
+	FEdGraphUtilities::RegisterVisualNodeFactory(MakeShareable(new FQuestEditorNodeFactory));
+	FEdGraphUtilities::RegisterVisualNodeFactory(MakeShareable(new FDialogEditorNodeFactory));
 
 	auto& MenuStructure = WorkspaceMenu::GetMenuStructure();
 	auto developerCategory = MenuStructure.GetDeveloperToolsMiscCategory();

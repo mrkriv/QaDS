@@ -19,14 +19,11 @@ public:
 protected:
 	UObject* GetEditedAsset() const override;
 	FName GetEditorName() const override;
-	
-	virtual FString ExportToXml() override;
-	virtual void ImportFromXml(FXmlFile* xml) override;
 
 	UEdGraph* CreateGraphFromAsset();
 	UDialogRootEdGraphNode* GetRootNode();
 
-	void CompileExecute() override;
+	void Compile() override;
 	void ResetCompilePhrase(UDialogEdGraphNode* Node);
 	UDialogNode* Compile(UDialogEdGraphNode* Node);
 };

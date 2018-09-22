@@ -2,26 +2,49 @@
 
 #include "EdGraph/EdGraphNode.h"
 #include "QuestNodes.h"
-#include "DialogEditorNodes.h"
+#include "QaDSEdGraphNode.h"
 #include "QuestEditorNodes.generated.h"
 
 class UEdGraphPin;
 class FXmlNode;
 
 UCLASS()
-class DIALOGSYSTEMEDITOR_API UQuestEdGraphNode : public UEdGraphNode
+class DIALOGSYSTEMEDITOR_API UQuestEdGraphNode : public UQaDSEdGraphNode
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY()
 	UQuestNode* CompileNode;
+	virtual void ResetCompile() override { CompileNode = NULL; }
+};
 
-	TArray<UQuestEdGraphNode*> GetChildNodes() const;
-	virtual int GetOrder() const;
+UCLASS()
+class DIALOGSYSTEMEDITOR_API UQuestStageEdGraphNode : public UQuestEdGraphNode
+{
+	GENERATED_BODY()
+
+public:
 	virtual FString SaveToXml(int tabLevel) const;
-	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQuestEdGraphNode*>& nodeById);
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
+	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
+};
 
-	TSharedPtr<FNodePropertyObserver> PropertyObserver;
+UCLASS()
+class DIALOGSYSTEMEDITOR_API UQuestEndEdGraphNode : public UQuestEdGraphNode
+{
+	GENERATED_BODY()
+
+public:
+	virtual FString SaveToXml(int tabLevel) const;
+	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
+};
+
+UCLASS()
+class DIALOGSYSTEMEDITOR_API UQuestRootEdGraphNode : public UQuestEdGraphNode
+{
+	GENERATED_BODY()
+
+public:
+	virtual FString SaveToXml(int tabLevel) const;
+	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
 };

@@ -1,7 +1,7 @@
 #include "DialogSystemEditor.h"
 #include "QuestAssetTypeActions.h"
 #include "QuestAsset.h"
-//#include "QuestAssetEditor.h"
+#include "QuestAssetEditor.h"
 #include "QuestScript.h"
 
 FQuestAssetTypeActions::FQuestAssetTypeActions(EAssetTypeCategories::Type InAssetCategory)
@@ -21,7 +21,7 @@ FColor FQuestAssetTypeActions::GetTypeColor() const
 
 void FQuestAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor)
 {
-	/*const EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
+	const EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
 
 	for (auto It = InObjects.CreateConstIterator(); It; ++It)
 	{
@@ -31,7 +31,7 @@ void FQuestAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, 
 			TSharedRef<FQuestAssetEditor> NewCustEditor(new FQuestAssetEditor());
 			NewCustEditor->InitQuestAssetEditor(Mode, EditWithinLevelEditor, obj);
 		}
-	}*/
+	}
 }
 
 UClass* FQuestAssetTypeActions::GetSupportedClass() const
