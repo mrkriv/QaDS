@@ -18,6 +18,9 @@ public:
 	UPROPERTY()
 	UQuestNode* RootNode;
 
+	UPROPERTY()
+	UQuestNode* CurrentNode;
+
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "QuestScript"))
 	TSubclassOf<AQuestScript> QuestScriptClass;
 

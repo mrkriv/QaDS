@@ -25,6 +25,10 @@ class DIALOGSYSTEMEDITOR_API UQuestStageEdGraphNode : public UQuestEdGraphNode
 	GENERATED_BODY()
 
 public:
+
+	UPROPERTY()
+	FQuestStageInfo Stage;
+
 	virtual FString SaveToXml(int tabLevel) const;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
 };

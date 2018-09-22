@@ -1,5 +1,6 @@
 #pragma once
 
+#include "QuestStage.h"
 #include "QuestNodes.generated.h"
 
 class UQuestAsset;	
@@ -16,6 +17,9 @@ public:
 
 	UPROPERTY()
 	TArray<UQuestNode*> Childs;
+
+	UPROPERTY()
+	FQuestStageInfo Stage;
 
 	virtual bool Ckeck(UQuestProcessor* processor);
 	virtual void InvokePostScript(UQuestProcessor* processor);
