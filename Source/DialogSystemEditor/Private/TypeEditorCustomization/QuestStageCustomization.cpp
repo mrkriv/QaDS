@@ -1,4 +1,5 @@
 #include "DialogSystemEditor.h"
+#include "QuestStageCustomization.h"
 #include "UObject/UnrealType.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/SViewport.h"
@@ -10,45 +11,37 @@
 #include "DetailCategoryBuilder.h"
 #include "IDetailsView.h"
 #include "Slate/SceneViewport.h"
-#include "DialogEditorNodes.h"
+#include "QuestEditorNodes.h"
 #include "PhraseNodeCustomization.h"
 #include "DetailLayoutBuilder.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Editor/UnrealEd/Public/Toolkits/AssetEditorManager.h"
 
-#define LOCTEXT_NAMESPACE "DialogPhraseEventCustomization"
+#define LOCTEXT_NAMESPACE "QuestStageEventCustomization"
 
-TSharedRef<IDetailCustomization> FPhraseNodeDetails::MakeInstance()
+TSharedRef<IDetailCustomization> FQuestStageDetails::MakeInstance()
 {
-	return MakeShareable(new FPhraseNodeDetails());
+	return MakeShareable(new FQuestStageDetails());
 }
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
-void FPhraseNodeDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
+void FQuestStageDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 {
-	auto DataProperty = DetailLayout.GetProperty(GET_MEMBER_NAME_CHECKED(UDialogPhraseEdGraphNode, Data));
+	auto StageProperty = DetailLayout.GetProperty(GET_MEMBER_NAME_CHECKED(UQuestStageEdGraphNode, Stage));
 
-	uint32 DataPropertyCount;
-	DataProperty->GetNumChildren(DataPropertyCount);
+	uint32 StagePropertyCount;
+	StageProperty->GetNumChildren(StagePropertyCount);
 
-	DetailLayout.HideProperty(DataProperty);
-
-	auto AutoTimeProperty = DataProperty->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDialogPhraseInfo, AutoTime));
-	bool isAutoTime;
-	AutoTimeProperty->GetValue(isAutoTime);
-	AutoTimeProperty->SetOnPropertyValueChanged(FSimpleDelegate::CreateLambda([&DetailLayout]()
-	{
-		DetailLayout.ForceRefreshDetails();
-	}));
+	DetailLayout.HideProperty(StageProperty);
 	
-	for (uint32 i = 0; i < DataPropertyCount; i++)
+	for (uint32 i = 0; i < StagePropertyCount; i++)
 	{
-		auto prop = DataProperty->GetChildHandle(i);
+		auto prop = StageProperty->GetChildHandle(i);
 		auto name = prop->GetProperty()->GetName();
 
 		auto& categoty = DetailLayout.EditCategory(FName(*prop->GetMetaData("Category")));
 
-		if (name == "Text")
+		if (name == "Description")
 		{
 			FText Text;
 			prop->GetValue(Text);
@@ -84,10 +77,6 @@ void FPhraseNodeDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 					]
 				]
 			];
-		}
-		else if (name == "PhraseManualTime" && isAutoTime)
-		{
-			continue;
 		}
 		else
 		{

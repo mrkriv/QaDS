@@ -3,17 +3,23 @@
 #include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
 #include "Editor/WorkspaceMenuStructure/Public/WorkspaceMenuStructure.h"
 #include "Editor/WorkspaceMenuStructure/Public/WorkspaceMenuStructureModule.h"
+#include "ISettingsModule.h"
+#include "ThumbnailRendering/ThumbnailManager.h"
+#include "BrushSet.h"
+
+#include "StoryKeyWindow.h"
+#include "QaDSSettings.h"
+
 #include "DialogEditorNodeFactory.h"
 #include "DialogPhraseEventCustomization.h"
 #include "PhraseNodeCustomization.h"
 #include "DialogAssetTypeActions.h"
 #include "DialogAssetEditor.h"
-#include "ISettingsModule.h"
-#include "ThumbnailRendering/ThumbnailManager.h"
-#include "DialogSettings.h"
-#include "DialogScript.h"
-#include "StoryKeyWindow.h"
-#include "BrushSet.h"
+
+#include "QuestEditorNodeFactory.h"
+#include "QuestStageCustomization.h"
+#include "QuestAssetTypeActions.h"
+#include "QuestAssetEditor.h"
 
 DEFINE_LOG_CATEGORY(DialogModuleLog)
 
@@ -23,26 +29,28 @@ void FDialogSystemEditorModule::StartupModule()
 {
 	FBrushSet::Register();
 	FDialogCommands::Register();
+	FQuestCommands::Register();
 
 	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	auto& SettingsModule = FModuleManager::LoadModuleChecked<ISettingsModule>("Settings");
-	auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
 	AssetCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Gameplay")), LOCTEXT("GameplayAssetCategory", "Gameplay"));
 	AssetTools.RegisterAssetTypeActions(MakeShareable(new FDialogAssetTypeActions(AssetCategory)));
+	AssetTools.RegisterAssetTypeActions(MakeShareable(new FQuestAssetTypeActions(AssetCategory)));
 	
+	auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseCondition", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
 	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseEvent", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
 	PropertyModule.RegisterCustomClassLayout("DialogPhraseEdGraphNode", FOnGetDetailCustomizationInstance::CreateStatic(&FPhraseNodeDetails::MakeInstance));
+	PropertyModule.RegisterCustomClassLayout("QuestStageEdGraphNode", FOnGetDetailCustomizationInstance::CreateStatic(&FQuestStageDetails::MakeInstance));
 
+	auto& SettingsModule = FModuleManager::LoadModuleChecked<ISettingsModule>("Settings");
 	SettingsModule.RegisterSettings("Project", "Plugins", "Dialog",
 		LOCTEXT("RuntimeSettingsName", "Dialog Editor"),
 		LOCTEXT("RuntimeSettingsDescription", "Dialog editor settings"),
-		UDialogSettings::StaticClass()->GetDefaultObject()
+		UQaDSSettings::StaticClass()->GetDefaultObject()
 	);
 
-	TSharedPtr<FGraphPanelNodeFactory> GraphPanelNodeFactory = MakeShareable(new FDialogEditorNodeFactory);
-	FEdGraphUtilities::RegisterVisualNodeFactory(GraphPanelNodeFactory);
+	FEdGraphUtilities::RegisterVisualNodeFactory(MakeShareable(new FQuestEditorNodeFactory));
+	FEdGraphUtilities::RegisterVisualNodeFactory(MakeShareable(new FDialogEditorNodeFactory));
 
 	auto& MenuStructure = WorkspaceMenu::GetMenuStructure();
 	auto developerCategory = MenuStructure.GetDeveloperToolsMiscCategory();
@@ -70,12 +78,14 @@ void FDialogSystemEditorModule::ShutdownModule()
 		PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseCondition");
 		PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseEvent");
 		PropertyModule.UnregisterCustomClassLayout("DialogPhraseNode");
+		PropertyModule.UnregisterCustomClassLayout("QuestStageEdGraphNode");
 	}
 
 	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
 	{
 		auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 		AssetTools.UnregisterAssetTypeActions(MakeShareable(new FDialogAssetTypeActions(AssetCategory)));
+		AssetTools.UnregisterAssetTypeActions(MakeShareable(new FQuestAssetTypeActions(AssetCategory)));
 	}
 }
 
