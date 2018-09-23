@@ -163,21 +163,6 @@ void FDialogAssetEditor::Compile()
 	EditedAsset->RootNode = Compile(rootNode);
 }
 
-void FDialogAssetEditor::ResetCompilePhrase(UDialogEdGraphNode* Node)
-{
-	if (Node->CompileNode == NULL)
-		return;
-
-	Node->CompileNode = NULL;
-
-	for (auto& child : Node->GetChildNodes())
-	{
-		auto childPhrase = Cast<UDialogEdGraphNode>(child);
-		if (childPhrase)
-			ResetCompilePhrase(childPhrase);
-	}
-}
-
 UDialogNode* FDialogAssetEditor::Compile(UDialogEdGraphNode* node)
 {
 	if (node->CompileNode != NULL)

@@ -3,6 +3,7 @@
 #include "DialogProcessor.h"
 #include "DialogNodes.h"
 #include "StoryInformationManager.h"
+#include "QuestProcessor.h"
 
 void UDialogPhraseNode::Invoke(UDialogProcessor* processor)
 {
@@ -14,8 +15,11 @@ void UDialogPhraseNode::Invoke(UDialogProcessor* processor)
 
 	for (auto& Event : Data.Action)
 		Event.Invoke(processor);
-
-	//StoryKeyManager->AddKey(Data.UID);
+	
+	if (Data.StartQuest.IsValid())
+	{
+		UQuestProcessor::GetQuestProcessor()->StartQuest(Data.StartQuest);
+	}
 	
 	if (Data.Source == EDialogPhraseSource::Player)
 	{

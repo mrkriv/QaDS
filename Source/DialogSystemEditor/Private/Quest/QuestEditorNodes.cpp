@@ -8,6 +8,12 @@
 #include "XmlFile.h"
 
 //UQuestStageEdGraphNode...........................................................................................
+void UQuestStageEdGraphNode::AllocateDefaultPins()
+{
+	CreatePin(EGPD_Input, NAME_None, FName("Input"));
+	CreatePin(EGPD_Output, NAME_None, FName("Output"));
+}
+
 FString UQuestStageEdGraphNode::SaveToXml(int tabLevel) const
 {
 	FString xml;
@@ -19,6 +25,11 @@ void UQuestStageEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQ
 }
 
 //UQuestEndEdGraphNode...........................................................................................
+void UQuestEndEdGraphNode::AllocateDefaultPins()
+{
+	CreatePin(EGPD_Input, NAME_None, FName("Input"));
+}
+
 FString UQuestEndEdGraphNode::SaveToXml(int tabLevel) const
 {
 	FString xml;
@@ -29,7 +40,12 @@ void UQuestEndEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaD
 {
 }
 
-//UQuestEndEdGraphNode...........................................................................................
+//UQuestRootEdGraphNode...........................................................................................
+void UQuestRootEdGraphNode::AllocateDefaultPins()
+{
+	CreatePin(EGPD_Output, NAME_None, FName("Output"));
+}
+
 FString UQuestRootEdGraphNode::SaveToXml(int tabLevel) const
 {
 	FString xml;

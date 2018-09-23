@@ -40,13 +40,16 @@ FString UDialogPhraseEdGraphNode::SaveToXml(int tabLevel) const
 	if (!Data.AutoTime)
 		xml += tab + "<time>" + FString::SanitizeFloat(Data.PhraseManualTime) + "</time>\n";
 
+	if (Data.StartQuest.IsValid())
+		xml += tab + "<quest>" + Data.StartQuest.GetLongPackageName() + "</quest>\n";
+
 	xml += FXmlSerealizeHelper::SerealizeArray(tab, "give_keys", "key", Data.GiveKeys);
 	xml += FXmlSerealizeHelper::SerealizeArray(tab, "remove_keys", "key", Data.RemoveKeys);
 	xml += FXmlSerealizeHelper::SerealizeArray(tab, "check_has_keys", "key", Data.CheckHasKeys);
 	xml += FXmlSerealizeHelper::SerealizeArray(tab, "check_dont_has_keys", "key", Data.CheckDontHasKeys);
 	xml += FXmlSerealizeHelper::SerealizeArray(tab, "actions", "action", Data.Action);
 	xml += FXmlSerealizeHelper::SerealizeArray(tab, "predicates", "predicate", Data.Predicate);
-
+	
 	return xml;
 }
 
@@ -61,6 +64,10 @@ void UDialogPhraseEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, 
 	auto sourceTag = xmlNode->FindChildNode("source");
 	if (sourceTag != NULL)
 		Data.Source = (EDialogPhraseSource)FCString::Atoi(*sourceTag->GetContent());
+
+	auto questTag = xmlNode->FindChildNode("quest");
+	if (questTag != NULL)
+		Data.StartQuest = TAssetPtr<UQuestAsset>(questTag->GetContent());
 
 	auto timeTag = xmlNode->FindChildNode("time");
 	if (timeTag != NULL)

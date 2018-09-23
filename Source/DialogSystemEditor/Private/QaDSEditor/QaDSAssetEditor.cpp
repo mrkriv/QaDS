@@ -281,6 +281,21 @@ void FQaDSAssetEditor::CompileExecute()
 	CompilerResultsListing->AddMessages(CompileLogResults.Messages);
 }
 
+void FQaDSAssetEditor::ResetCompilePhrase(UQaDSEdGraphNode* Node)
+{
+	if (Node->GetCompile() == NULL)
+		return;
+
+	Node->ResetCompile();
+
+	for (auto& child : Node->GetChildNodes())
+	{
+		auto childPhrase = Cast<UQaDSEdGraphNode>(child);
+		if (childPhrase)
+			ResetCompilePhrase(childPhrase);
+	}
+}
+
 void FQaDSAssetEditor::OnNodeDoubleClicked(class UEdGraphNode* Node)
 {
 

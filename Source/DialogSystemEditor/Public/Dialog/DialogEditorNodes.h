@@ -17,6 +17,7 @@ public:
 	UPROPERTY()
 	UDialogNode* CompileNode;
 
+	virtual UObject* GetCompile() override { return CompileNode; }
 	virtual void ResetCompile() override { CompileNode = NULL; }
 };
 

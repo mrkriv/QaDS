@@ -35,25 +35,29 @@ FName SGraphNode_Phrase::GetIcon() const
 void SGraphNode_Phrase::CreateNodeWidget()
 {
 	auto phraseNode = CastChecked<UDialogPhraseEdGraphNode>(GraphNode);
+	auto& data = phraseNode->Data;
 
 	SGraphNode_QaDSNodeBase::CreateNodeWidget();
 	
-	for (auto key : phraseNode->Data.CheckHasKeys)
+	for (auto key : data.CheckHasKeys)
 		AddTextToContent(ConditionsBox, TEXT("HAS KEY ") + key.ToString(), FColor(170, 255, 0));
 
-	for (auto key : phraseNode->Data.CheckDontHasKeys)
+	for (auto key : data.CheckDontHasKeys)
 		AddTextToContent(ConditionsBox, TEXT("HAS NOT KEY ") + key.ToString(), FColor(255, 150, 0));
 
-	for (auto key : phraseNode->Data.Predicate)
+	for (auto key : data.Predicate)
 		AddTextToContent(ConditionsBox, TEXT("IF ") + key.ToString(), FColor(255, 255, 0));
 	
-	for (auto key : phraseNode->Data.Action)
+	if(data.StartQuest.IsValid())
+		AddTextToContent(EventsBox, TEXT("> ") + data.StartQuest.GetAssetName(), FColor(255, 0, 255));
+
+	for (auto key : data.Action)
 		AddTextToContent(EventsBox, TEXT("E ") + key.ToString(), FColor(0, 170, 255));
 
-	for (auto key : phraseNode->Data.GiveKeys)
+	for (auto key : data.GiveKeys)
 		AddTextToContent(EventsBox, TEXT("+ ") + key.ToString(), FColor(0, 255, 0));
 
-	for (auto key : phraseNode->Data.RemoveKeys)
+	for (auto key : data.RemoveKeys)
 		AddTextToContent(EventsBox, TEXT("- ") + key.ToString(), FColor(255, 0, 0));
 
 	ConditionsBox->SetVisibility(ConditionsBox->NumSlots() > 0 ? EVisibility::Visible : EVisibility::Collapsed);

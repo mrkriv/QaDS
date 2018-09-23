@@ -16,6 +16,8 @@ class DIALOGSYSTEMEDITOR_API UQuestEdGraphNode : public UQaDSEdGraphNode
 public:
 	UPROPERTY()
 	UQuestNode* CompileNode;
+
+	virtual UObject* GetCompile() override { return CompileNode; }
 	virtual void ResetCompile() override { CompileNode = NULL; }
 };
 
@@ -29,6 +31,7 @@ public:
 	UPROPERTY()
 	FQuestStageInfo Stage;
 
+	virtual void AllocateDefaultPins() override;
 	virtual FString SaveToXml(int tabLevel) const;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
 };
@@ -39,6 +42,11 @@ class DIALOGSYSTEMEDITOR_API UQuestEndEdGraphNode : public UQuestEdGraphNode
 	GENERATED_BODY()
 
 public:
+
+	UPROPERTY()
+	bool IsSuccesEnd;
+
+	virtual void AllocateDefaultPins() override;
 	virtual FString SaveToXml(int tabLevel) const;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
 };
@@ -49,6 +57,7 @@ class DIALOGSYSTEMEDITOR_API UQuestRootEdGraphNode : public UQuestEdGraphNode
 	GENERATED_BODY()
 
 public:
+	virtual void AllocateDefaultPins() override;
 	virtual FString SaveToXml(int tabLevel) const;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
 };

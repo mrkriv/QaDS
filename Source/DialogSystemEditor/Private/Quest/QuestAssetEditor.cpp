@@ -155,10 +155,6 @@ UEdGraph* FQuestAssetEditor::CreateGraphFromAsset()
 	return CustGraph;
 }
 
-void FQuestAssetEditor::Compile()
-{
-}
-
 void FQuestAssetEditor::ResetCompilePhrase(UQuestEdGraphNode* Node)
 {
 	if (Node->CompileNode == NULL)
@@ -174,9 +170,103 @@ void FQuestAssetEditor::ResetCompilePhrase(UQuestEdGraphNode* Node)
 	}
 }
 
+void FQuestAssetEditor::Compile()
+{
+	auto rootNode = GetRootNode();
+	if (rootNode == NULL)
+	{
+		CompileLogResults.Error(TEXT("Root node not found"));
+		return;
+	}
+
+	ResetCompilePhrase(rootNode);
+	EditedAsset->RootNode = Compile(rootNode);
+}
+
 UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 {
-	return NULL;
+	if (node->CompileNode != NULL)
+		return node->CompileNode;
+
+	auto stageNode = Cast<UQuestStageEdGraphNode>(node);
+	auto endNode = Cast<UQuestEndEdGraphNode>(node);
+	auto rootNode = Cast<UQuestRootEdGraphNode>(node);
+	bool needUpdate = false;
+
+	if (rootNode != NULL)
+	{
+		node->CompileNode = NewObject<UQuestNode>(EditedAsset);
+	}
+	else if (endNode != NULL)
+	{
+		auto compileNode = NewObject<UQuestEndNode>(EditedAsset);
+		compileNode->IsSuccesEnd = endNode->IsSuccesEnd;
+		node->CompileNode = compileNode;
+	}
+	else if (stageNode != NULL)
+	{
+		auto compileNode = NewObject<UQuestNode>((UObject*)EditedAsset);
+		node->CompileNode = compileNode;
+
+		compileNode->OwnerQuest = Cast<UQuestAsset>(EditedAsset);
+		compileNode->Stage = stageNode->Stage;
+
+		FString ErrorMessage;
+
+		for (auto& Event : compileNode->Stage.Action)
+		{
+			//todo:: create action for quest
+			//Event.OwnerNode = compileNode;
+
+			if (!Event.Compile(ErrorMessage, needUpdate))
+			{
+				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + compileNode->Stage.SystemName.ToString() + "\""));
+			}
+		}
+
+		for (auto& Condition : compileNode->Stage.Predicate)
+		{
+			//Condition.OwnerNode = compileNode;
+
+			if (!Condition.Compile(ErrorMessage, needUpdate))
+			{
+				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + compileNode->Stage.SystemName.ToString() + "\""));
+			}
+		}
+	}
+
+	auto childs = node->GetChildNodes();
+	childs.Sort([](auto& a, auto& b)
+	{
+		return a.GetOrder() < b.GetOrder();
+	});
+
+	for (auto& child : childs)
+	{
+		auto questNode = Cast<UQuestEdGraphNode>(child);
+		if (questNode != NULL)
+			node->CompileNode->Childs.Add(Compile(questNode));
+	}
+
+	if (needUpdate && PropertyEditor.IsValid())
+	{
+		for (auto& obj : PropertyEditor->GetSelectedObjects())
+		{
+			if (obj == node)
+			{
+				auto selected = GraphEditor->GetSelectedNodes();
+				GraphEditor->ClearSelectionSet();
+
+				for (auto n : selected.Array())
+					GraphEditor->SetNodeSelection(Cast<UEdGraphNode>(n), true);
+
+				break;
+			}
+		}
+	}
+
+	return node->CompileNode;
 }
+
 
 #undef LOCTEXT_NAMESPACE

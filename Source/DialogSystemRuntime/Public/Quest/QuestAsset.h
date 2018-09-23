@@ -15,10 +15,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName Name;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FText Title;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FText Description;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UQuestNode* RootNode;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UQuestNode* CurrentNode;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "QuestScript"))

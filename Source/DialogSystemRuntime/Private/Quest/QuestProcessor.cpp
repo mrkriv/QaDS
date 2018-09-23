@@ -13,6 +13,11 @@ UQuestProcessor* UQuestProcessor::GetQuestProcessor()
 	return NewObject<UQuestProcessor>();
 }
 
+TArray<UQuestAsset*> UQuestProcessor::GetActiveQuests() const
+{
+	return activeQuests;
+}
+
 void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 {
 	if (!QuestAsset.IsValid())

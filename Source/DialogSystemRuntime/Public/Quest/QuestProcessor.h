@@ -43,4 +43,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
 	void EndQuest(UQuestAsset* Quest, bool IsSuccses);
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
+	TArray<UQuestAsset*> GetActiveQuests() const;
 };

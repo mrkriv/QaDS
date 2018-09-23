@@ -13,6 +13,7 @@ class UDialogSubGraphNode;
 class UDialogElseIfNode;
 class ADialogScript;
 class UDialogAsset;
+class UQuestAsset;
 
 UENUM(BlueprintType)
 enum class EDialogPhraseSource : uint8
@@ -79,4 +80,7 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Activate")
 	TArray<FDialogPhraseEvent> Action;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Activate")
+	TAssetPtr<UQuestAsset> StartQuest;
 };

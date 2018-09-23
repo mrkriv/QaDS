@@ -41,4 +41,23 @@ void UQuestGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
 		ContextMenuBuilder.AddAction(Action);
 }
 
+void UQuestGraphSchema::GetContextMenuActions(const UEdGraph* CurrentGraph, const UEdGraphNode* InGraphNode, const UEdGraphPin* InGraphPin, FMenuBuilder* MenuBuilder, bool bIsDebugging) const
+{
+	MenuBuilder->AddMenuEntry(FGenericCommands::Get().Delete);
+	MenuBuilder->AddMenuEntry(FGenericCommands::Get().Cut);
+	MenuBuilder->AddMenuEntry(FGenericCommands::Get().Copy);
+	MenuBuilder->AddMenuEntry(FGenericCommands::Get().Paste);
+	MenuBuilder->AddMenuEntry(FGenericCommands::Get().SelectAll);
+
+	if (!Cast<UDialogRootEdGraphNode>(InGraphNode))
+		MenuBuilder->AddMenuEntry(FGenericCommands::Get().Duplicate);
+
+	if (InGraphPin)
+		MenuBuilder->AddMenuEntry(FGraphEditorCommands::Get().BreakPinLinks);
+	else
+		MenuBuilder->AddMenuEntry(FGraphEditorCommands::Get().BreakNodeLinks);
+
+	Super::GetContextMenuActions(CurrentGraph, InGraphNode, InGraphPin, MenuBuilder, bIsDebugging);
+}
+
 #undef LOCTEXT_NAMESPACE

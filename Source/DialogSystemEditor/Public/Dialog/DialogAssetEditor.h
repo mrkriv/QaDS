@@ -24,7 +24,6 @@ protected:
 	UDialogRootEdGraphNode* GetRootNode();
 
 	void Compile() override;
-	void ResetCompilePhrase(UDialogEdGraphNode* Node);
 	UDialogNode* Compile(UDialogEdGraphNode* Node);
 };
 

@@ -17,6 +17,7 @@
 class UEdGraph;
 class UEdGraphNode;
 class SGraphEditor;
+class UQaDSEdGraphNode;
 class FXmlFile;
 
 struct DIALOGSYSTEMEDITOR_API FQaDSAssetEditorTabs
@@ -87,7 +88,8 @@ protected:
 	bool CanDuplicateNodes() const;
 	void DeleteSelectedDuplicatableNodes();
 	void OnSelectedNodesChanged(const TSet<UObject*>& NewSelection);
-	void OnNodeDoubleClicked(UEdGraphNode* Node);
+	void OnNodeDoubleClicked(UEdGraphNode* Node); 
+	void ResetCompilePhrase(UQaDSEdGraphNode* Node);
 
 	virtual void Compile() = 0;
 	virtual UObject* GetEditedAsset() const = 0;
