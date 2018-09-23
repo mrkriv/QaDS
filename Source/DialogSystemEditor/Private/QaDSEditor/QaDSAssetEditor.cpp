@@ -190,19 +190,13 @@ void FQaDSAssetEditor::ExportExecute()
 
 	if (isSaved)
 	{
-		FString xml = "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>\n";
-		xml += "<nodes>\n";		
-
+		FXmlWriteNode nodes("nodes");
 		for (auto graphNode : GraphEditor->GetCurrentGraph()->Nodes)
 		{
-			xml += "\t<node>\n";
-			xml += Cast<UQaDSEdGraphNode>(graphNode)->SaveToXml(2);
-			xml += "\t</node>\n";
+			nodes.Childrens.Add(Cast<UQaDSEdGraphNode>(graphNode)->SaveToXml());
 		}
 
-		xml += "</nodes>";
-
-		FFileHelper::SaveStringToFile(xml, *Filenames[0]);
+		FFileHelper::SaveStringToFile(nodes.GetXml(), *Filenames[0]);
 	}
 }
 

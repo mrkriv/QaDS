@@ -28,7 +28,7 @@ class DIALOGSYSTEMEDITOR_API UDialogRootEdGraphNode : public UDialogEdGraphNode
 
 public:
 	virtual void AllocateDefaultPins() override;
-	virtual FString SaveToXml(int tabLevel) const override;
+	virtual FXmlWriteNode SaveToXml() const override;
 	virtual bool CanUserDeleteNode() const override;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
@@ -45,7 +45,7 @@ public:
 
 	UDialogPhraseEdGraphNode();
 	virtual void AllocateDefaultPins() override;
-	virtual FString SaveToXml(int tabLevel) const override;
+	virtual FXmlWriteNode SaveToXml() const override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
@@ -70,7 +70,7 @@ public:
 	TAssetPtr<class UDialogAsset> TargetDialogAsset;
 
 	virtual void AllocateDefaultPins() override;
-	virtual FString SaveToXml(int tabLevel) const override;
+	virtual FXmlWriteNode SaveToXml() const override;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };
@@ -85,7 +85,7 @@ public:
 	TArray<FDialogElseIfCondition> Conditions;
 
 	virtual void AllocateDefaultPins() override;
-	virtual FString SaveToXml(int tabLevel) const override;
+	virtual FXmlWriteNode SaveToXml() const override;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };

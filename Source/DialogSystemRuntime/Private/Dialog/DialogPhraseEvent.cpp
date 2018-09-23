@@ -8,6 +8,7 @@
 #include "DialogProcessor.h"
 #include "DialogNodes.h"
 #include "DialogAsset.h"
+#include "DialogScript.h"
 #include "DialogPhraseEvent.h"
 
 #define ERROR(Message, ...) ErrorMessage =  FString::Printf(TEXT(Message), ##__VA_ARGS__); return false
@@ -30,12 +31,12 @@ bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 		if (!OwnerNode || !OwnerNode->OwnerDialog)
 			break;
 
-		if (OwnerNode->OwnerDialog->DialogScriptClass == NULL)
+		if (!OwnerNode->OwnerDialog->DialogScriptClass.IsValid())
 		{
 			ERROR("DialogScript not found, pleass select dialog script class in root node");
 		}
 
-		ObjectClass = OwnerNode->OwnerDialog->DialogScriptClass;
+		ObjectClass = OwnerNode->OwnerDialog->DialogScriptClass.Get()->GetClass();
 		break;
 		
 	case EDialogPhraseEventCallType::Player:

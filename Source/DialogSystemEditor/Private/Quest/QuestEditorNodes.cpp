@@ -14,10 +14,9 @@ void UQuestStageEdGraphNode::AllocateDefaultPins()
 	CreatePin(EGPD_Output, NAME_None, FName("Output"));
 }
 
-FString UQuestStageEdGraphNode::SaveToXml(int tabLevel) const
+FXmlWriteNode UQuestStageEdGraphNode::SaveToXml() const
 {
-	FString xml;
-	return xml;
+	return Super::SaveToXml();
 }
 
 void UQuestStageEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
@@ -30,10 +29,9 @@ void UQuestEndEdGraphNode::AllocateDefaultPins()
 	CreatePin(EGPD_Input, NAME_None, FName("Input"));
 }
 
-FString UQuestEndEdGraphNode::SaveToXml(int tabLevel) const
+FXmlWriteNode UQuestEndEdGraphNode::SaveToXml() const
 {
-	FString xml;
-	return xml;
+	return Super::SaveToXml();
 }
 
 void UQuestEndEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
@@ -46,10 +44,9 @@ void UQuestRootEdGraphNode::AllocateDefaultPins()
 	CreatePin(EGPD_Output, NAME_None, FName("Output"));
 }
 
-FString UQuestRootEdGraphNode::SaveToXml(int tabLevel) const
+FXmlWriteNode UQuestRootEdGraphNode::SaveToXml() const
 {
-	FString xml;
-	return xml;
+	return Super::SaveToXml();
 }
 
 void UQuestRootEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)

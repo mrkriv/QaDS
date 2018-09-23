@@ -21,14 +21,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText Description;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY()
 	UQuestNode* RootNode;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly)
 	UQuestNode* CurrentNode;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "QuestScript"))
-	TSubclassOf<AQuestScript> QuestScriptClass;
+	TAssetPtr<AQuestScript> QuestScriptClass;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY()

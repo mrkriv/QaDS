@@ -6,7 +6,6 @@
 #include "EdGraph/EdGraph.h"
 #include "QaDSSettings.h"
 #include "DialogAsset.h"
-#include "XmlSerealizeHelper.h"
 #include "XmlFile.h"
 
 //PhraseNode..........................................................................................................
@@ -29,28 +28,27 @@ FText UDialogPhraseEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) con
 	return Data.Text;
 }
 
-FString UDialogPhraseEdGraphNode::SaveToXml(int tabLevel) const
+FXmlWriteNode UDialogPhraseEdGraphNode::SaveToXml() const
 {
-	FString tab(tabLevel, TEXT("\t\t\t\t\t\t\t\t\t\t\t"));
-	FString xml = Super::SaveToXml(tabLevel);
+	auto node = Super::SaveToXml();
 
-	xml += tab + "<text>" + Data.Text.ToString() + "</text>\n";
-	xml += tab + "<source>" + FString::FromInt((uint8)Data.Source) + "</source>\n";
+	node.Append("text", Data.Text.ToString());
+	node.Append("source", (uint8)Data.Source);
 
 	if (!Data.AutoTime)
-		xml += tab + "<time>" + FString::SanitizeFloat(Data.PhraseManualTime) + "</time>\n";
+		node.Append("time", Data.PhraseManualTime);
 
 	if (Data.StartQuest.IsValid())
-		xml += tab + "<quest>" + Data.StartQuest.GetLongPackageName() + "</quest>\n";
+		node.Append("quest", Data.StartQuest.GetLongPackageName());
 
-	xml += FXmlSerealizeHelper::SerealizeArray(tab, "give_keys", "key", Data.GiveKeys);
-	xml += FXmlSerealizeHelper::SerealizeArray(tab, "remove_keys", "key", Data.RemoveKeys);
-	xml += FXmlSerealizeHelper::SerealizeArray(tab, "check_has_keys", "key", Data.CheckHasKeys);
-	xml += FXmlSerealizeHelper::SerealizeArray(tab, "check_dont_has_keys", "key", Data.CheckDontHasKeys);
-	xml += FXmlSerealizeHelper::SerealizeArray(tab, "actions", "action", Data.Action);
-	xml += FXmlSerealizeHelper::SerealizeArray(tab, "predicates", "predicate", Data.Predicate);
+	node.AppendArray("give_keys", "key", Data.GiveKeys);
+	node.AppendArray("remove_keys", "key", Data.RemoveKeys);
+	node.AppendArray("check_has_keys", "key", Data.CheckHasKeys);
+	node.AppendArray("check_dont_has_keys", "key", Data.CheckDontHasKeys);
+	node.AppendArray("actions", "action", Data.Action);
+	node.AppendArray("predicates", "predicate", Data.Predicate);
 	
-	return xml;
+	return node;
 }
 
 void UDialogPhraseEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
@@ -96,14 +94,12 @@ void UDialogSubGraphEdGraphNode::AllocateDefaultPins()
 	CreatePin(EGPD_Input, NAME_None, FName("Input"));
 }
 
-FString UDialogSubGraphEdGraphNode::SaveToXml(int tabLevel) const
+FXmlWriteNode UDialogSubGraphEdGraphNode::SaveToXml() const
 {
-	FString tab(tabLevel, TEXT("\t\t\t\t\t\t\t\t\t\t\t"));
-	FString xml = Super::SaveToXml(tabLevel);
+	auto node = Super::SaveToXml();
+	node.Append("asset", TargetDialogAsset.GetLongPackageName());
 
-	xml += tab + "<asset>" + TargetDialogAsset.GetLongPackageName() + "</asset>\n";
-
-	return xml;
+	return node;
 }
 
 void UDialogSubGraphEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
@@ -132,12 +128,10 @@ void UDialogElseIfEdGraphNode::AllocateDefaultPins()
 	CreatePin(EGPD_Output, NAME_None, FName("Default"));
 }
 
-FString UDialogElseIfEdGraphNode::SaveToXml(int tabLevel) const
+FXmlWriteNode UDialogElseIfEdGraphNode::SaveToXml() const
 {
-	FString tab(tabLevel, TEXT("\t\t\t\t\t\t\t\t\t\t\t"));
-	FString xml = Super::SaveToXml(tabLevel);
-
-	return xml;
+	auto node = Super::SaveToXml();
+	return node;
 }
 
 void UDialogElseIfEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
@@ -166,12 +160,10 @@ void UDialogRootEdGraphNode::AllocateDefaultPins()
 	CreatePin(EGPD_Output, NAME_None, FName("Start"));
 }
 
-FString UDialogRootEdGraphNode::SaveToXml(int tabLevel) const
+FXmlWriteNode UDialogRootEdGraphNode::SaveToXml() const
 {
-	FString tab(tabLevel, TEXT("\t\t\t\t\t\t\t\t\t\t\t"));
-	FString xml = Super::SaveToXml(tabLevel);
-
-	return xml;
+	auto node = Super::SaveToXml();
+	return node;
 }
 
 void UDialogRootEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)

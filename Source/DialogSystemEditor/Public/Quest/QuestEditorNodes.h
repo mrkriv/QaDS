@@ -28,11 +28,11 @@ class DIALOGSYSTEMEDITOR_API UQuestStageEdGraphNode : public UQuestEdGraphNode
 
 public:
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FQuestStageInfo Stage;
 
 	virtual void AllocateDefaultPins() override;
-	virtual FString SaveToXml(int tabLevel) const;
+	virtual FXmlWriteNode SaveToXml() const;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
 };
 
@@ -43,11 +43,11 @@ class DIALOGSYSTEMEDITOR_API UQuestEndEdGraphNode : public UQuestEdGraphNode
 
 public:
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsSuccesEnd;
 
 	virtual void AllocateDefaultPins() override;
-	virtual FString SaveToXml(int tabLevel) const;
+	virtual FXmlWriteNode SaveToXml() const;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
 };
 
@@ -58,6 +58,6 @@ class DIALOGSYSTEMEDITOR_API UQuestRootEdGraphNode : public UQuestEdGraphNode
 
 public:
 	virtual void AllocateDefaultPins() override;
-	virtual FString SaveToXml(int tabLevel) const;
+	virtual FXmlWriteNode SaveToXml() const;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
 };

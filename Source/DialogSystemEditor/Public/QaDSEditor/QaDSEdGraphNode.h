@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EdGraph/EdGraphNode.h"
+#include "XmlSerealizeHelper.h"
 #include "QaDSEdGraphNode.generated.h"
 
 class UEdGraphPin;
@@ -26,7 +27,7 @@ public:
 	virtual int GetOrder() const;
 	TArray<UQaDSEdGraphNode*> GetChildNodes() const;
 
-	virtual FString SaveToXml(int tabLevel) const;
+	virtual FXmlWriteNode SaveToXml() const;
 	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
 
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;

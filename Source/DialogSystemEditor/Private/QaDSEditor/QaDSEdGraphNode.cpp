@@ -62,18 +62,18 @@ void UQaDSEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 	Super::PostEditChangeProperty(e);
 }
 
-FString UQaDSEdGraphNode::SaveToXml(int tabLevel) const
+FXmlWriteNode UQaDSEdGraphNode::SaveToXml() const
 {
-	FString tab(tabLevel, TEXT("\t\t\t\t\t\t\t\t\t\t\t"));
-	FString xml;
+	auto node = FXmlWriteNode("node");
 
-	xml += tab + "<id>" + NodeGuid.ToString() + "</id>\n";
-	xml += tab + "<class>" + GetClass()->GetFName().ToString() + "</class>\n";
-	xml += tab + "<x>" + FString::FromInt(NodePosX) + "</x>\n";
-	xml += tab + "<y>" + FString::FromInt(NodePosY) + "</y>\n";
-	xml += FXmlSerealizeHelper::SerealizeArray(tab, "links", "link", GetChildNodes());
+	node.Append("id", NodeGuid.ToString());
+	node.Append("class", GetClass()->GetFName());
+	node.Append("x", NodePosX);
+	node.Append("y", NodePosY);
 
-	return xml;
+	node.AppendArray("links", "link", GetChildNodes());
+
+	return node;
 }
 
 void UQaDSEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)

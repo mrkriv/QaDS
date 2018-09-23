@@ -178,10 +178,10 @@ FReply FDialogPhraseEventCustomization::OnTitleClick()
 	{
 		auto node = Cast<UDialogNode>(Property_OwnerNode);
 
-		if (node == NULL || node->OwnerDialog == NULL || node->OwnerDialog->DialogScriptClass == NULL)
+		if (node == NULL || node->OwnerDialog == NULL || !node->OwnerDialog->DialogScriptClass.IsValid())
 			return FReply::Handled();
 
-		auto sc = Cast<UDialogNode>(Property_OwnerNode)->OwnerDialog->DialogScriptClass->ClassDefaultObject;
+		auto sc = Cast<UDialogNode>(Property_OwnerNode)->OwnerDialog->DialogScriptClass.Get();
 
 		if (sc != NULL)
 			FAssetEditorManager::Get().OpenEditorsForAssets(TArray<FName>({ *sc->GetPathName() }));
