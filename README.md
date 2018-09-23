@@ -20,6 +20,9 @@ Supported version is 4.20, this is not release version!
 
 | Task  	                	| Status 
 | --- 	                    	| ---	
+| Dialog system (base) 			| done 
+| PhraseNode id dialog  		| done 	
+| RootNode id dialog  			| done 	
 | SubDialogNode id dialog  		| done 	
 | ElseIfNode id dialog  		| 		
 | JumpNode id dialog  			| 		
@@ -30,9 +33,9 @@ Supported version is 4.20, this is not release version!
 | Load story key is game  		| 
 | Save story key is game  		| 
 | Story key viewer  			| done 	
-| Story key navigator  			| done 	
-| Quest system (base) 			|   	
-| QuestStageNode 		    	|   	
+| Story key navigator  			|
+| Quest system (base) 			| done 	
+| QuestStageNode 		    	| done
 | QuestEndNode 		        	|   	
 | Find in quest graph  	    	| 
 | Export quest to xml  			| 		

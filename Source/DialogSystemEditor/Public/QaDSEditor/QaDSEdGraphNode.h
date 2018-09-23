@@ -18,9 +18,6 @@ class DIALOGSYSTEMEDITOR_API UQaDSEdGraphNode : public UEdGraphNode
 	GENERATED_BODY()
 
 public:
-	UEdGraphPin* InputPin;	//todo:: remove
-	UEdGraphPin* OutputPin;
-
 	TSharedPtr<FNodePropertyObserver> PropertyObserver;
 
 	virtual UObject* GetCompile() { return NULL; } // todo:: remove this

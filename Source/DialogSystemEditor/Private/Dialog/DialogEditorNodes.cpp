@@ -17,8 +17,8 @@ UDialogPhraseEdGraphNode::UDialogPhraseEdGraphNode()
 
 void UDialogPhraseEdGraphNode::AllocateDefaultPins()
 {
-	InputPin = CreatePin(EGPD_Input, NAME_None, FName("Input"));
-	OutputPin = CreatePin(EGPD_Output, NAME_None, FName("Output"));
+	CreatePin(EGPD_Input, NAME_None, FName("Input"));
+	CreatePin(EGPD_Output, NAME_None, FName("Output"));
 }
 
 FText UDialogPhraseEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
@@ -93,7 +93,7 @@ void UDialogPhraseEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEve
 void UDialogSubGraphEdGraphNode::AllocateDefaultPins()
 {
 	Pins.Reset();
-	InputPin = CreatePin(EGPD_Input, NAME_None, FName("Input"));
+	CreatePin(EGPD_Input, NAME_None, FName("Input"));
 }
 
 FString UDialogSubGraphEdGraphNode::SaveToXml(int tabLevel) const
@@ -128,8 +128,8 @@ FText UDialogSubGraphEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) c
 void UDialogElseIfEdGraphNode::AllocateDefaultPins()
 {
 	Pins.Reset();
-	InputPin = CreatePin(EGPD_Input, NAME_None, FName("Input"));
-	OutputPin = CreatePin(EGPD_Output, NAME_None, FName("Default"));
+	CreatePin(EGPD_Input, NAME_None, FName("Input"));
+	CreatePin(EGPD_Output, NAME_None, FName("Default"));
 }
 
 FString UDialogElseIfEdGraphNode::SaveToXml(int tabLevel) const
@@ -163,7 +163,7 @@ UDialogPhraseEdGraphNode_Player::UDialogPhraseEdGraphNode_Player()
 void UDialogRootEdGraphNode::AllocateDefaultPins()
 {
 	Pins.Reset();
-	OutputPin = CreatePin(EGPD_Output, NAME_None, FName("Start"));
+	CreatePin(EGPD_Output, NAME_None, FName("Start"));
 }
 
 FString UDialogRootEdGraphNode::SaveToXml(int tabLevel) const
