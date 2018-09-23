@@ -1,7 +1,7 @@
 ### DialogPlugin
-Plugin for Unreal Engine 4 adding a dialog system and editor for it.
+Plugin for Unreal Engine 4 adding a dialogue and quest system.
 
-The supported version is 4.20
+Supported version is 4.20, this is not release version!
 
 ### Example
 
@@ -13,8 +13,35 @@ The supported version is 4.20
 
  - PhraseNode
  - RootNode
- - ElseIfNode
  - SubDialogNode
 
+### Roadmap
+
+
+| Task  	                	| Status 
+| --- 	                    	| ---	
+| SubDialogNode id dialog  		| done 	
+| ElseIfNode id dialog  		| 		
+| JumpNode id dialog  			| 		
+| Export dialog to xml  		| done	
+| Import dialog from xml  		| 		
+| Import dialog from STALKER :D	| done 	
+| Find in dialog graph  		| 
+| Load story key is game  		| 
+| Save story key is game  		| 
+| Story key viewer  			| done 	
+| Story key navigator  			| done 	
+| Quest system (base) 			|   	
+| QuestStageNode 		    	|   	
+| QuestEndNode 		        	|   	
+| Find in quest graph  	    	| 
+| Export quest to xml  			| 		
+| Import quest from xml  		| 		
+| Interface for items and inventory | 
+| Cleanup code  				|   	
+| Use color graph  				| 		
+| Plugun settings  				| 		
+
+ 
 ## .
 todo:: написать нормальный README.md
