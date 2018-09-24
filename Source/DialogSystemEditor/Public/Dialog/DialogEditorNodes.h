@@ -8,6 +8,9 @@
 class UEdGraphPin;
 class FXmlNode;
 
+FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseEvent>& tuple);
+FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseCondition>& tuple);
+
 UCLASS()
 class DIALOGSYSTEMEDITOR_API UDialogEdGraphNode : public UQaDSEdGraphNode
 {

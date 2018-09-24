@@ -53,7 +53,6 @@ public:
 	virtual FString ToString() const;
 };
 
-
 USTRUCT(BlueprintType)
 struct DIALOGSYSTEMRUNTIME_API FDialogPhraseCondition : public FDialogPhraseEvent
 {

@@ -14,12 +14,6 @@ struct FXmlWriteTuple
 	FXmlWriteTuple(const FString& tag, const T& value) : Tag(tag), Value(value) {}
 };
 
-FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FString>& tuple)
-{
-	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value));
-	return node;
-}
-
 class DIALOGSYSTEMEDITOR_API FXmlWriteNode
 {
 public:
@@ -34,35 +28,70 @@ public:
 	FString GetXml() const;
 	FString GetXml(const FString& tab) const;
 
-	void AppendArray(FString tag, FString itemTag, TArray<FString> values);
-
 	template<typename T>
 	void Append(FString tag, T value)
 	{
-		this << FXmlWriteTuple<T>(tag, value);
+		*this << FXmlWriteTuple<T>(tag, value);
 	}
 
-	void AppendArray(FString tag, FString itemTag, TArray<FString> values);
-	void AppendArray(FString tag, FString itemTag, TArray<FName> values);
-	void AppendArray(FString tag, FString itemTag, TArray<UQaDSEdGraphNode*> values); // todo:: move to UQaDSEdGraphNode
-	void AppendArray(FString tag, FString itemTag, TArray<FDialogPhraseEvent> values); // todo:: move to FDialogPhraseEvent
-	void AppendArray(FString tag, FString itemTag, TArray<FDialogPhraseCondition> values); // todo:: move to FDialogPhraseCondition
-	void Append(FString tag, const FDialogPhraseEvent& value); // todo:: move to FDialogPhraseEvent
-	void Append(FString tag, const FDialogPhraseCondition& value); // todo:: move to FDialogPhraseCondition
-	void Append(FString tag, const FString& value);
-	void Append(FString tag, const FName& value);
-	void Append(FString tag, const FText& value);
-	void Append(FString tag, float value);
-	void Append(FString tag, int value);
-	void Append(FString tag, bool value);
+	template<typename T>
+	void AppendArray(FString tag, FString itemTag, TArray<T> values)
+	{
+		if (values.Num() != 0)
+			return;
+
+		auto node = FXmlWriteNode(tag);
+		for (auto& value : values)
+		{
+			node.Append(itemTag, value);
+		}
+
+		Childrens.Add(node);
+	}
 };
 
-class DIALOGSYSTEMEDITOR_API FXmlSerealizeHelper
+FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FString>& tuple)
+{
+	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value));
+	return node;
+}
+
+FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FName>& tuple)
+{
+	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value.ToString()));
+	return node;
+}
+
+FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FText>& tuple)
+{
+	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value.ToString()));
+	return node;
+}
+
+FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<int>& tuple)
+{
+	node.Childrens.Add(FXmlWriteNode(tuple.Tag, FString::FromInt(tuple.Value)));
+	return node;
+}
+
+FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<float>& tuple)
+{
+	node.Childrens.Add(FXmlWriteNode(tuple.Tag, FString::SanitizeFloat(tuple.Value)));
+	return node;
+}
+
+FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<bool>& tuple)
+{
+	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value ? "true" : "false"));
+	return node;
+}
+
+class DIALOGSYSTEMEDITOR_API FXmlSerealizeHelper //todo:: remove this
 {
 public:
 	static FString EncodeString(const FString& input);
 
-	static void DeserealizeArray(FXmlNode* tag, TArray<FString>& outValues); //todo::
+	static void DeserealizeArray(FXmlNode* tag, TArray<FString>& outValues);
 	static void DeserealizeArray(FXmlNode* tag, TArray<FName>& outValues);
 	static void DeserealizeArray(FXmlNode* tag, TArray<FDialogPhraseEvent>& outValues);
 	static void DeserealizeArray(FXmlNode* tag, TArray<FDialogPhraseCondition>& outValues);

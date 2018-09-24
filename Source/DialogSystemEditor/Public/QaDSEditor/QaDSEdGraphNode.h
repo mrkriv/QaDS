@@ -32,3 +32,9 @@ public:
 
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
 };
+
+FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<UQaDSEdGraphNode*>& tuple)
+{
+	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value->NodeGuid.ToString()));
+	return node;
+}

@@ -8,6 +8,35 @@
 #include "DialogAsset.h"
 #include "XmlFile.h"
 
+//FDialogPhraseEvent..........................................................................................................
+FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseEvent>& tuple)
+{
+	auto subNode = FXmlWriteNode(tuple.Tag);
+	auto& value = tuple.Value;
+
+	subNode.Append("type", (int)value.CallType);
+	subNode.Append("event", value.EventName);
+	subNode.Append("tag", value.FindTag);
+	subNode.Append("command", value.Command);
+
+	if (value.ObjectClass != NULL)
+		subNode.Append("class", value.ObjectClass->GetFullName());
+
+	subNode.AppendArray("params", "param", value.Parameters);
+
+	node.Childrens.Add(node);
+	return node;
+}
+
+//FDialogPhraseCondition..........................................................................................................
+FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseCondition>& tuple)
+{
+	node << FXmlWriteTuple<FDialogPhraseEvent>(tuple.Tag, tuple.Value);
+	node.Childrens.Last().Append("invert", tuple.Value.InvertCondition);
+
+	return node;
+}
+
 //PhraseNode..........................................................................................................
 UDialogPhraseEdGraphNode::UDialogPhraseEdGraphNode()
 {
@@ -33,7 +62,7 @@ FXmlWriteNode UDialogPhraseEdGraphNode::SaveToXml() const
 	auto node = Super::SaveToXml();
 
 	node.Append("text", Data.Text.ToString());
-	node.Append("source", (uint8)Data.Source);
+	node.Append("source", (int)Data.Source);
 
 	if (!Data.AutoTime)
 		node.Append("time", Data.PhraseManualTime);
