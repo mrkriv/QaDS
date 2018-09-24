@@ -9,7 +9,7 @@
 #include "XmlFile.h"
 
 //FDialogPhraseEvent..........................................................................................................
-FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseEvent>& tuple)
+void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseEvent>& tuple)
 {
 	auto subNode = FXmlWriteNode(tuple.Tag);
 	auto& value = tuple.Value;
@@ -25,16 +25,29 @@ FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhras
 	subNode.AppendArray("params", "param", value.Parameters);
 
 	node.Childrens.Add(node);
-	return node;
+}
+
+void operator>>(const FXmlReadNode& node, FDialogPhraseEvent& value)
+{
+	node.TryGet("type", (int&)value.CallType);
+	node.TryGet("tag", value.FindTag);
+	node.TryGet("command", value.Command);
+	node.TryGet("params", value.Parameters);
+
+	value.ObjectClass=FindObject<UClass>(ANY_PACKAGE, *node.Get("class"));
 }
 
 //FDialogPhraseCondition..........................................................................................................
-FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseCondition>& tuple)
+void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseCondition>& tuple)
 {
 	node << FXmlWriteTuple<FDialogPhraseEvent>(tuple.Tag, tuple.Value);
 	node.Childrens.Last().Append("invert", tuple.Value.InvertCondition);
+}
 
-	return node;
+void operator>>(const FXmlReadNode& node, FDialogPhraseCondition& value)
+{
+	node >> (FDialogPhraseEvent&)value;
+	node.TryGet("invert", value.InvertCondition);
 }
 
 //PhraseNode..........................................................................................................
@@ -52,7 +65,7 @@ void UDialogPhraseEdGraphNode::AllocateDefaultPins()
 FText UDialogPhraseEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
 	if (Data.Text.IsEmpty())
-		return FText::FromString("Phrase");
+		return FText::FromString("Proxy node");
 
 	return Data.Text;
 }
@@ -80,35 +93,23 @@ FXmlWriteNode UDialogPhraseEdGraphNode::SaveToXml() const
 	return node;
 }
 
-void UDialogPhraseEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
+void UDialogPhraseEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
-	Super::LoadInXml(xmlNode, nodeById);
+	Super::LoadInXml(reader, nodeById);
 
-	auto textTag = xmlNode->FindChildNode("text");
-	if (textTag != NULL)
-		Data.Text = FText::FromString(textTag->GetContent());
+	reader->TryGet("text", Data.Text);
+	reader->TryGet("source", (int&)Data.Source);
+	reader->TryGet("time", Data.PhraseManualTime);
 
-	auto sourceTag = xmlNode->FindChildNode("source");
-	if (sourceTag != NULL)
-		Data.Source = (EDialogPhraseSource)FCString::Atoi(*sourceTag->GetContent());
+	reader->TryGet("give_keys", Data.GiveKeys);
+	reader->TryGet("remove_keys", Data.RemoveKeys);
+	reader->TryGet("check_has_keys", Data.CheckHasKeys);
+	reader->TryGet("check_dont_has_keys", Data.CheckDontHasKeys);
+	reader->TryGet("give_actionskeys", Data.Action);
+	reader->TryGet("predicates", Data.Predicate);
 
-	auto questTag = xmlNode->FindChildNode("quest");
-	if (questTag != NULL)
-		Data.StartQuest = TAssetPtr<UQuestAsset>(questTag->GetContent());
-
-	auto timeTag = xmlNode->FindChildNode("time");
-	if (timeTag != NULL)
-	{
-		Data.AutoTime = false;
-		Data.PhraseManualTime = FCString::Atof(*timeTag->GetContent());
-	}
-
-	FXmlSerealizeHelper::DeserealizeArray(xmlNode->FindChildNode("give_keys"), Data.GiveKeys);
-	FXmlSerealizeHelper::DeserealizeArray(xmlNode->FindChildNode("remove_keys"), Data.RemoveKeys);
-	FXmlSerealizeHelper::DeserealizeArray(xmlNode->FindChildNode("check_has_keys"), Data.CheckHasKeys);
-	FXmlSerealizeHelper::DeserealizeArray(xmlNode->FindChildNode("check_dont_has_keys"), Data.CheckDontHasKeys);
-	FXmlSerealizeHelper::DeserealizeArray(xmlNode->FindChildNode("actions"), Data.Action);
-	FXmlSerealizeHelper::DeserealizeArray(xmlNode->FindChildNode("predicates"), Data.Predicate);
+	Data.AutoTime = Data.PhraseManualTime > 0;
+	Data.StartQuest = TAssetPtr<UQuestAsset>(reader->Get("quest"));
 }
 
 void UDialogPhraseEdGraphNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
@@ -131,13 +132,10 @@ FXmlWriteNode UDialogSubGraphEdGraphNode::SaveToXml() const
 	return node;
 }
 
-void UDialogSubGraphEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
+void UDialogSubGraphEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
-	Super::LoadInXml(xmlNode, nodeById);
-
-	auto assetTag = xmlNode->FindChildNode("asset");
-	if (assetTag != NULL)
-		TargetDialogAsset = TAssetPtr<UDialogAsset>(assetTag->GetContent());
+	Super::LoadInXml(reader, nodeById);
+	TargetDialogAsset = TAssetPtr<UDialogAsset>(reader->Get("asset"));
 }
 
 FText UDialogSubGraphEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
@@ -163,11 +161,8 @@ FXmlWriteNode UDialogElseIfEdGraphNode::SaveToXml() const
 	return node;
 }
 
-void UDialogElseIfEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
+void UDialogElseIfEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
-	auto xTag = xmlNode->FindChildNode("x");
-	if (xTag != NULL)
-		NodePosX = FCString::Atoi(*xTag->GetContent());
 }
 
 FText UDialogElseIfEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
@@ -195,11 +190,8 @@ FXmlWriteNode UDialogRootEdGraphNode::SaveToXml() const
 	return node;
 }
 
-void UDialogRootEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
+void UDialogRootEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
-	auto xTag = xmlNode->FindChildNode("x");
-	if (xTag != NULL)
-		NodePosX = FCString::Atoi(*xTag->GetContent());
 }
 
 FText UDialogRootEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const

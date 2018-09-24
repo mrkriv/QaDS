@@ -26,7 +26,7 @@ FString FXmlWriteNode::GetXml(const FString& tab) const
 	}
 	else if (!Content.IsEmpty())
 	{
-		auto content = FXmlSerealizeHelper::EncodeString(Content);
+		auto content = EncodeString(Content);
 		xml += tab + "<" + Tag + ">" + content + "</" + Tag + ">\n";
 	}
 	else
@@ -37,7 +37,7 @@ FString FXmlWriteNode::GetXml(const FString& tab) const
 	return xml;
 }
 
-FString FXmlSerealizeHelper::EncodeString(const FString& input)
+FString FXmlWriteNode::EncodeString(const FString& input)
 {
 	FString result;
 	result = input; // it work? 
@@ -60,95 +60,71 @@ FString FXmlSerealizeHelper::EncodeString(const FString& input)
 	return result;
 }
 
-void FXmlSerealizeHelper::DeserealizeArray(FXmlNode* tag, TArray<FString>& outValues)
+/* Serealize */
+
+void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FString>& tuple)
 {
-	outValues.Reset();
-
-	if (tag == NULL)
-		return;
-
-	for (auto childTag : tag->GetChildrenNodes())
-	{
-		outValues.Add(childTag->GetContent());
-	}
+	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value));
 }
 
-void FXmlSerealizeHelper::DeserealizeArray(FXmlNode* tag, TArray<FName>& outValues)
+void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FName>& tuple)
 {
-	outValues.Reset();
-
-	if (tag == NULL)
-		return;
-
-	for (auto childTag : tag->GetChildrenNodes())
-	{
-		outValues.Add(*childTag->GetContent());
-	}
+	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value.ToString()));
 }
 
-void FXmlSerealizeHelper::DeserealizeArray(FXmlNode* tag, TArray<FDialogPhraseEvent>& outValues)
+void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FText>& tuple)
 {
-	outValues.Reset();
-
-	if (tag == NULL)
-		return;
-
-	for (auto childTag : tag->GetChildrenNodes())
-	{
-		FDialogPhraseEvent out;
-		Deserealize(childTag, out);
-		outValues.Add(out);
-	}
+	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value.ToString()));
 }
 
-void FXmlSerealizeHelper::DeserealizeArray(FXmlNode* tag, TArray<FDialogPhraseCondition>& outValues)
+void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<int>& tuple)
 {
-	outValues.Reset();
-
-	if (tag == NULL)
-		return;
-
-	for (auto childTag : tag->GetChildrenNodes())
-	{
-		FDialogPhraseCondition out;
-		FXmlSerealizeHelper::Deserealize(childTag, out);
-		outValues.Add(out);
-	}
+	node.Childrens.Add(FXmlWriteNode(tuple.Tag, FString::FromInt(tuple.Value)));
 }
 
-void FXmlSerealizeHelper::Deserealize(FXmlNode* tag, FDialogPhraseEvent& outValue)
+void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<float>& tuple)
 {
-	auto typeTag = tag->FindChildNode("type");
-	if (typeTag != NULL)
-		outValue.CallType = (EDialogPhraseEventCallType)FCString::Atoi(*typeTag->GetContent());
-
-	auto eventTag = tag->FindChildNode("event");
-	if (eventTag != NULL)
-		outValue.EventName = *eventTag->GetContent();
-
-	auto tagTag = tag->FindChildNode("tag");
-	if (tagTag != NULL)
-		outValue.FindTag = tagTag->GetContent();
-
-	auto commandTag = tag->FindChildNode("command");
-	if (commandTag != NULL)
-		outValue.Command = commandTag->GetContent();
-
-	auto classTag = tag->FindChildNode("command");
-	if (classTag != NULL)
-	{
-		auto objClass = FindObject<UClass>(ANY_PACKAGE, *classTag->GetContent());
-		outValue.ObjectClass = objClass;
-	}
-
-	FXmlSerealizeHelper::DeserealizeArray(tag->FindChildNode("params"), outValue.Parameters);
+	node.Childrens.Add(FXmlWriteNode(tuple.Tag, FString::SanitizeFloat(tuple.Value)));
 }
 
-void FXmlSerealizeHelper::Deserealize(FXmlNode* tag, FDialogPhraseCondition& outValue)
+void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<bool>& tuple)
 {
-	FXmlSerealizeHelper::Deserealize(tag, (FDialogPhraseEvent&)outValue);
+	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value ? "true" : "false"));
+}
 
-	auto invertTag = tag->FindChildNode("invert");
-	if (invertTag != NULL)
-		outValue.InvertCondition = invertTag->GetContent().ToLower() == "true";
+/* Deserealize */
+
+void operator>>(const FXmlReadNode& node, FString& value)
+{
+	value = node.XmlNode->GetContent();
+}
+
+void operator>>(const FXmlReadNode& node, FName& value)
+{
+	value = *node.XmlNode->GetContent();
+}
+
+void operator>>(const FXmlReadNode& node, FText& value)
+{
+	value = FText::FromString(node.XmlNode->GetContent());
+}
+
+void operator>>(const FXmlReadNode& node, int& value)
+{
+	value = FCString::Atoi(*node.XmlNode->GetContent());
+}
+
+void operator>>(const FXmlReadNode& node, float& value)
+{
+	value = FCString::Atof(*node.XmlNode->GetContent());
+}
+
+void operator>>(const FXmlReadNode& node, bool& value)
+{
+	value = node.XmlNode->GetContent().ToLower() == "true";
+}
+
+void operator>>(const FXmlReadNode& node, UClass*& value)
+{
+	value = FindObject<UClass>(ANY_PACKAGE, *node.XmlNode->GetContent());
 }

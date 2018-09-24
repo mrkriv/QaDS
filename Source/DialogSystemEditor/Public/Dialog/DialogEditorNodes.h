@@ -8,8 +8,10 @@
 class UEdGraphPin;
 class FXmlNode;
 
-FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseEvent>& tuple);
-FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseCondition>& tuple);
+FORCEINLINE void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseEvent>& tuple);
+FORCEINLINE void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseCondition>& tuple);
+FORCEINLINE void operator>>(const FXmlReadNode& node, FDialogPhraseEvent& value);
+FORCEINLINE void operator>>(const FXmlReadNode& node, FDialogPhraseCondition& value);
 
 UCLASS()
 class DIALOGSYSTEMEDITOR_API UDialogEdGraphNode : public UQaDSEdGraphNode
@@ -33,7 +35,7 @@ public:
 	virtual void AllocateDefaultPins() override;
 	virtual FXmlWriteNode SaveToXml() const override;
 	virtual bool CanUserDeleteNode() const override;
-	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
+	virtual void LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };
 
@@ -50,7 +52,7 @@ public:
 	virtual void AllocateDefaultPins() override;
 	virtual FXmlWriteNode SaveToXml() const override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
-	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
+	virtual void LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
 };
 
@@ -74,7 +76,7 @@ public:
 
 	virtual void AllocateDefaultPins() override;
 	virtual FXmlWriteNode SaveToXml() const override;
-	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
+	virtual void LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };
 
@@ -89,6 +91,6 @@ public:
 
 	virtual void AllocateDefaultPins() override;
 	virtual FXmlWriteNode SaveToXml() const override;
-	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
+	virtual void LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById) override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 };

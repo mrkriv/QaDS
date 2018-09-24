@@ -76,32 +76,25 @@ FXmlWriteNode UQaDSEdGraphNode::SaveToXml() const
 	return node;
 }
 
-void UQaDSEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
+void UQaDSEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
-	auto xTag = xmlNode->FindChildNode("x");
-	if (xTag != NULL)
-		NodePosX = FCString::Atoi(*xTag->GetContent());
+	reader->TryGet("x", NodePosX);
+	reader->TryGet("y", NodePosY);
 
-	auto yTag = xmlNode->FindChildNode("y");
-	if (yTag != NULL)
-		NodePosY = FCString::Atoi(*yTag->GetContent());
+	FGuid::Parse(reader->Get<FString>("id"), NodeGuid);
 
-	auto linksTag = xmlNode->FindChildNode("links");
-	if (linksTag != NULL)
+	auto links = reader->Get<TArray<FString>>("links");
+	for (auto id : links)
 	{
-		for (auto linkTag : linksTag->GetChildrenNodes())
+		auto node = nodeById[id];
+
+		if (node != NULL)
 		{
-			auto id = linkTag->GetContent();
-			auto node = nodeById[id];
+			auto inputPin = node->Pins.FindByPredicate([](UEdGraphPin* pin) { return pin->Direction == EEdGraphPinDirection::EGPD_Input; });
+			auto outputPin = Pins.FindByPredicate([](UEdGraphPin* pin) { return pin->Direction == EEdGraphPinDirection::EGPD_Output; });
 
-			if (node != NULL)
-			{
-				auto inputPin = node->Pins.FindByPredicate([](UEdGraphPin* pin) { return pin->Direction == EEdGraphPinDirection::EGPD_Input; });
-				auto outputPin = Pins.FindByPredicate([](UEdGraphPin* pin) { return pin->Direction == EEdGraphPinDirection::EGPD_Output; });
-
-				if (inputPin != NULL && outputPin != NULL)
-					(*outputPin)->MakeLinkTo(*inputPin);
-			}
+			if (inputPin != NULL && outputPin != NULL)
+				(*outputPin)->MakeLinkTo(*inputPin);
 		}
 	}
 }

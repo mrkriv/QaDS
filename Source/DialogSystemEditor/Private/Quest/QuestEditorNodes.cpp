@@ -19,7 +19,7 @@ FXmlWriteNode UQuestStageEdGraphNode::SaveToXml() const
 	return Super::SaveToXml();
 }
 
-void UQuestStageEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
+void UQuestStageEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
 }
 
@@ -34,7 +34,7 @@ FXmlWriteNode UQuestEndEdGraphNode::SaveToXml() const
 	return Super::SaveToXml();
 }
 
-void UQuestEndEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
+void UQuestEndEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
 }
 
@@ -49,6 +49,6 @@ FXmlWriteNode UQuestRootEdGraphNode::SaveToXml() const
 	return Super::SaveToXml();
 }
 
-void UQuestRootEdGraphNode::LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
+void UQuestRootEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
 }

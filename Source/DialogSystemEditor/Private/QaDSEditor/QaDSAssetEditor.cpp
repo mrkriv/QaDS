@@ -217,27 +217,23 @@ void FQaDSAssetEditor::ImportExecute()
 	{
 		FXmlFile xml(*Filenames[0]);
 
-		TMap<UQaDSEdGraphNode*, FXmlNode*> xmlByNode;
+		TMap<UQaDSEdGraphNode*, FXmlReadNode> xmlByNode;
 		TMap<FString, UQaDSEdGraphNode*> nodesById;
 
 		for (auto nodeTag : xml.GetRootNode()->GetChildrenNodes())
 		{
-			auto idTag = nodeTag->FindChildNode("id");
-			auto classTag = nodeTag->FindChildNode("class");
+			auto reader = FXmlReadNode(nodeTag);
 
-			if (idTag == NULL || classTag == NULL)
+			auto nodeClass = FindObject<UClass>(ANY_PACKAGE, *reader.Get("class"));
+			if (nodeClass == NULL)
 				continue;
 
-			auto nodeClass = FindObject<UClass>(ANY_PACKAGE, *classTag->GetContent());
-
-			auto nodeTemplate = NewObject<UQaDSEdGraphNode>(EditedAsset, nodeClass);
+			auto nodeTemplate = NewObject<UQaDSEdGraphNode>(GraphEditor->GetCurrentGraph(), nodeClass);
 			auto node = FQaDSSchemaAction_NewNode::SpawnNodeFromTemplate<UQaDSEdGraphNode>(EdGraph, nodeTemplate, FVector2D::ZeroVector, false);
 			node->AllocateDefaultPins();
 
-			FGuid::Parse(idTag->GetContent(), node->NodeGuid);
-
-			nodesById.Add(idTag->GetContent(), node);
-			xmlByNode.Add(node, nodeTag);
+			nodesById.Add(reader.Get("id"), node);
+			xmlByNode.Add(node, reader);
 		}
 
 		if (xmlByNode.Num() == 0)
@@ -248,7 +244,7 @@ void FQaDSAssetEditor::ImportExecute()
 
 		for (auto kpv : xmlByNode)
 		{
-			kpv.Key->LoadInXml(kpv.Value, nodesById);
+			kpv.Key->LoadInXml(&kpv.Value, nodesById);
 			graph->Nodes.Add(kpv.Key);
 		}
 	}

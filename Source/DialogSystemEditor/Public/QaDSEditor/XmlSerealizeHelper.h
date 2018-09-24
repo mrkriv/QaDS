@@ -1,9 +1,9 @@
 #pragma once
 
+#include "XmlFile.h"
 #include "DialogNodes.h"
 
 class FXmlNode;
-class UQaDSEdGraphNode;
 
 template<typename T>
 struct FXmlWriteTuple
@@ -28,14 +28,16 @@ public:
 	FString GetXml() const;
 	FString GetXml(const FString& tab) const;
 
+	static FString EncodeString(const FString& input);
+
 	template<typename T>
-	void Append(FString tag, T value)
+	FORCEINLINE void Append(FString tag, T value)
 	{
 		*this << FXmlWriteTuple<T>(tag, value);
 	}
 
 	template<typename T>
-	void AppendArray(FString tag, FString itemTag, TArray<T> values)
+	FORCEINLINE void AppendArray(FString tag, FString itemTag, TArray<T> values)
 	{
 		if (values.Num() != 0)
 			return;
@@ -50,51 +52,74 @@ public:
 	}
 };
 
-FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FString>& tuple)
-{
-	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value));
-	return node;
-}
+FORCEINLINE void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FString>& tuple);
+FORCEINLINE void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FName>& tuple);
+FORCEINLINE void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FText>& tuple);
+FORCEINLINE void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<int>& tuple);
+FORCEINLINE void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<float>& tuple);
+FORCEINLINE void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<bool>& tuple);
 
-FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FName>& tuple)
-{
-	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value.ToString()));
-	return node;
-}
-
-FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FText>& tuple)
-{
-	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value.ToString()));
-	return node;
-}
-
-FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<int>& tuple)
-{
-	node.Childrens.Add(FXmlWriteNode(tuple.Tag, FString::FromInt(tuple.Value)));
-	return node;
-}
-
-FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<float>& tuple)
-{
-	node.Childrens.Add(FXmlWriteNode(tuple.Tag, FString::SanitizeFloat(tuple.Value)));
-	return node;
-}
-
-FORCEINLINE FXmlWriteNode& operator<<(FXmlWriteNode& node, const FXmlWriteTuple<bool>& tuple)
-{
-	node.Childrens.Add(FXmlWriteNode(tuple.Tag, tuple.Value ? "true" : "false"));
-	return node;
-}
-
-class DIALOGSYSTEMEDITOR_API FXmlSerealizeHelper //todo:: remove this
+class DIALOGSYSTEMEDITOR_API FXmlReadNode
 {
 public:
-	static FString EncodeString(const FString& input);
+	FXmlNode* XmlNode;
 
-	static void DeserealizeArray(FXmlNode* tag, TArray<FString>& outValues);
-	static void DeserealizeArray(FXmlNode* tag, TArray<FName>& outValues);
-	static void DeserealizeArray(FXmlNode* tag, TArray<FDialogPhraseEvent>& outValues);
-	static void DeserealizeArray(FXmlNode* tag, TArray<FDialogPhraseCondition>& outValues);
-	static void Deserealize(FXmlNode* tag, FDialogPhraseEvent& outValue);
-	static void Deserealize(FXmlNode* tag, FDialogPhraseCondition& outValue);
+	FXmlReadNode() {}
+	FXmlReadNode(FXmlNode* xmlNode) : XmlNode(xmlNode) {}
+
+	FORCEINLINE FString Get(const FString& tag) const
+	{
+		auto xml = XmlNode->FindChildNode(tag);
+
+		if (xml != NULL)
+			return xml->GetContent();
+
+		return "";
+		//return Get<FString>(tag);
+	}
+
+	template<typename T>
+	FORCEINLINE T Get(const FString& tag) const
+	{
+		T item;
+		TryGet(tag, item);
+
+		return item;
+	}
+
+	template<typename T>
+	FORCEINLINE void TryGet(const FString& tag, T& outValue) const
+	{
+		auto xml = XmlNode->FindChildNode(tag);
+
+		if (xml != NULL)
+			*this >> outValue;
+	}
+
+	template<typename T>
+	FORCEINLINE void TryGet(const FString& tag, TArray<T>& outValue) const
+	{
+		auto xml = XmlNode->FindChildNode(tag);
+		outValue.Reset();
+
+		if (xml == NULL)
+			return;
+
+		auto childReader = FXmlReadNode(xml);
+		for (auto subXml : xml->GetChildrenNodes())
+		{
+			T item;
+			childReader >> item;
+
+			outValue.Add(item);
+		}
+	}
 };
+
+FORCEINLINE void operator>>(const FXmlReadNode& node, FString& value);
+FORCEINLINE void operator>>(const FXmlReadNode& node, FName& value);
+FORCEINLINE void operator>>(const FXmlReadNode& node, FText& value);
+FORCEINLINE void operator>>(const FXmlReadNode& node, int& value);
+FORCEINLINE void operator>>(const FXmlReadNode& node, float& value);
+FORCEINLINE void operator>>(const FXmlReadNode& node, bool& value);
+FORCEINLINE void operator>>(const FXmlReadNode& node, UClass*& value);

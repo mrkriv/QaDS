@@ -28,7 +28,7 @@ public:
 	TArray<UQaDSEdGraphNode*> GetChildNodes() const;
 
 	virtual FXmlWriteNode SaveToXml() const;
-	virtual void LoadInXml(FXmlNode* xmlNode, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
+	virtual void LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
 
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
 };
