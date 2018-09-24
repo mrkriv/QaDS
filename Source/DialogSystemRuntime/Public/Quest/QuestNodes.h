@@ -12,13 +12,13 @@ class DIALOGSYSTEMRUNTIME_API UQuestNode : public UObject
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	UQuestAsset* OwnerQuest;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TArray<UQuestNode*> Childs;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FQuestStageInfo Stage;
 
 	virtual bool Ckeck(UQuestProcessor* processor);

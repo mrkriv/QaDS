@@ -28,7 +28,7 @@ public:
 	UQuestNode* CurrentNode;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "QuestScript"))
-	TAssetPtr<AQuestScript> QuestScriptClass;
+	TAssetSubclassOf<AQuestScript> QuestScriptClass;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY()

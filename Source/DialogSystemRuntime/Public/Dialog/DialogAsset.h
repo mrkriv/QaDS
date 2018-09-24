@@ -16,7 +16,7 @@ public:
 	class UDialogNode* RootNode;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "DialogScript"))
-	TAssetPtr<class ADialogScript> DialogScriptClass;
+	TAssetSubclassOf<class ADialogScript> DialogScriptClass;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY()

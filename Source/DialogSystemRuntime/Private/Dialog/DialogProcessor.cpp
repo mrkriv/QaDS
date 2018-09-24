@@ -51,15 +51,10 @@ void UDialogProcessor::SetDialogAsset(UDialogAsset* NewDialogAsset)
 	{
 		DialogScript = NULL;
 	}
-	else if (DialogScript == NULL )
+	else if (DialogScript == NULL || !DialogScript->IsA(Asset->DialogScriptClass.Get()))
 	{
-		auto newScript = Asset->DialogScriptClass.Get();
-
-		if (!DialogScript->IsA(newScript->GetClass()))
-		{
-			DialogScript = newScript;
-			DialogScript->Implementer = this;
-		}
+		DialogScript = NPC->GetWorld()->SpawnActor<ADialogScript>(Asset->DialogScriptClass.Get());
+		DialogScript->Implementer = this;
 	}
 }
 

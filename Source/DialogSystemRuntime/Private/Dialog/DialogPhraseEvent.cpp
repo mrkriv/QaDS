@@ -36,7 +36,7 @@ bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 			ERROR("DialogScript not found, pleass select dialog script class in root node");
 		}
 
-		ObjectClass = OwnerNode->OwnerDialog->DialogScriptClass.Get()->GetClass();
+		ObjectClass = OwnerNode->OwnerDialog->DialogScriptClass.Get();
 		break;
 		
 	case EDialogPhraseEventCallType::Player:
