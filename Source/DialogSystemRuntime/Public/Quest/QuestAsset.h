@@ -25,7 +25,16 @@ public:
 	UQuestNode* RootNode;
 
 	UPROPERTY(BlueprintReadOnly)
-	UQuestNode* CurrentNode;
+	TArray<UQuestNode*> CompletedNodes;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<UQuestNode*> SkipedNodes; //todo:: use this
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<UQuestNode*> FailedNodes;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<UQuestNode*> ActiveNodes;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "QuestScript"))
 	TAssetSubclassOf<AQuestScript> QuestScriptClass;

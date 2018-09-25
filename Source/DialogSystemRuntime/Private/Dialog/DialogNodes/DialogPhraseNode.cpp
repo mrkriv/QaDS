@@ -16,9 +16,9 @@ void UDialogPhraseNode::Invoke(UDialogProcessor* processor)
 	for (auto& Event : Data.Action)
 		Event.Invoke(processor);
 	
-	if (Data.StartQuest.IsValid())
+	if (!Data.StartQuest.ToSoftObjectPath().IsNull()) //todo:: use SoftObjectPath
 	{
-		UQuestProcessor::GetQuestProcessor()->StartQuest(Data.StartQuest);
+		UQuestProcessor::GetQuestProcessor()->StartQuest(Data.StartQuest.ToSoftObjectPath().TryLoad());
 	}
 	
 	if (Data.Source == EDialogPhraseSource::Player)

@@ -75,7 +75,6 @@ public:
 			return xml->GetContent();
 
 		return "";
-		//return Get<FString>(tag);
 	}
 
 	template<typename T>

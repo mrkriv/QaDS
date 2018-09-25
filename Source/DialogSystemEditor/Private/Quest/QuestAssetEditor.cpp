@@ -11,7 +11,7 @@
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Views/SListView.h"
-#include "QuestNodes.h"
+#include "QuestNode.h"
 #include "QuestEditorNodes.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Kismet2/DebuggerCommands.h"
@@ -137,7 +137,7 @@ UQuestEdGraphNode* FQuestAssetEditor::GetRootNode()
 {
 	for (auto node : GraphEditor->GetCurrentGraph()->Nodes)
 	{
-		if (auto root = Cast<UQuestEdGraphNode>(node))
+		if (auto root = Cast<UQuestRootEdGraphNode>(node))
 			return root;
 	}
 

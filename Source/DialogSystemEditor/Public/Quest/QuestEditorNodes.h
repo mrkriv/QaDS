@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EdGraph/EdGraphNode.h"
-#include "QuestNodes.h"
+#include "QuestNode.h"
 #include "QaDSEdGraphNode.h"
 #include "QuestEditorNodes.generated.h"
 

@@ -55,7 +55,7 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseInfo
 	float PhraseManualTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
-	USoundBase* Sound;
+	TAssetPtr<USoundBase> Sound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
 	EDialogPhraseSource Source;
