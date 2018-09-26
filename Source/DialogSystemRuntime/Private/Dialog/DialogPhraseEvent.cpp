@@ -11,18 +11,16 @@
 #include "DialogScript.h"
 #include "DialogPhraseEvent.h"
 
-#define ERROR(Message, ...) ErrorMessage =  FString::Printf(TEXT(Message), ##__VA_ARGS__); return false
-
 bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 {
 	if (EventName.IsNone())
 	{
-		ERROR("Event name is empty");
+		FString::Printf(TEXT("Event name is empty"));
 	}
 
 	if (ObjectClass == NULL && CallType != EDialogPhraseEventCallType::DialogScript)
 	{
-		ERROR("Object class	is empty");
+		FString::Printf(TEXT("Object classis empty"));
 	}
 
 	switch (CallType)
@@ -33,7 +31,7 @@ bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 
 		if (!OwnerNode->OwnerDialog->DialogScriptClass.IsValid())
 		{
-			ERROR("DialogScript not found, pleass select dialog script class in root node");
+			FString::Printf(TEXT("DialogScript not found, pleass select dialog script class in root node"));
 		}
 
 		ObjectClass = OwnerNode->OwnerDialog->DialogScriptClass.Get();
@@ -46,23 +44,23 @@ bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 	case EDialogPhraseEventCallType::FindByTag:
 		if (FindTag.IsEmpty())
 		{
-			ERROR("Find tag is empty");
+			FString::Printf(TEXT("Find tag is empty"));
 		}
 
 		if (!ObjectClass->IsChildOf(AActor::StaticClass()) && !ObjectClass->IsChildOf(UActorComponent::StaticClass()))
 		{
-			ERROR("Object class must be an actor or its component");
+			FString::Printf(TEXT("Object class must be an actor or its component"));
 		}
 		break;
 
 	default:
-		ERROR("Unknown call type");
+		FString::Printf(TEXT("Unknown call type"));
 	}
 
 	auto func = ObjectClass->ClassDefaultObject->FindFunction(EventName);
 	if (func == NULL)
 	{
-		ERROR("Function %s not found", *EventName.ToString());
+		FString::Printf(TEXT("Function %s not found"), *EventName.ToString());
 	}
 
 	TArray<UProperty*> params;
@@ -110,16 +108,15 @@ bool FDialogPhraseCondition::Compile(FString& ErrorMessage, bool& needUpdate)
 
 	if (found == 0)
 	{
-		ERROR("Function %s does not return a boolean value", *EventName.ToString());
+		FString::Printf(TEXT("Function %s does not return a boolean value"), *EventName.ToString());
 	}
 	else if (found > 1)
 	{
-		ERROR("Function %s returns several Boolean values", *EventName.ToString());
+		FString::Printf(TEXT("Function %s returns several Boolean values"), *EventName.ToString());
 	}
 
 	return true;
 }
-#undef ERROR
 
 
 UObject* FDialogPhraseEvent::GetObject(UDialogProcessor* DialogProcessor) const

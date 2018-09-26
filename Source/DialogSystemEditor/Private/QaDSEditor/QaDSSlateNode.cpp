@@ -81,7 +81,6 @@ void SGraphNode_QaDSNodeBase::UpdateGraphNode()
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot()
-			.Padding(0.0f, 0.0f)
 			.HAlign(HAlign_Fill)
 			.VAlign(VAlign_Top)
 			.AutoHeight()
@@ -97,7 +96,7 @@ void SGraphNode_QaDSNodeBase::UpdateGraphNode()
 					.VAlign(VAlign_Top)
 					.AutoHeight()
 					[
-						SAssignNew(InputPinBox, SHorizontalBox) // INPUT PIN AREA
+						SAssignNew(InputPinBox, SHorizontalBox)
 					]
 	
 					+ SVerticalBox::Slot()
@@ -112,7 +111,6 @@ void SGraphNode_QaDSNodeBase::UpdateGraphNode()
 			]
 
 			+ SVerticalBox::Slot()
-			.Padding(-15.0f, 0.0f)
 			.HAlign(HAlign_Fill)
 			.VAlign(VAlign_Top)
 			.AutoHeight()
@@ -122,7 +120,6 @@ void SGraphNode_QaDSNodeBase::UpdateGraphNode()
 			]
 	
 			+ SVerticalBox::Slot()
-			.Padding(-15.0f, 0.0f)
 			.HAlign(HAlign_Fill)
 			.VAlign(VAlign_Fill)
 			.FillHeight(1.0f)
@@ -135,7 +132,7 @@ void SGraphNode_QaDSNodeBase::UpdateGraphNode()
 					+ SHorizontalBox::Slot()
 					.HAlign(HAlign_Left)
 					.VAlign(VAlign_Top)
-					.Padding(-15.0f, 0.0f, -5.0f, 0.0f)
+					.Padding(-7.0f, 0.0f, -5.0f, 0.0f)
 					.AutoWidth()
 					[
 						SNew(SButton)
@@ -153,14 +150,22 @@ void SGraphNode_QaDSNodeBase::UpdateGraphNode()
 					.FillWidth(1.0f)
 					.Padding(2.0f, 2.0f, 10.0f, 4.0f)
 					[
-						SNew(SBox)
+						SAssignNew(BodyBox, SVerticalBox)
+
+						+ SVerticalBox::Slot()
 						.HAlign(HAlign_Fill)
-						.VAlign(VAlign_Center)
-						.MinDesiredHeight(70.0f)
-						.WidthOverride(320.0f)
-						.MaxDesiredWidth(320.0f)
+						.VAlign(VAlign_Fill)
+						.FillHeight(1.0f)
 						[
-							SAssignNew(NodeWiget, STextBlock)
+							SNew(SBox)
+							.HAlign(HAlign_Fill)
+							.VAlign(VAlign_Center)
+							.MinDesiredHeight(70.0f)
+							.WidthOverride(320.0f)
+							.MaxDesiredWidth(320.0f)
+							[
+								SAssignNew(NodeWiget, STextBlock)
+							]
 						]
 					]
 					
@@ -180,7 +185,6 @@ void SGraphNode_QaDSNodeBase::UpdateGraphNode()
 			]
 
 			+ SVerticalBox::Slot()
-			.Padding(-15.0f, 0.0f)
 			.HAlign(HAlign_Fill)
 			.VAlign(VAlign_Bottom)
 			.AutoHeight()
@@ -190,7 +194,6 @@ void SGraphNode_QaDSNodeBase::UpdateGraphNode()
 			]
 	
 			+ SVerticalBox::Slot()
-			.Padding(0.0f, 0.0f)
 			.HAlign(HAlign_Fill)
 			.VAlign(VAlign_Bottom)
 			.AutoHeight()
@@ -214,7 +217,7 @@ void SGraphNode_QaDSNodeBase::UpdateGraphNode()
 					.VAlign(VAlign_Bottom)
 					.AutoHeight()
 					[
-						SAssignNew(OutputPinBox, SHorizontalBox) // OUTPUT PIN AREA
+						SAssignNew(OutputPinBox, SHorizontalBox)
 					]
 				]
 			]
@@ -259,8 +262,8 @@ void SGraphNode_QaDSNodeBase::AddPin(const TSharedRef<SGraphPin>& PinToAdd)
 {
 	PinToAdd->SetOwner(SharedThis(this));
 
-	const UEdGraphPin* PinObj = PinToAdd->GetPinObj();
-	const bool bAdvancedParameter = PinObj && PinObj->bAdvancedView;
+	auto PinObj = PinToAdd->GetPinObj();
+	auto bAdvancedParameter = PinObj && PinObj->bAdvancedView;
 	if (bAdvancedParameter)
 	{
 		PinToAdd->SetVisibility(TAttribute<EVisibility>(PinToAdd, &SGraphPin::IsPinVisibleAsAdvanced));
@@ -327,7 +330,7 @@ void SGraphNode_QaDSNodeBase::Tick(const FGeometry& AllottedGeometry, double InC
 
 	auto order = CastChecked<UQaDSEdGraphNode>(GraphNode)->GetOrder();
 
-	OrderDisplayBorder->SetVisibility(order > 0 ? EVisibility::Visible : EVisibility::Collapsed);
+	OrderDisplayBorder->SetVisibility(order > 0 ? EVisibility::Visible : EVisibility::Hidden);
 	OrderDisplayText->SetText(FText::AsNumber(order));
 }
 

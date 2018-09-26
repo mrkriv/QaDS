@@ -6,6 +6,8 @@
 
 void UDialogSubGraphNode::Invoke(UDialogProcessor* processor)
 {
+	check(processor);
+
 	if (TargetDialog == NULL)
 		TargetDialog = TargetDialogAsset.Get();
 
@@ -32,6 +34,8 @@ bool UDialogSubGraphNode::Check(UDialogProcessor* processor)
 
 TArray<UDialogPhraseNode*> UDialogSubGraphNode::GetNextPhrases(UDialogProcessor* processor)
 {
+	check(processor);
+
 	TArray<UDialogPhraseNode*> result;
 
 	if (TargetDialog == NULL)

@@ -7,6 +7,8 @@
 
 void UDialogPhraseNode::Invoke(UDialogProcessor* processor)
 {
+	check(processor);
+
 	for (auto key : Data.GiveKeys)
 		processor->StoryKeyManager->AddKey(key);
 
@@ -16,7 +18,7 @@ void UDialogPhraseNode::Invoke(UDialogProcessor* processor)
 	for (auto& Event : Data.Action)
 		Event.Invoke(processor);
 	
-	if (!Data.StartQuest.ToSoftObjectPath().IsNull()) //todo:: use SoftObjectPath
+	if (!Data.StartQuest.ToSoftObjectPath().IsNull())
 	{
 		UQuestProcessor::GetQuestProcessor()->StartQuest(Data.StartQuest.ToSoftObjectPath().TryLoad());
 	}
@@ -53,6 +55,8 @@ void UDialogPhraseNode::Invoke(UDialogProcessor* processor)
 
 bool UDialogPhraseNode::Check(UDialogProcessor* processor)
 {
+	check(processor);
+
 	for (auto key : Data.CheckHasKeys)
 	{
 		if (processor->StoryKeyManager->DontHasKey(key))

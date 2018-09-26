@@ -5,6 +5,8 @@
 
 void UDialogNode::Invoke(UDialogProcessor* processor)
 {
+	check(processor);
+
 	for (auto child : Childs)
 	{
 		if (child->Check(processor))
@@ -22,6 +24,8 @@ bool UDialogNode::Check(UDialogProcessor* processor)
 
 TArray<UDialogPhraseNode*> UDialogNode::GetNextPhrases(UDialogProcessor* processor)
 {
+	check(processor);
+
 	TArray<UDialogPhraseNode*> result;
 
     for (auto child : Childs)

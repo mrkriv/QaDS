@@ -48,7 +48,7 @@ void SGraphNode_Phrase::CreateNodeWidget()
 	for (auto key : data.Predicate)
 		AddTextToContent(ConditionsBox, TEXT("IF ") + key.ToString(), FColor(255, 255, 0));
 	
-	if(data.StartQuest.IsValid())
+	if(!data.StartQuest.ToSoftObjectPath().IsNull())
 		AddTextToContent(EventsBox, TEXT("> ") + data.StartQuest.GetAssetName(), FColor(255, 0, 255));
 
 	for (auto key : data.Action)

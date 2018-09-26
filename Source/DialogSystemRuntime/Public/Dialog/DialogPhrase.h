@@ -82,5 +82,5 @@ struct DIALOGSYSTEMRUNTIME_API FDialogPhraseInfo
 	TArray<FDialogPhraseEvent> Action;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Activate")
-	TAssetPtr<UQuestAsset> StartQuest;
+	TSoftObjectPtr<UQuestAsset> StartQuest;
 };
