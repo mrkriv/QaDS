@@ -32,12 +32,12 @@ FName SGraphNode_QuestNode::GetIcon() const
 		return "DialogSystem.Feiled";
 	}
 
-	if (node->GetChildNodes().Num() == 0)
+	if (node->GetChildNodes().Num() > 1)
 	{
-		return "DialogSystem.Stage";
+		return stage.WaitAllOwner ? "DialogSystem.HasAll" : "DialogSystem.HasOne";
 	}
 
-	return stage.WaitAllOwner ? "DialogSystem.HasAll" : "DialogSystem.HasOne";
+	return "DialogSystem.Stage";
 }
 
 void SGraphNode_QuestNode::CreateNodeWidget()
@@ -45,6 +45,8 @@ void SGraphNode_QuestNode::CreateNodeWidget()
 	SGraphNode_QaDSNodeBase::CreateNodeWidget();
 
 	auto& stage = CastChecked<UQuestStageEdGraphNode>(GraphNode)->Stage;
+
+	AddTextToContent(BodyBox, stage.Caption.ToString(), FColor(255, 255, 255));
 
 	for (auto key : stage.CheckHasKeys)
 		AddTextToContent(ConditionsBox, TEXT("HAS KEY ") + key.ToString(), FColor(170, 255, 0));
@@ -66,13 +68,14 @@ void SGraphNode_QuestNode::CreateNodeWidget()
 		AddTextToContent(BodyBox, TEXT("Wait ") + key.ToString(), FColor(255, 255, 0));
 
 
-	for (auto key : stage.WaitHasKeys)
+	AddTextToContent(BodyBox, TEXT(""), FColor(0, 0, 0));
+	for (auto key : stage.FailedIfGiveKeys)
 		AddTextToContent(BodyBox, TEXT("Failed if give key ") + key.ToString(), FColor(255, 32, 32));
 
-	for (auto key : stage.WaitDontHasKeys)
+	for (auto key : stage.FailedIfRemoveKeys)
 		AddTextToContent(BodyBox, TEXT("Failed if remove key ") + key.ToString(), FColor(255, 32, 32));
 
-	for (auto key : stage.WaitPredicate)
+	for (auto key : stage.FailedPredicate)
 		AddTextToContent(BodyBox, TEXT("Failed if ") + key.ToString(), FColor(255, 32, 32));
 
 

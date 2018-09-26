@@ -4,55 +4,105 @@
 #include "QuestProcessor.h"
 #include "StoryInformationManager.h"
 
-void UQuestNode::InvokePostScript(UQuestProcessor* processor)
+TArray<UQuestNode*> UQuestNode::GetNextStage()
 {
-	check(processor);
-
-	for (auto key : Stage.GiveKeys)
-		processor->StoryKeyManager->AddKey(key);
-
-	for (auto key : Stage.RemoveKeys)
-		processor->StoryKeyManager->RemoveKey(key);
-
-	for (auto& Event : Stage.Action)
-		Event.Invoke(this);
+	return Childs.FilterByPredicate([=](UQuestNode* node)
+	{
+		return node->CkeckForActivate();
+	});
 }
 
-void UQuestNode::SetOwnerQuest(UQuestAsset* quest)
+void UQuestNode::Prepare(UQuestProcessor* processor, UQuestAsset* quest)
 {
+	check(processor);
+	check(quest);
+
+	Processor = processor;
 	OwnerQuest = quest;
 	for (auto child : Childs)
 	{
-		child->SetOwnerQuest(quest);
+		child->Prepare(processor, quest);
 	}
 }
 
-bool UQuestNode::TryComplete(UQuestProcessor* processor)
+void UQuestNode::Activate()
 {
-	check(processor);
+	OwnerQuest->ActiveNodes.Add(this);
+	Status = EQuestCompleteStatus::Active;
 
-	if (!CkeckForComplete(processor))
-		return false;
+	if (TryComplete())
+		return;
 
-	processor->ActivateStage(this);
-	//todo:: use WaitAllOwner
-	
+	if (Stage.WaitHasKeys.Num() != 0 ||
+		Stage.WaitDontHasKeys.Num() != 0 ||
+		Stage.FailedIfGiveKeys.Num() != 0 ||
+		Stage.FailedIfRemoveKeys.Num() != 0)
+	{
+		Processor->StoryKeyManager->OnKeyRemoveBP.AddDynamic(this, &UQuestNode::OnChangeStoryKey);
+		Processor->StoryKeyManager->OnKeyAddBP.AddDynamic(this, &UQuestNode::OnChangeStoryKey);
+	}
+}
+
+void UQuestNode::OnChangeStoryKey(const FName& key)
+{
+	if (Stage.WaitHasKeys.Contains(key) ||
+		Stage.WaitDontHasKeys.Contains(key) ||
+		Stage.FailedIfGiveKeys.Contains(key) ||
+		Stage.FailedIfRemoveKeys.Contains(key))
+	{
+		TryComplete();
+	}
+}
+
+bool UQuestNode::TryComplete() //todo:: use WaitAllOwner
+{
+	if (CkeckForFailed())
+	{
+		Status = EQuestCompleteStatus::Failed;
+	}
+	else
+	{
+		if (!CkeckForComplete())
+			return false;
+
+		Status = EQuestCompleteStatus::Completed;
+
+		for (auto key : Stage.GiveKeys)
+			Processor->StoryKeyManager->AddKey(key);
+
+		for (auto key : Stage.RemoveKeys)
+			Processor->StoryKeyManager->RemoveKey(key);
+
+		for (auto& Event : Stage.Action)
+			Event.Invoke(this);
+	}
+
+	CompleteNode();
 	return true;
 }
 
-bool UQuestNode::CkeckForActivate(UQuestProcessor* processor)
+void UQuestNode::CompleteNode()
 {
-	check(processor);
+	OwnerQuest->ActiveNodes.Remove(this);
+	OwnerQuest->ArchiveNodes.Add(this);
 
+	Processor->CompleteStage(this);
+
+	Processor->StoryKeyManager->OnKeyRemoveBP.RemoveDynamic(this, &UQuestNode::OnChangeStoryKey);
+	Processor->StoryKeyManager->OnKeyAddBP.RemoveDynamic(this, &UQuestNode::OnChangeStoryKey);
+}
+
+bool UQuestNode::CkeckForActivate()
+{
 	for (auto key : Stage.CheckHasKeys)
 	{
-		if (processor->StoryKeyManager->DontHasKey(key))
+		if (Processor->StoryKeyManager->DontHasKey(key))
 			return false;
 	}
 
 	for (auto key : Stage.CheckDontHasKeys)
 	{
-		if (processor->StoryKeyManager->HasKey(key))
+		if (Processor->StoryKeyManager->HasKey(key))
 			return false;
 	}
 
@@ -65,52 +115,48 @@ bool UQuestNode::CkeckForActivate(UQuestProcessor* processor)
 	return true;
 }
 
-bool UQuestNode::CkeckForComplete(UQuestProcessor* processor)
+bool UQuestNode::CkeckForComplete()
 {
-	check(processor);
-
 	for (auto key : Stage.WaitHasKeys)
 	{
-		if (processor->StoryKeyManager->DontHasKey(key))
+		if (Processor->StoryKeyManager->DontHasKey(key))
 			return false;
 	}
 
 	for (auto key : Stage.WaitDontHasKeys)
 	{
-		if (processor->StoryKeyManager->HasKey(key))
+		if (Processor->StoryKeyManager->HasKey(key))
 			return false;
 	}
 
-	//todo:: WaitPredicate
+	for (auto& Conditions : Stage.WaitPredicate)
+	{
+		if (!Conditions.InvokeCheck(this))
+			return false;
+	}
 
 	return true;
 }
 
-void UQuestNode::Assign(UQuestProcessor* processor)
+bool UQuestNode::CkeckForFailed()
 {
-	check(processor);
-
-	if (Stage.WaitDontHasKeys.Num() + Stage.WaitHasKeys.Num() > 0)
+	for (auto key : Stage.FailedIfGiveKeys)
 	{
-		auto onMyKeyChange = [this](FName key)
-		{
-			if (Stage.WaitHasKeys.Contains(key) || Stage.WaitDontHasKeys.Contains(key))
-			{
-				TryComplete(UQuestProcessor::GetQuestProcessor());
-			}
-		};
-
-		processor->StoryKeyManager->OnKeyRemove.AddLambda(onMyKeyChange);
-		processor->StoryKeyManager->OnKeyAdd.AddLambda(onMyKeyChange);
+		if (Processor->StoryKeyManager->HasKey(key))
+			return true;
 	}
-}
 
-TArray<UQuestNode*> UQuestNode::GetNextStage(UQuestProcessor* processor)
-{
-	check(processor);
-
-	return Childs.FilterByPredicate([=](UQuestNode* node)
+	for (auto key : Stage.FailedIfRemoveKeys)
 	{
-		return node->CkeckForActivate(processor);
-	});
+		if (Processor->StoryKeyManager->DontHasKey(key))
+			return true;
+	}
+
+	for (auto& Conditions : Stage.FailedPredicate)
+	{
+		if (Conditions.InvokeCheck(this))
+			return true;
+	}
+
+	return false;
 }

@@ -4,6 +4,7 @@
 #include "QuestAsset.h"
 #include "QuestNode.h"
 #include "QuestProcessor.h"
+#include "StoryInformationManager.h"
 
 UQuestProcessor* UQuestProcessor::GetQuestProcessor()
 {
@@ -33,7 +34,8 @@ void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 		return;
 	}
 
-	auto stages = quest->RootNode->GetNextStage(this);
+	quest->RootNode->Prepare(this, quest);
+	auto stages = quest->RootNode->GetNextStage();
 	if (stages.Num() == 0)
 	{
 		UE_LOG(DialogModuleLog, Error, TEXT("Failed start new quest: not found valid stage in %s"), *QuestAsset.GetAssetName());
@@ -44,43 +46,41 @@ void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 	OnQuestStart.Broadcast(quest);
 	OnQuestStartBP.Broadcast(quest);
 
-	quest->RootNode->SetOwnerQuest(quest);
 	WaitStage(quest->RootNode);
 }
 
-void UQuestProcessor::WaitStage(UQuestNode* root)
-{
-	auto stages = root->GetNextStage(this);
-	for (auto stage : stages)
-	{
-		if (!activeQuests.Contains(stage->OwnerQuest)) //todo:: add Status ti UQuestAsset and use hear
-			break;
-
-		root->OwnerQuest->ActiveNodes.Add(stage);
-		if (!stage->TryComplete(this))
-		{
-			stage->Assign(this);
-		}
-	}
-}
-
-void UQuestProcessor::ActivateStage(UQuestNode* StageNode)
+void UQuestProcessor::WaitStage(UQuestNode* StageNode)
 {
 	check(StageNode);
 	check(StageNode->OwnerQuest);
 
-	auto quest = StageNode->OwnerQuest;
-	if (!quest->ActiveNodes.Remove(StageNode))
+	auto stages = StageNode->GetNextStage();
+
+	if (stages.Num() == 0)
 	{
-		UE_LOG(DialogModuleLog, Warning, TEXT("Failed activate quest stage: stage is not active (%s)"), *quest->GetFName().ToString());
+		EndQuest(StageNode->OwnerQuest, StageNode->Status == EQuestCompleteStatus::Completed);
 		return;
 	}
 
-	//quest->CompletedNodes.Add(StageNode); //todo:: use status
+	for (auto stage : stages)
+	{
+		stage->Activate();
 
-	StageNode->InvokePostScript(this);
-	OnQuestStageChange.Broadcast(quest, StageNode->Stage);
-	OnQuestStageChangeBP.Broadcast(quest, StageNode->Stage);
+		if (stage->TryComplete())
+		{
+			if (StageNode->OwnerQuest->Status != EQuestCompleteStatus::Active)
+				break;
+		}
+	}
+}
+
+void UQuestProcessor::CompleteStage(UQuestNode* StageNode)
+{
+	check(StageNode);
+	check(StageNode->OwnerQuest);
+
+	OnQuestStageChange.Broadcast(StageNode->OwnerQuest, StageNode->Stage);
+	OnQuestStageChangeBP.Broadcast(StageNode->OwnerQuest, StageNode->Stage);
 
 	WaitStage(StageNode);
 }
@@ -93,14 +93,12 @@ void UQuestProcessor::EndQuest(UQuestAsset* Quest, bool IsSuccses)
 		return;
 	}
 
-	if (IsSuccses)
+	if (Quest->Status == EQuestCompleteStatus::Active)
 	{
-//		completedQuests.Add(Quest);
+		Quest->Status = IsSuccses ? EQuestCompleteStatus::Completed : EQuestCompleteStatus::Failed;
 	}
-	else
-	{
-		//failedQuests.Add(Quest);
-	}
+
+	archiveQuests.Add(Quest);
 
 	OnQuestEnd.Broadcast(Quest, IsSuccses);
 	OnQuestEndBP.Broadcast(Quest, IsSuccses);

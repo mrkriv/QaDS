@@ -71,6 +71,8 @@ class DIALOGSYSTEMRUNTIME_API UQuestNode : public UObject
 {
 	GENERATED_BODY()
 
+	UPROPERTY()
+	UQuestProcessor* Processor;
 public:
 	UPROPERTY()
 	UQuestAsset* OwnerQuest;
@@ -84,11 +86,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FQuestStageInfo Stage;
 
-	void SetOwnerQuest(UQuestAsset* quest);
-	bool TryComplete(UQuestProcessor* processor);
-	bool CkeckForActivate(UQuestProcessor* processor);
-	bool CkeckForComplete(UQuestProcessor* processor);
-	void InvokePostScript(UQuestProcessor* processor);
-	void Assign(UQuestProcessor* processor);
-	TArray<UQuestNode*> GetNextStage(UQuestProcessor* processor);
+	void Prepare(UQuestProcessor* processor, UQuestAsset* quest);
+	bool TryComplete();
+	bool CkeckForActivate();
+	bool CkeckForComplete();
+	bool CkeckForFailed();
+	void Activate();
+	void CompleteNode();
+	TArray<UQuestNode*> GetNextStage();
+
+	UFUNCTION()
+	void OnChangeStoryKey(const FName& key);
 };

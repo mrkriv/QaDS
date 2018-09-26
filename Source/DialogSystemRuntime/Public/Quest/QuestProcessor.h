@@ -6,7 +6,6 @@
 #include "QuestProcessor.generated.h"
 
 class UQuestAsset;
-class UQuestNode;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(		FQuestStart,	UQuestAsset*);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FQuestStartBP,	UQuestAsset*,	Quest);
@@ -30,11 +29,11 @@ public:
 	FQuestStartBP OnQuestStartBP;
 	FQuestStart OnQuestStart;
 
-	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Quest")
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Quest")	//todo:: rename to OnStageComplete
 	FQuestStageChangeBP OnQuestStageChangeBP;
 	FQuestStageChange OnQuestStageChange;
 
-	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Quest")
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Quest") //todo:: use EQuestCompleteStatus
 	FQuestEndBP OnQuestEndBP;
 	FQuestEnd OnQuestEnd;
 
@@ -47,15 +46,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
 	void StartQuest(TAssetPtr<UQuestAsset> QuestAsset);
 
-	void ActivateStage(UQuestNode* Stage);
+	void CompleteStage(UQuestNode* Stage);
 	void WaitStage(UQuestNode* Stage);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
 	void EndQuest(UQuestAsset* Quest, bool IsSuccses);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
-	TArray<UQuestAsset*> GetActiveQuests() const;
+	TArray<UQuestAsset*> GetActiveQuests() const;  // todo:: remove this, use GetArchiveQuests witch filter
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
-	TArray<UQuestAsset*> GetArchiveQuests() const;
+	TArray<UQuestAsset*> GetArchiveQuests() const; // todo:: add status filter to param
 };
