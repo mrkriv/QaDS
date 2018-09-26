@@ -1,9 +1,9 @@
 #pragma once
 
-#include "DialogPhraseEvent.h" //todo:: create FQuestStageCondition (need update rate param)
+#include "QuestStageEvent.h"
+#include "QuestAsset.h"
 #include "QuestNode.generated.h"
 
-class UQuestAsset;	
 class UQuestProcessor;
 
 USTRUCT(BlueprintType)
@@ -33,7 +33,7 @@ struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
 	TArray<FName> CheckDontHasKeys;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
-	TArray<FDialogPhraseCondition> Predicate;
+	TArray<FQuestStageCondition> Predicate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
 	TArray<FName> WaitHasKeys;
@@ -42,7 +42,16 @@ struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
 	TArray<FName> WaitDontHasKeys;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
-	TArray<FDialogPhraseCondition> WaitPredicate; //todo:: create FQuestStageCondition (need update rate param)
+	TArray<FQuestStageCondition> WaitPredicate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Failed")
+	TArray<FName> FailedIfGiveKeys;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Failed")
+	TArray<FName> FailedIfRemoveKeys;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Failed")
+	TArray<FQuestStageCondition> FailedPredicate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Complete")
 	TArray<FName> GiveKeys;
@@ -51,10 +60,13 @@ struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
 	TArray<FName> RemoveKeys;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Complete")
-	TArray<FDialogPhraseEvent> Action;
+	TArray<FQuestStageEvent> Action;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Complete")
+	EQuestCompleteStatus ChangeQuestState;
 };
 
-UCLASS(Blueprintable)
+UCLASS()
 class DIALOGSYSTEMRUNTIME_API UQuestNode : public UObject
 {
 	GENERATED_BODY()
@@ -66,6 +78,9 @@ public:
 	UPROPERTY()
 	TArray<UQuestNode*> Childs;
 
+	UPROPERTY(BlueprintReadOnly)
+	EQuestCompleteStatus Status;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FQuestStageInfo Stage;
 
@@ -76,15 +91,4 @@ public:
 	void InvokePostScript(UQuestProcessor* processor);
 	void Assign(UQuestProcessor* processor);
 	TArray<UQuestNode*> GetNextStage(UQuestProcessor* processor);
-};
-
-UCLASS()
-class DIALOGSYSTEMRUNTIME_API UQuestEndNode : public UQuestNode
-{
-	GENERATED_BODY()
-
-public:
-
-	UPROPERTY()
-	bool IsSuccesEnd;
 };

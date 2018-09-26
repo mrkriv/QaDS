@@ -189,19 +189,12 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 		return node->CompileNode;
 
 	auto stageNode = Cast<UQuestStageEdGraphNode>(node);
-	auto endNode = Cast<UQuestEndEdGraphNode>(node);
 	auto rootNode = Cast<UQuestRootEdGraphNode>(node);
 	bool needUpdate = false;
 
 	if (rootNode != NULL)
 	{
 		node->CompileNode = NewObject<UQuestNode>(EditedAsset);
-	}
-	else if (endNode != NULL)
-	{
-		auto compileNode = NewObject<UQuestEndNode>(EditedAsset);
-		compileNode->IsSuccesEnd = endNode->IsSuccesEnd;
-		node->CompileNode = compileNode;
 	}
 	else if (stageNode != NULL)
 	{
@@ -219,6 +212,16 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 			//Event.OwnerNode = compileNode;
 
 			if (!Event.Compile(ErrorMessage, needUpdate))
+			{
+				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + compileNode->Stage.SystemName.ToString() + "\""));
+			}
+		}
+
+		for (auto& Condition : compileNode->Stage.WaitPredicate)
+		{
+			//Condition.OwnerNode = compileNode;
+
+			if (!Condition.Compile(ErrorMessage, needUpdate))
 			{
 				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + compileNode->Stage.SystemName.ToString() + "\""));
 			}

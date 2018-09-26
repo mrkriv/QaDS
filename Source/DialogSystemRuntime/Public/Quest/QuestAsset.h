@@ -6,6 +6,16 @@
 class UQuestNode;
 class AQuestScript;
 
+UENUM(BlueprintType)
+enum class EQuestCompleteStatus : uint8
+{
+	None,
+	Active,
+	Failed,
+	Completed,
+	Skiped
+};
+
 UCLASS(Blueprintable)
 class DIALOGSYSTEMRUNTIME_API UQuestAsset : public UDataAsset
 {
@@ -21,23 +31,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText Description;
 
+	UPROPERTY(BlueprintReadOnly)
+	EQuestCompleteStatus Status;
+
 	UPROPERTY()
 	UQuestNode* RootNode;
 
 	UPROPERTY(BlueprintReadOnly)
-	TArray<UQuestNode*> CompletedNodes;
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<UQuestNode*> SkipedNodes; //todo:: use this
-
-	UPROPERTY(BlueprintReadOnly)
-	TArray<UQuestNode*> FailedNodes;
+	TArray<UQuestNode*> ArchiveNodes;
 
 	UPROPERTY(BlueprintReadOnly)
 	TArray<UQuestNode*> ActiveNodes;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "QuestScript"))
 	TAssetSubclassOf<AQuestScript> QuestScriptClass;
+
+	UPROPERTY(BlueprintReadOnly)
+	AQuestScript* QuestScript;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY()

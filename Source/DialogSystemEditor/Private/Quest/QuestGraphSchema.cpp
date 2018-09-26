@@ -35,7 +35,6 @@ void UQuestGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
 		QaDSSchemaUtils::AddAction<UQuestRootEdGraphNode>(TEXT("Create Root Node"), TEXT(""), Actions, OwnerOfTemp);
 
 	QaDSSchemaUtils::AddAction<UQuestStageEdGraphNode>(TEXT("Add Stage"), TEXT(""), Actions, OwnerOfTemp);
-	QaDSSchemaUtils::AddAction<UQuestEndEdGraphNode>(TEXT("Add End Node"), TEXT(""), Actions, OwnerOfTemp);
 
 	for (TSharedPtr<FEdGraphSchemaAction> Action : Actions)
 		ContextMenuBuilder.AddAction(Action);

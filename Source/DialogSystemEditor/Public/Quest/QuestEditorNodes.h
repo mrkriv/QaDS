@@ -37,21 +37,6 @@ public:
 };
 
 UCLASS()
-class DIALOGSYSTEMEDITOR_API UQuestEndEdGraphNode : public UQuestEdGraphNode
-{
-	GENERATED_BODY()
-
-public:
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool IsSuccesEnd;
-
-	virtual void AllocateDefaultPins() override;
-	virtual FXmlWriteNode SaveToXml() const;
-	virtual void LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
-};
-
-UCLASS()
 class DIALOGSYSTEMEDITOR_API UQuestRootEdGraphNode : public UQuestEdGraphNode
 {
 	GENERATED_BODY()

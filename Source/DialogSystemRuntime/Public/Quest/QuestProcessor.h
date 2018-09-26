@@ -22,8 +22,7 @@ class DIALOGSYSTEMRUNTIME_API UQuestProcessor : public UObject
 {
 	GENERATED_BODY()
 
-	TArray<UQuestAsset*> completedQuests;
-	TArray<UQuestAsset*> failedQuests;
+	TArray<UQuestAsset*> archiveQuests;
 	TArray<UQuestAsset*> activeQuests;
 
 public:
@@ -38,6 +37,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Quest")
 	FQuestEndBP OnQuestEndBP;
 	FQuestEnd OnQuestEnd;
+
+	UPROPERTY(BlueprintReadOnly)
+	UStoryKeyManager* StoryKeyManager;
 
 	UFUNCTION(BlueprintPure, Category = "Gameplay|Quest")
 	static UQuestProcessor* GetQuestProcessor();
@@ -55,8 +57,5 @@ public:
 	TArray<UQuestAsset*> GetActiveQuests() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
-	TArray<UQuestAsset*> GetCompletedQuests() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
-	TArray<UQuestAsset*> GetFailedQuests() const;
+	TArray<UQuestAsset*> GetArchiveQuests() const;
 };

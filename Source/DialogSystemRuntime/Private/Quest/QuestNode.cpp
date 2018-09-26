@@ -7,7 +7,15 @@
 void UQuestNode::InvokePostScript(UQuestProcessor* processor)
 {
 	check(processor);
-	//todo
+
+	for (auto key : Stage.GiveKeys)
+		processor->StoryKeyManager->AddKey(key);
+
+	for (auto key : Stage.RemoveKeys)
+		processor->StoryKeyManager->RemoveKey(key);
+
+	for (auto& Event : Stage.Action)
+		Event.Invoke(this);
 }
 
 void UQuestNode::SetOwnerQuest(UQuestAsset* quest)
@@ -35,7 +43,25 @@ bool UQuestNode::TryComplete(UQuestProcessor* processor)
 bool UQuestNode::CkeckForActivate(UQuestProcessor* processor)
 {
 	check(processor);
-	//todo
+
+	for (auto key : Stage.CheckHasKeys)
+	{
+		if (processor->StoryKeyManager->DontHasKey(key))
+			return false;
+	}
+
+	for (auto key : Stage.CheckDontHasKeys)
+	{
+		if (processor->StoryKeyManager->HasKey(key))
+			return false;
+	}
+
+	for (auto& Conditions : Stage.Predicate)
+	{
+		if (!Conditions.InvokeCheck(this))
+			return false;
+	}
+
 	return true;
 }
 
@@ -43,21 +69,16 @@ bool UQuestNode::CkeckForComplete(UQuestProcessor* processor)
 {
 	check(processor);
 
-	if (Stage.WaitDontHasKeys.Num() + Stage.WaitHasKeys.Num() > 0)
+	for (auto key : Stage.WaitHasKeys)
 	{
-		auto skm = UStoryKeyManager::GetStoryKeyManager();
+		if (processor->StoryKeyManager->DontHasKey(key))
+			return false;
+	}
 
-		for (auto key : Stage.WaitHasKeys)
-		{
-			if (skm->DontHasKey(key))
-				return false;
-		}
-
-		for (auto key : Stage.WaitDontHasKeys)
-		{
-			if (skm->HasKey(key))
-				return false;
-		}
+	for (auto key : Stage.WaitDontHasKeys)
+	{
+		if (processor->StoryKeyManager->HasKey(key))
+			return false;
 	}
 
 	//todo:: WaitPredicate
@@ -71,7 +92,6 @@ void UQuestNode::Assign(UQuestProcessor* processor)
 
 	if (Stage.WaitDontHasKeys.Num() + Stage.WaitHasKeys.Num() > 0)
 	{
-		auto skm = UStoryKeyManager::GetStoryKeyManager();
 		auto onMyKeyChange = [this](FName key)
 		{
 			if (Stage.WaitHasKeys.Contains(key) || Stage.WaitDontHasKeys.Contains(key))
@@ -80,8 +100,8 @@ void UQuestNode::Assign(UQuestProcessor* processor)
 			}
 		};
 
-		skm->OnKeyRemove.AddLambda(onMyKeyChange);
-		skm->OnKeyAdd.AddLambda(onMyKeyChange);
+		processor->StoryKeyManager->OnKeyRemove.AddLambda(onMyKeyChange);
+		processor->StoryKeyManager->OnKeyAdd.AddLambda(onMyKeyChange);
 	}
 }
 

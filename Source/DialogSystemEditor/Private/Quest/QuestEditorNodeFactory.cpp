@@ -8,11 +8,7 @@ TSharedPtr<class SGraphNode> FQuestEditorNodeFactory::CreateNode(UEdGraphNode* N
 {
 	TSharedPtr<SGraphNode_QaDSNodeBase> SNode;
 
-	if (Node->IsA(UQuestEndEdGraphNode::StaticClass()))
-	{
-		SNode = SNew(SGraphNode_QuestEndNode, Cast<UQuestEndEdGraphNode>(Node));
-	}
-	else if (Node->IsA(UQuestRootEdGraphNode::StaticClass()))
+	if (Node->IsA(UQuestRootEdGraphNode::StaticClass()))
 	{
 		SNode = SNew(SGraphNode_QuestRootNode, Cast<UQuestRootEdGraphNode>(Node));
 	}

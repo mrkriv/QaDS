@@ -23,21 +23,6 @@ void UQuestStageEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString,
 {
 }
 
-//UQuestEndEdGraphNode...........................................................................................
-void UQuestEndEdGraphNode::AllocateDefaultPins()
-{
-	CreatePin(EGPD_Input, NAME_None, FName("Input"));
-}
-
-FXmlWriteNode UQuestEndEdGraphNode::SaveToXml() const
-{
-	return Super::SaveToXml();
-}
-
-void UQuestEndEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
-{
-}
-
 //UQuestRootEdGraphNode...........................................................................................
 void UQuestRootEdGraphNode::AllocateDefaultPins()
 {

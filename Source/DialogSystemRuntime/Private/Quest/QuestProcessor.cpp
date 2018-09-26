@@ -15,6 +15,11 @@ UQuestProcessor* UQuestProcessor::GetQuestProcessor()
 
 void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 {
+	if (StoryKeyManager == NULL)
+	{
+		StoryKeyManager = UStoryKeyManager::GetStoryKeyManager();
+	}
+
 	if (!QuestAsset.IsValid())
 	{
 		UE_LOG(DialogModuleLog, Error, TEXT("Failed start new quest: asset is not set"));
@@ -71,7 +76,7 @@ void UQuestProcessor::ActivateStage(UQuestNode* StageNode)
 		return;
 	}
 
-	quest->CompletedNodes.Add(StageNode); //todo:: use status
+	//quest->CompletedNodes.Add(StageNode); //todo:: use status
 
 	StageNode->InvokePostScript(this);
 	OnQuestStageChange.Broadcast(quest, StageNode->Stage);
@@ -90,11 +95,11 @@ void UQuestProcessor::EndQuest(UQuestAsset* Quest, bool IsSuccses)
 
 	if (IsSuccses)
 	{
-		completedQuests.Add(Quest);
+//		completedQuests.Add(Quest);
 	}
 	else
 	{
-		failedQuests.Add(Quest);
+		//failedQuests.Add(Quest);
 	}
 
 	OnQuestEnd.Broadcast(Quest, IsSuccses);
@@ -106,12 +111,7 @@ TArray<UQuestAsset*> UQuestProcessor::GetActiveQuests() const
 	return activeQuests;
 }
 
-TArray<UQuestAsset*> UQuestProcessor::GetCompletedQuests() const
+TArray<UQuestAsset*> UQuestProcessor::GetArchiveQuests() const
 {
-	return completedQuests;
-}
-
-TArray<UQuestAsset*> UQuestProcessor::GetFailedQuests() const
-{
-	return failedQuests;
+	return archiveQuests;
 }

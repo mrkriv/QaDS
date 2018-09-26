@@ -35,8 +35,9 @@ class SGraphNode_QaDSNodeBase : public SGraphNode, public FNodePropertyObserver
 
 	TSharedPtr<SHorizontalBox> OutputPinBox;
 	TSharedPtr<SHorizontalBox> InputPinBox;
-	TSharedPtr<SVerticalBox> EventsBox;
 	TSharedPtr<SVerticalBox> ConditionsBox;
+	TSharedPtr<SVerticalBox> EventsBox;
+	TSharedPtr<SVerticalBox> BodyBox;
 	TSharedPtr<STextBlock> NodeWiget;
 	TSharedPtr<SImage> NodeIcon;
 	TSharedPtr<SBorder> OrderDisplayBorder;
