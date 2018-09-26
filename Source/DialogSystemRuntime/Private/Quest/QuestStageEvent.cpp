@@ -15,12 +15,14 @@ bool FQuestStageEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 {
 	if (EventName.IsNone())
 	{
-		FString::Printf(TEXT("Event name is empty"));
+		ErrorMessage = FString::Printf(TEXT("Event name is empty"));
+		return false;
 	}
 
 	if (ObjectClass == NULL && CallType != EQuestStageEventCallType::QuestScript)
 	{
-		FString::Printf(TEXT("Object classis empty"));
+		ErrorMessage = FString::Printf(TEXT("Object classis empty"));
+		return false;
 	}
 
 	switch (CallType)
@@ -31,7 +33,8 @@ bool FQuestStageEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 
 		if (!OwnerNode->OwnerQuest->QuestScriptClass.IsValid())
 		{
-			FString::Printf(TEXT("QuestScript not found, pleass select Quest script class in root node"));
+			ErrorMessage = FString::Printf(TEXT("QuestScript not found, pleass select Quest script class in root node"));
+			return false;
 		}
 
 		ObjectClass = OwnerNode->OwnerQuest->QuestScriptClass.Get();
@@ -43,23 +46,27 @@ bool FQuestStageEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 	case EQuestStageEventCallType::FindByTag:
 		if (FindTag.IsEmpty())
 		{
-			FString::Printf(TEXT("Find tag is empty"));
+			ErrorMessage = FString::Printf(TEXT("Find tag is empty"));
+			return false;
 		}
 
 		if (!ObjectClass->IsChildOf(AActor::StaticClass()) && !ObjectClass->IsChildOf(UActorComponent::StaticClass()))
 		{
-			FString::Printf(TEXT("Object class must be an actor or its component"));
+			ErrorMessage = FString::Printf(TEXT("Object class must be an actor or its component"));
+			return false;
 		}
 		break;
 
 	default:
-		FString::Printf(TEXT("Unknown call type"));
+		ErrorMessage = FString::Printf(TEXT("Unknown call type"));
+		return false;
 	}
 
 	auto func = ObjectClass->ClassDefaultObject->FindFunction(EventName);
 	if (func == NULL)
 	{
-		FString::Printf(TEXT("Function %s not found"), *EventName.ToString());
+		ErrorMessage = FString::Printf(TEXT("Function %s not found"), *EventName.ToString());
+		return false;
 	}
 
 	TArray<UProperty*> params;
@@ -107,11 +114,13 @@ bool FQuestStageCondition::Compile(FString& ErrorMessage, bool& needUpdate)
 
 	if (found == 0)
 	{
-		FString::Printf(TEXT("Function %s does not return a boolean value"), *EventName.ToString());
+		ErrorMessage = FString::Printf(TEXT("Function %s does not return a boolean value"), *EventName.ToString());
+		return false;
 	}
 	else if (found > 1)
 	{
-		FString::Printf(TEXT("Function %s returns several Boolean values"), *EventName.ToString());
+		ErrorMessage = FString::Printf(TEXT("Function %s returns several Boolean values"), *EventName.ToString());
+		return false;
 	}
 
 	return true;
