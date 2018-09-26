@@ -108,7 +108,7 @@ TSharedRef<SDockTab> FQaDSAssetEditor::SpawnTab_Details(const FSpawnTabArgs& Arg
 TSharedRef<SGraphEditor> FQaDSAssetEditor::CreateGraphEditorWidget(UEdGraph* InGraph)
 {
 	FGraphAppearanceInfo AppearanceInfo;
-	AppearanceInfo.CornerText = FText::FromString("EDITOR");
+	AppearanceInfo.CornerText = FText::FromString(GetEditorName().ToString().ToUpper() + " EDITOR");
 
 	GraphEditorCommands = MakeShareable(new FUICommandList);
 	{

@@ -46,8 +46,6 @@ void SGraphNode_QuestNode::CreateNodeWidget()
 
 	auto& stage = CastChecked<UQuestStageEdGraphNode>(GraphNode)->Stage;
 
-	AddTextToContent(BodyBox, stage.Caption.ToString(), FColor(255, 255, 255));
-
 	for (auto key : stage.CheckHasKeys)
 		AddTextToContent(ConditionsBox, TEXT("HAS KEY ") + key.ToString(), FColor(170, 255, 0));
 

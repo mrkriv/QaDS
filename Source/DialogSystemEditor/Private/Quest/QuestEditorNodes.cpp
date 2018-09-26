@@ -14,6 +14,14 @@ void UQuestStageEdGraphNode::AllocateDefaultPins()
 	CreatePin(EGPD_Output, NAME_None, FName("Output"));
 }
 
+FText UQuestStageEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
+{
+	if (Stage.Caption.IsEmpty())
+		return FText::FromString("Quest Stage");
+
+	return Stage.Caption;
+}
+
 FXmlWriteNode UQuestStageEdGraphNode::SaveToXml() const
 {
 	return Super::SaveToXml();
@@ -27,6 +35,11 @@ void UQuestStageEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString,
 void UQuestRootEdGraphNode::AllocateDefaultPins()
 {
 	CreatePin(EGPD_Output, NAME_None, FName("Output"));
+}
+
+FText UQuestRootEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
+{
+	return FText::FromString("Quest Start");
 }
 
 FXmlWriteNode UQuestRootEdGraphNode::SaveToXml() const
