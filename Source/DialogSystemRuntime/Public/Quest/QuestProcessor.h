@@ -7,14 +7,9 @@
 
 class UQuestAsset;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(		FQuestStart,	UQuestAsset*);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FQuestStartBP,	UQuestAsset*,	Quest);
-
-DECLARE_MULTICAST_DELEGATE_TwoParams(		 FQuestStageChange,		UQuestAsset*,			FQuestStageInfo);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FQuestStageChangeBP,	UQuestAsset*,	Quest,	FQuestStageInfo, Stage);
-
-DECLARE_MULTICAST_DELEGATE_TwoParams(		 FQuestEnd,		UQuestAsset*,			bool);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FQuestEndBP,	UQuestAsset*,	Quest,	bool, IsSucces);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FQuestStartSignature, UQuestAsset*, Quest);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FQuestStageCompleteSignature, UQuestAsset*, Quest, FQuestStageInfo, Stage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FQuestEndSignature, UQuestAsset*, Quest, EQuestCompleteStatus, QuestStatus);
 
 UCLASS()
 class DIALOGSYSTEMRUNTIME_API UQuestProcessor : public UObject
@@ -26,16 +21,13 @@ class DIALOGSYSTEMRUNTIME_API UQuestProcessor : public UObject
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Quest")
-	FQuestStartBP OnQuestStartBP;
-	FQuestStart OnQuestStart;
+	FQuestStartSignature OnQuestStart;
 
-	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Quest")	//todo:: rename to OnStageComplete
-	FQuestStageChangeBP OnQuestStageChangeBP;
-	FQuestStageChange OnQuestStageChange;
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Quest")
+	FQuestStageCompleteSignature OnStageComplete;
 
-	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Quest") //todo:: use EQuestCompleteStatus
-	FQuestEndBP OnQuestEndBP;
-	FQuestEnd OnQuestEnd;
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Quest")
+	FQuestEndSignature OnQuestEnd;
 
 	UPROPERTY(BlueprintReadOnly)
 	UStoryKeyManager* StoryKeyManager;
@@ -50,11 +42,8 @@ public:
 	void WaitStage(UQuestNode* Stage);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
-	void EndQuest(UQuestAsset* Quest, bool IsSuccses);
+	void EndQuest(UQuestAsset* Quest, EQuestCompleteStatus QuestStatus);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
-	TArray<UQuestAsset*> GetActiveQuests() const;  // todo:: remove this, use GetArchiveQuests witch filter
-
-	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
-	TArray<UQuestAsset*> GetArchiveQuests() const; // todo:: add status filter to param
+	TArray<UQuestAsset*> GetQuests(EQuestCompleteStatus FilterStatus) const;
 };

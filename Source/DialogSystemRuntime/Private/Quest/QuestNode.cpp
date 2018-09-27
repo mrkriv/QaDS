@@ -59,6 +59,7 @@ bool UQuestNode::TryComplete() //todo:: use WaitAllOwner
 	if (CkeckForFailed())
 	{
 		Status = EQuestCompleteStatus::Failed;
+		Processor->EndQuest(OwnerQuest, EQuestCompleteStatus::Failed);
 	}
 	else
 	{

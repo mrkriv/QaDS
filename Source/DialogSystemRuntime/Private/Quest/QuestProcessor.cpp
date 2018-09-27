@@ -44,7 +44,6 @@ void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 
 	activeQuests.Add(quest);
 	OnQuestStart.Broadcast(quest);
-	OnQuestStartBP.Broadcast(quest);
 
 	WaitStage(quest->RootNode);
 }
@@ -58,7 +57,7 @@ void UQuestProcessor::WaitStage(UQuestNode* StageNode)
 
 	if (stages.Num() == 0)
 	{
-		EndQuest(StageNode->OwnerQuest, StageNode->Status == EQuestCompleteStatus::Completed);
+		EndQuest(StageNode->OwnerQuest, EQuestCompleteStatus::Completed);
 		return;
 	}
 
@@ -79,13 +78,12 @@ void UQuestProcessor::CompleteStage(UQuestNode* StageNode)
 	check(StageNode);
 	check(StageNode->OwnerQuest);
 
-	OnQuestStageChange.Broadcast(StageNode->OwnerQuest, StageNode->Stage);
-	OnQuestStageChangeBP.Broadcast(StageNode->OwnerQuest, StageNode->Stage);
+	OnStageComplete.Broadcast(StageNode->OwnerQuest, StageNode->Stage);
 
 	WaitStage(StageNode);
 }
 
-void UQuestProcessor::EndQuest(UQuestAsset* Quest, bool IsSuccses)
+void UQuestProcessor::EndQuest(UQuestAsset* Quest, EQuestCompleteStatus Status)
 {
 	if (!activeQuests.Remove(Quest))
 	{
@@ -95,21 +93,30 @@ void UQuestProcessor::EndQuest(UQuestAsset* Quest, bool IsSuccses)
 
 	if (Quest->Status == EQuestCompleteStatus::Active)
 	{
-		Quest->Status = IsSuccses ? EQuestCompleteStatus::Completed : EQuestCompleteStatus::Failed;
+		Quest->Status = Status;
 	}
 
 	archiveQuests.Add(Quest);
 
-	OnQuestEnd.Broadcast(Quest, IsSuccses);
-	OnQuestEndBP.Broadcast(Quest, IsSuccses);
+	OnQuestEnd.Broadcast(Quest, Status);
 }
 
-TArray<UQuestAsset*> UQuestProcessor::GetActiveQuests() const
+TArray<UQuestAsset*> UQuestProcessor::GetQuests(EQuestCompleteStatus FilterStatus) const
 {
-	return activeQuests;
-}
+	if (FilterStatus == EQuestCompleteStatus::None)
+	{
+		auto result = archiveQuests;
+		result.Append(activeQuests);
 
-TArray<UQuestAsset*> UQuestProcessor::GetArchiveQuests() const
-{
-	return archiveQuests;
+		return result;
+	}
+	if (FilterStatus == EQuestCompleteStatus::Active)
+	{
+		return activeQuests;
+	}
+
+	return archiveQuests.FilterByPredicate([FilterStatus](UQuestAsset* quest)
+	{
+		return quest->Status == FilterStatus;
+	});
 }
