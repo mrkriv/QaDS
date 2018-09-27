@@ -24,42 +24,19 @@
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Editor/UnrealEd/Public/Toolkits/AssetEditorManager.h"
 
+#define GET_PROPERTY(Property) GET_PROPERTY_IN_TYPE(FQuestStageEvent, Property)
+#define GET_PROPERTY_IN_TYPE(Type, Property) StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(Type, Property))
+
 TSharedRef<IPropertyTypeCustomization> FQuestStageEventCustomization::MakeInstance()
 {
 	return MakeShareable(new FQuestStageEventCustomization());
 }
 
-FQuestStageEventCustomization::FQuestStageEventCustomization()
-{
-}
-
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
-void FQuestStageEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> StructPropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
+void FQuestStageEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> structPropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
-	static const FName PropertyName_ObjectClass = GET_MEMBER_NAME_CHECKED(FQuestStageEvent, ObjectClass);
-	static const FName PropertyName_Parameters = GET_MEMBER_NAME_CHECKED(FQuestStageEvent, Parameters);
-	static const FName PropertyName_EventName = GET_MEMBER_NAME_CHECKED(FQuestStageEvent, EventName);
-	static const FName PropertyName_OwnerNode = GET_MEMBER_NAME_CHECKED(FQuestStageEvent, OwnerNode);
-	static const FName PropertyName_CallType = GET_MEMBER_NAME_CHECKED(FQuestStageEvent, CallType);
-	static const FName PropertyName_FindTag = GET_MEMBER_NAME_CHECKED(FQuestStageEvent, FindTag);
-	static const FName PropertyName_Invert = GET_MEMBER_NAME_CHECKED(FQuestStageCondition, InvertCondition);
-
-	PropertyHandle_ObjectClass = StructPropertyHandle->GetChildHandle(PropertyName_ObjectClass);
-	PropertyHandle_Parameters = StructPropertyHandle->GetChildHandle(PropertyName_Parameters);
-	PropertyHandle_EventName = StructPropertyHandle->GetChildHandle(PropertyName_EventName);
-	PropertyHandle_OwnerNode = StructPropertyHandle->GetChildHandle(PropertyName_OwnerNode);
-	PropertyHandle_CallType = StructPropertyHandle->GetChildHandle(PropertyName_CallType);
-	PropertyHandle_FindTag = StructPropertyHandle->GetChildHandle(PropertyName_FindTag);
-	PropertyHandle_Invert = StructPropertyHandle->GetChildHandle(PropertyName_Invert);
-	PropertyHandle_PhraseEvent = StructPropertyHandle;
-
-	check(PropertyHandle_ObjectClass.IsValid());
-	check(PropertyHandle_Parameters.IsValid());
-	check(PropertyHandle_OwnerNode.IsValid());
-	check(PropertyHandle_EventName.IsValid());
-	check(PropertyHandle_CallType.IsValid());
-	check(PropertyHandle_FindTag.IsValid());
-
+	StructPropertyHandle = structPropertyHandle;
+	
 	HeaderRow.NameContent()
 		[
 			StructPropertyHandle->CreatePropertyNameWidget(StructPropertyHandle->GetPropertyDisplayName())
@@ -81,29 +58,29 @@ void FQuestStageEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> 
 
 void FQuestStageEventCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> StructPropertyHandle, IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
-	StructBuilder.AddProperty(PropertyHandle_CallType.ToSharedRef());
-	StructBuilder.AddProperty(PropertyHandle_EventName.ToSharedRef());
+	StructBuilder.AddProperty(GET_PROPERTY(CallType).ToSharedRef());
+	StructBuilder.AddProperty(GET_PROPERTY(EventName).ToSharedRef());
 
-	StructBuilder.AddProperty(PropertyHandle_ObjectClass.ToSharedRef())
+	StructBuilder.AddProperty(GET_PROPERTY(ObjectClass).ToSharedRef())
 		.Visibility(TAttribute<EVisibility>(this, &FQuestStageEventCustomization::GetObjectClassVisibility));
 
-	StructBuilder.AddProperty(PropertyHandle_FindTag.ToSharedRef())
+	StructBuilder.AddProperty(GET_PROPERTY(FindTag).ToSharedRef())
 		.Visibility(TAttribute<EVisibility>(this, &FQuestStageEventCustomization::GetFingTagVisibility));
 
-	if (PropertyHandle_Invert.IsValid())
-		StructBuilder.AddProperty(PropertyHandle_Invert.ToSharedRef());
+	if (GET_PROPERTY_IN_TYPE(FQuestStageCondition, InvertCondition).IsValid())
+		StructBuilder.AddProperty(GET_PROPERTY_IN_TYPE(FQuestStageCondition, InvertCondition).ToSharedRef());
 
 	UObject* Property_ObjectClass;
 	FName Property_EventName;
 
-	PropertyHandle_EventName->GetValue(Property_EventName);
-	PropertyHandle_ObjectClass->GetValue(Property_ObjectClass);
+	GET_PROPERTY(EventName)->GetValue(Property_EventName);
+	GET_PROPERTY(ObjectClass)->GetValue(Property_ObjectClass);
 
 	if (Property_ObjectClass == NULL)
 		return;
 
 	auto func = Cast<UClass>(Property_ObjectClass)->ClassDefaultObject->FindFunction(Property_EventName);
-	auto array = PropertyHandle_Parameters->AsArray();
+	auto array = GET_PROPERTY(Parameters)->AsArray();
 
 	if (func == NULL || !array.IsValid())
 		return;
@@ -168,9 +145,9 @@ FReply FQuestStageEventCustomization::OnTitleClick()
 	UObject* Property_OwnerNode;
 	EQuestStageEventCallType Property_CallType;
 
-	PropertyHandle_ObjectClass->GetValue(Property_ObjectClass);
-	PropertyHandle_CallType->GetValue((uint8&)Property_CallType);
-	PropertyHandle_OwnerNode->GetValue(Property_OwnerNode);
+	GET_PROPERTY(ObjectClass)->GetValue(Property_ObjectClass);
+	GET_PROPERTY(CallType)->GetValue((uint8&)Property_CallType);
+	GET_PROPERTY(OwnerNode)->GetValue(Property_OwnerNode);
 
 	if (Property_CallType == EQuestStageEventCallType::QuestScript && Property_OwnerNode != NULL)
 	{
@@ -194,16 +171,16 @@ FReply FQuestStageEventCustomization::OnTitleClick()
 
 FText FQuestStageEventCustomization::GetTitleText() const
 {
-	FQuestStageEvent phraseEvent;
-	PropertyHandle_PhraseEvent->GetValue((uint8&)phraseEvent);
+	FQuestStageEvent stageEvent;
+	StructPropertyHandle->GetValue((uint8&)stageEvent);
 
-	return FText::FromString(phraseEvent.ToString());
+	return FText::FromString(stageEvent.ToString());
 }
 
 EVisibility FQuestStageEventCustomization::GetFingTagVisibility() const
 {
 	EQuestStageEventCallType Property_CallType;
-	PropertyHandle_CallType->GetValue((uint8&)Property_CallType);
+	GET_PROPERTY(CallType)->GetValue((uint8&)Property_CallType);
 
 	return Property_CallType == EQuestStageEventCallType::FindByTag ? EVisibility::Visible : EVisibility::Collapsed;
 }
@@ -211,7 +188,10 @@ EVisibility FQuestStageEventCustomization::GetFingTagVisibility() const
 EVisibility FQuestStageEventCustomization::GetObjectClassVisibility() const
 {
 	EQuestStageEventCallType Property_CallType;
-	PropertyHandle_CallType->GetValue((uint8&)Property_CallType);
+	GET_PROPERTY(CallType)->GetValue((uint8&)Property_CallType);
 
 	return Property_CallType != EQuestStageEventCallType::QuestScript ? EVisibility::Visible : EVisibility::Collapsed;
 }
+
+#undef GET_PROPERTY
+#undef GET_PROPERTY_IN_TYPE

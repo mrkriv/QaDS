@@ -24,41 +24,17 @@
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Editor/UnrealEd/Public/Toolkits/AssetEditorManager.h"
 
+#define GET_PROPERTY(Property) GET_PROPERTY_IN_TYPE(FDialogPhraseEvent, Property)
+#define GET_PROPERTY_IN_TYPE(Type, Property) StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(Type, Property))
+
 TSharedRef<IPropertyTypeCustomization> FDialogPhraseEventCustomization::MakeInstance()
 {
 	return MakeShareable(new FDialogPhraseEventCustomization());
 }
 
-FDialogPhraseEventCustomization::FDialogPhraseEventCustomization()
+void FDialogPhraseEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> structPropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
-}
-
-BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
-void FDialogPhraseEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> StructPropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
-{
-	static const FName PropertyName_ObjectClass = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, ObjectClass);
-	static const FName PropertyName_Parameters = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, Parameters);
-	static const FName PropertyName_EventName = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, EventName);
-	static const FName PropertyName_OwnerNode = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, OwnerNode);
-	static const FName PropertyName_CallType = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, CallType);
-	static const FName PropertyName_FindTag = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, FindTag);
-	static const FName PropertyName_Invert = GET_MEMBER_NAME_CHECKED(FDialogPhraseCondition, InvertCondition);
-
-	PropertyHandle_ObjectClass = StructPropertyHandle->GetChildHandle(PropertyName_ObjectClass);
-	PropertyHandle_Parameters = StructPropertyHandle->GetChildHandle(PropertyName_Parameters);
-	PropertyHandle_EventName = StructPropertyHandle->GetChildHandle(PropertyName_EventName);
-	PropertyHandle_OwnerNode = StructPropertyHandle->GetChildHandle(PropertyName_OwnerNode);
-	PropertyHandle_CallType = StructPropertyHandle->GetChildHandle(PropertyName_CallType);
-	PropertyHandle_FindTag = StructPropertyHandle->GetChildHandle(PropertyName_FindTag);
-	PropertyHandle_Invert = StructPropertyHandle->GetChildHandle(PropertyName_Invert);
-	PropertyHandle_PhraseEvent = StructPropertyHandle;
-
-	check(PropertyHandle_ObjectClass.IsValid());
-	check(PropertyHandle_Parameters.IsValid());
-	check(PropertyHandle_OwnerNode.IsValid());
-	check(PropertyHandle_EventName.IsValid());
-	check(PropertyHandle_CallType.IsValid());
-	check(PropertyHandle_FindTag.IsValid());
+	StructPropertyHandle = structPropertyHandle;
 
 	HeaderRow.NameContent()
 		[
@@ -81,29 +57,29 @@ void FDialogPhraseEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle
 
 void FDialogPhraseEventCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> StructPropertyHandle, IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
-	StructBuilder.AddProperty(PropertyHandle_CallType.ToSharedRef());
-	StructBuilder.AddProperty(PropertyHandle_EventName.ToSharedRef());
+	StructBuilder.AddProperty(GET_PROPERTY(CallType).ToSharedRef());
+	StructBuilder.AddProperty(GET_PROPERTY(EventName).ToSharedRef());
 
-	StructBuilder.AddProperty(PropertyHandle_ObjectClass.ToSharedRef())
+	StructBuilder.AddProperty(GET_PROPERTY(ObjectClass).ToSharedRef())
 		.Visibility(TAttribute<EVisibility>(this, &FDialogPhraseEventCustomization::GetObjectClassVisibility));
 
-	StructBuilder.AddProperty(PropertyHandle_FindTag.ToSharedRef())
+	StructBuilder.AddProperty(GET_PROPERTY(FindTag).ToSharedRef())
 		.Visibility(TAttribute<EVisibility>(this, &FDialogPhraseEventCustomization::GetFingTagVisibility));
 
-	if (PropertyHandle_Invert.IsValid())
-		StructBuilder.AddProperty(PropertyHandle_Invert.ToSharedRef());
+	if (GET_PROPERTY_IN_TYPE(FDialogPhraseCondition, InvertCondition).IsValid())
+		StructBuilder.AddProperty(GET_PROPERTY_IN_TYPE(FDialogPhraseCondition, InvertCondition).ToSharedRef());
 
 	UObject* Property_ObjectClass;
 	FName Property_EventName;
 
-	PropertyHandle_EventName->GetValue(Property_EventName);
-	PropertyHandle_ObjectClass->GetValue(Property_ObjectClass);
+	GET_PROPERTY(EventName)->GetValue(Property_EventName);
+	GET_PROPERTY(ObjectClass)->GetValue(Property_ObjectClass);
 
 	if (Property_ObjectClass == NULL)
 		return;
 
 	auto func = Cast<UClass>(Property_ObjectClass)->ClassDefaultObject->FindFunction(Property_EventName);
-	auto array = PropertyHandle_Parameters->AsArray();
+	auto array = GET_PROPERTY(Parameters)->AsArray();
 
 	if (func == NULL || !array.IsValid())
 		return;
@@ -168,9 +144,9 @@ FReply FDialogPhraseEventCustomization::OnTitleClick()
 	UObject* Property_OwnerNode;
 	EDialogPhraseEventCallType Property_CallType;
 
-	PropertyHandle_ObjectClass->GetValue(Property_ObjectClass);
-	PropertyHandle_CallType->GetValue((uint8&)Property_CallType);
-	PropertyHandle_OwnerNode->GetValue(Property_OwnerNode);
+	GET_PROPERTY(ObjectClass)->GetValue(Property_ObjectClass);
+	GET_PROPERTY(CallType)->GetValue((uint8&)Property_CallType);
+	GET_PROPERTY(OwnerNode)->GetValue(Property_OwnerNode);
 
 	if (Property_CallType == EDialogPhraseEventCallType::DialogScript && Property_OwnerNode != NULL)
 	{
@@ -195,7 +171,7 @@ FReply FDialogPhraseEventCustomization::OnTitleClick()
 FText FDialogPhraseEventCustomization::GetTitleText() const
 {
 	FDialogPhraseEvent phraseEvent;
-	PropertyHandle_PhraseEvent->GetValue((uint8&)phraseEvent);
+	StructPropertyHandle->GetValue((uint8&)phraseEvent);
 
 	return FText::FromString(phraseEvent.ToString());
 }
@@ -203,7 +179,7 @@ FText FDialogPhraseEventCustomization::GetTitleText() const
 EVisibility FDialogPhraseEventCustomization::GetFingTagVisibility() const
 {
 	EDialogPhraseEventCallType Property_CallType;
-	PropertyHandle_CallType->GetValue((uint8&)Property_CallType);
+	GET_PROPERTY(CallType)->GetValue((uint8&)Property_CallType);
 
 	return Property_CallType == EDialogPhraseEventCallType::FindByTag ? EVisibility::Visible : EVisibility::Collapsed;
 }
@@ -211,7 +187,10 @@ EVisibility FDialogPhraseEventCustomization::GetFingTagVisibility() const
 EVisibility FDialogPhraseEventCustomization::GetObjectClassVisibility() const
 {
 	EDialogPhraseEventCallType Property_CallType;
-	PropertyHandle_CallType->GetValue((uint8&)Property_CallType);
+	GET_PROPERTY(CallType)->GetValue((uint8&)Property_CallType);
 
 	return Property_CallType != EDialogPhraseEventCallType::DialogScript ? EVisibility::Visible : EVisibility::Collapsed;
 }
+
+#undef GET_PROPERTY
+#undef GET_PROPERTY_IN_TYPE
