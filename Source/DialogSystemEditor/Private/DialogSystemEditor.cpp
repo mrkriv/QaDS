@@ -17,6 +17,7 @@
 #include "DialogAssetEditor.h"
 
 #include "QuestEditorNodeFactory.h"
+#include "QuestStageEventCustomization.h"
 #include "QuestStageCustomization.h"
 #include "QuestAssetTypeActions.h"
 #include "QuestAssetEditor.h"
@@ -37,10 +38,13 @@ void FDialogSystemEditorModule::StartupModule()
 	AssetTools.RegisterAssetTypeActions(MakeShareable(new FQuestAssetTypeActions(AssetCategory)));
 	
 	auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseCondition", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
-	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseEvent", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
 	PropertyModule.RegisterCustomClassLayout("DialogPhraseEdGraphNode", FOnGetDetailCustomizationInstance::CreateStatic(&FPhraseNodeDetails::MakeInstance));
+	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseEvent", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
+	PropertyModule.RegisterCustomPropertyTypeLayout("DialogPhraseCondition", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDialogPhraseEventCustomization::MakeInstance));
+	
 	PropertyModule.RegisterCustomClassLayout("QuestStageEdGraphNode", FOnGetDetailCustomizationInstance::CreateStatic(&FQuestStageDetails::MakeInstance));
+	PropertyModule.RegisterCustomPropertyTypeLayout("QuestStageEvent", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FQuestStageEventCustomization::MakeInstance));
+	PropertyModule.RegisterCustomPropertyTypeLayout("QuestStageCondition", FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FQuestStageEventCustomization::MakeInstance));
 
 	auto& SettingsModule = FModuleManager::LoadModuleChecked<ISettingsModule>("Settings");
 	SettingsModule.RegisterSettings("Project", "Plugins", "Dialog",
@@ -76,10 +80,13 @@ void FDialogSystemEditorModule::ShutdownModule()
 	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
 	{
 		auto& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-		PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseCondition");
-		PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseEvent");
 		PropertyModule.UnregisterCustomClassLayout("DialogPhraseNode");
+		PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseEvent");
+		PropertyModule.UnregisterCustomPropertyTypeLayout("DialogPhraseCondition");
+
 		PropertyModule.UnregisterCustomClassLayout("QuestStageEdGraphNode");
+		PropertyModule.UnregisterCustomPropertyTypeLayout("QuestStageEvent");
+		PropertyModule.UnregisterCustomPropertyTypeLayout("QuestStageCondition");
 	}
 
 	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))

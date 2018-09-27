@@ -208,8 +208,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 
 		for (auto& Event : compileNode->Stage.Action)
 		{
-			//todo:: create action for quest
-			//Event.OwnerNode = compileNode;
+			Event.OwnerNode = compileNode;
 
 			if (!Event.Compile(ErrorMessage, needUpdate))
 			{
@@ -217,9 +216,19 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 			}
 		}
 
+		for (auto& Condition : compileNode->Stage.FailedPredicate)
+		{
+			Condition.OwnerNode = compileNode;
+
+			if (!Condition.Compile(ErrorMessage, needUpdate))
+			{
+				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + compileNode->Stage.SystemName.ToString() + "\""));
+			}
+		}
+
 		for (auto& Condition : compileNode->Stage.WaitPredicate)
 		{
-			//Condition.OwnerNode = compileNode;
+			Condition.OwnerNode = compileNode;
 
 			if (!Condition.Compile(ErrorMessage, needUpdate))
 			{
@@ -229,7 +238,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 
 		for (auto& Condition : compileNode->Stage.Predicate)
 		{
-			//Condition.OwnerNode = compileNode;
+			Condition.OwnerNode = compileNode;
 
 			if (!Condition.Compile(ErrorMessage, needUpdate))
 			{

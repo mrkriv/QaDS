@@ -1,6 +1,6 @@
 #include "DialogSystemEditor.h"
-#include "DialogAsset.h"
-#include "DialogScript.h"
+#include "QuestAsset.h"
+#include "QuestScript.h"
 #include "UObject/UnrealType.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Layout/SSpacer.h"
@@ -20,29 +20,29 @@
 #include "Widgets/Input/SHyperlink.h"
 #include "ScopedTransaction.h"
 #include "Slate/SlateTextureAtlasInterface.h"
-#include "DialogPhraseEventCustomization.h"
+#include "QuestStageEventCustomization.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Editor/UnrealEd/Public/Toolkits/AssetEditorManager.h"
 
-TSharedRef<IPropertyTypeCustomization> FDialogPhraseEventCustomization::MakeInstance()
+TSharedRef<IPropertyTypeCustomization> FQuestStageEventCustomization::MakeInstance()
 {
-	return MakeShareable(new FDialogPhraseEventCustomization());
+	return MakeShareable(new FQuestStageEventCustomization());
 }
 
-FDialogPhraseEventCustomization::FDialogPhraseEventCustomization()
+FQuestStageEventCustomization::FQuestStageEventCustomization()
 {
 }
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
-void FDialogPhraseEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> StructPropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
+void FQuestStageEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> StructPropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
-	static const FName PropertyName_ObjectClass = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, ObjectClass);
-	static const FName PropertyName_Parameters = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, Parameters);
-	static const FName PropertyName_EventName = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, EventName);
-	static const FName PropertyName_OwnerNode = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, OwnerNode);
-	static const FName PropertyName_CallType = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, CallType);
-	static const FName PropertyName_FindTag = GET_MEMBER_NAME_CHECKED(FDialogPhraseEvent, FindTag);
-	static const FName PropertyName_Invert = GET_MEMBER_NAME_CHECKED(FDialogPhraseCondition, InvertCondition);
+	static const FName PropertyName_ObjectClass = GET_MEMBER_NAME_CHECKED(FQuestStageEvent, ObjectClass);
+	static const FName PropertyName_Parameters = GET_MEMBER_NAME_CHECKED(FQuestStageEvent, Parameters);
+	static const FName PropertyName_EventName = GET_MEMBER_NAME_CHECKED(FQuestStageEvent, EventName);
+	static const FName PropertyName_OwnerNode = GET_MEMBER_NAME_CHECKED(FQuestStageEvent, OwnerNode);
+	static const FName PropertyName_CallType = GET_MEMBER_NAME_CHECKED(FQuestStageEvent, CallType);
+	static const FName PropertyName_FindTag = GET_MEMBER_NAME_CHECKED(FQuestStageEvent, FindTag);
+	static const FName PropertyName_Invert = GET_MEMBER_NAME_CHECKED(FQuestStageCondition, InvertCondition);
 
 	PropertyHandle_ObjectClass = StructPropertyHandle->GetChildHandle(PropertyName_ObjectClass);
 	PropertyHandle_Parameters = StructPropertyHandle->GetChildHandle(PropertyName_Parameters);
@@ -68,27 +68,27 @@ void FDialogPhraseEventCustomization::CustomizeHeader(TSharedRef<IPropertyHandle
 		.MinDesiredWidth(250)
 		[
 			SNew(SButton)
-			.OnClicked(this, &FDialogPhraseEventCustomization::OnTitleClick)
+			.OnClicked(this, &FQuestStageEventCustomization::OnTitleClick)
 			.VAlign(VAlign_Fill)
 			.HAlign(HAlign_Fill)
 			[
 				SNew(STextBlock)
-				.Text(this, &FDialogPhraseEventCustomization::GetTitleText)
+				.Text(this, &FQuestStageEventCustomization::GetTitleText)
 				.Font(IDetailLayoutBuilder::GetDetailFont())
 			]
 		];
 }
 
-void FDialogPhraseEventCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> StructPropertyHandle, IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
+void FQuestStageEventCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> StructPropertyHandle, IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
 	StructBuilder.AddProperty(PropertyHandle_CallType.ToSharedRef());
 	StructBuilder.AddProperty(PropertyHandle_EventName.ToSharedRef());
 
 	StructBuilder.AddProperty(PropertyHandle_ObjectClass.ToSharedRef())
-		.Visibility(TAttribute<EVisibility>(this, &FDialogPhraseEventCustomization::GetObjectClassVisibility));
+		.Visibility(TAttribute<EVisibility>(this, &FQuestStageEventCustomization::GetObjectClassVisibility));
 
 	StructBuilder.AddProperty(PropertyHandle_FindTag.ToSharedRef())
-		.Visibility(TAttribute<EVisibility>(this, &FDialogPhraseEventCustomization::GetFingTagVisibility));
+		.Visibility(TAttribute<EVisibility>(this, &FQuestStageEventCustomization::GetFingTagVisibility));
 
 	if (PropertyHandle_Invert.IsValid())
 		StructBuilder.AddProperty(PropertyHandle_Invert.ToSharedRef());
@@ -162,24 +162,24 @@ void FDialogPhraseEventCustomization::CustomizeChildren(TSharedRef<IPropertyHand
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-FReply FDialogPhraseEventCustomization::OnTitleClick()
+FReply FQuestStageEventCustomization::OnTitleClick()
 {
 	UObject* Property_ObjectClass;
 	UObject* Property_OwnerNode;
-	EDialogPhraseEventCallType Property_CallType;
+	EQuestStageEventCallType Property_CallType;
 
 	PropertyHandle_ObjectClass->GetValue(Property_ObjectClass);
 	PropertyHandle_CallType->GetValue((uint8&)Property_CallType);
 	PropertyHandle_OwnerNode->GetValue(Property_OwnerNode);
 
-	if (Property_CallType == EDialogPhraseEventCallType::DialogScript && Property_OwnerNode != NULL)
+	if (Property_CallType == EQuestStageEventCallType::QuestScript && Property_OwnerNode != NULL)
 	{
-		auto node = Cast<UDialogNode>(Property_OwnerNode);
+		auto node = Cast<UQuestNode>(Property_OwnerNode);
 
-		if (node == NULL || node->OwnerDialog == NULL || !node->OwnerDialog->DialogScriptClass.IsValid())
+		if (node == NULL || node->OwnerQuest == NULL || !node->OwnerQuest->QuestScriptClass.IsValid())
 			return FReply::Handled();
 
-		auto sc = Cast<UDialogNode>(Property_OwnerNode)->OwnerDialog->DialogScriptClass.Get();
+		auto sc = Cast<UQuestNode>(Property_OwnerNode)->OwnerQuest->QuestScriptClass.Get();
 
 		if (sc != NULL)
 			FAssetEditorManager::Get().OpenEditorsForAssets(TArray<FName>({ *sc->GetPathName() }));
@@ -192,26 +192,26 @@ FReply FDialogPhraseEventCustomization::OnTitleClick()
 	return FReply::Handled();
 }
 
-FText FDialogPhraseEventCustomization::GetTitleText() const
+FText FQuestStageEventCustomization::GetTitleText() const
 {
-	FDialogPhraseEvent phraseEvent;
+	FQuestStageEvent phraseEvent;
 	PropertyHandle_PhraseEvent->GetValue((uint8&)phraseEvent);
 
 	return FText::FromString(phraseEvent.ToString());
 }
 
-EVisibility FDialogPhraseEventCustomization::GetFingTagVisibility() const
+EVisibility FQuestStageEventCustomization::GetFingTagVisibility() const
 {
-	EDialogPhraseEventCallType Property_CallType;
+	EQuestStageEventCallType Property_CallType;
 	PropertyHandle_CallType->GetValue((uint8&)Property_CallType);
 
-	return Property_CallType == EDialogPhraseEventCallType::FindByTag ? EVisibility::Visible : EVisibility::Collapsed;
+	return Property_CallType == EQuestStageEventCallType::FindByTag ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
-EVisibility FDialogPhraseEventCustomization::GetObjectClassVisibility() const
+EVisibility FQuestStageEventCustomization::GetObjectClassVisibility() const
 {
-	EDialogPhraseEventCallType Property_CallType;
+	EQuestStageEventCallType Property_CallType;
 	PropertyHandle_CallType->GetValue((uint8&)Property_CallType);
 
-	return Property_CallType != EDialogPhraseEventCallType::DialogScript ? EVisibility::Visible : EVisibility::Collapsed;
+	return Property_CallType != EQuestStageEventCallType::QuestScript ? EVisibility::Visible : EVisibility::Collapsed;
 }
