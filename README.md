@@ -39,6 +39,7 @@ Supported version is 4.20, this is not release version!
 | Trigger manager 				| done 	
 | QuestStageNode 		    	| done
 | Trigger names control 	    | 
+| StrotyVolume		 	 	    | done
 | Cancel quest stage action    	| 
 | Find in quest graph  	    	| 
 | Export quest to xml  			| 		
