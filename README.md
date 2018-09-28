@@ -36,7 +36,10 @@ Supported version is 4.20, this is not release version!
 | Story key navigator  			|
 | Quest system (base) 			| done 	
 | Quest processor (base) 		| done 	
+| Trigger manager 				| done 	
 | QuestStageNode 		    	| done
+| Trigger names control 	    | 
+| Cancel quest stage action    	| 
 | Find in quest graph  	    	| 
 | Export quest to xml  			| 		
 | Import quest from xml  		| 		

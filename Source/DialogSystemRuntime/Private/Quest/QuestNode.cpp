@@ -20,6 +20,7 @@ UQuestRuntimeNode* UQuestNode::Load(UQuestProcessor* processor, UQuestRuntimeAss
 	auto runtimeStage = NewObject<UQuestRuntimeNode>();
 	runtimeStage->Processor = processor;
 	runtimeStage->OwnerQuest = quest;
+	runtimeStage->Stage = Stage;
 
 	for (auto child : Childs)
 	{
