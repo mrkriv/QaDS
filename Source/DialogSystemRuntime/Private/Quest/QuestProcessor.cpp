@@ -34,22 +34,27 @@ void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 		return;
 	}
 
-	quest->RootNode->Prepare(this, quest);
-	auto stages = quest->RootNode->GetNextStage();
+	auto runtimeQuest = quest->Load(this);
+	auto stages = runtimeQuest->RootNode->GetNextStage();
 	if (stages.Num() == 0)
 	{
 		UE_LOG(DialogModuleLog, Error, TEXT("Failed start new quest: not found valid stage in %s"), *QuestAsset.GetAssetName());
 		return;
 	}
 
-	activeQuests.Add(quest);
-	OnQuestStart.Broadcast(quest);
+	runtimeQuest->Status = EQuestCompleteStatus::Active;
 
-	WaitStage(quest->RootNode);
+	activeQuests.Add(runtimeQuest);
+	OnQuestStart.Broadcast(runtimeQuest);
+
+	WaitStage(runtimeQuest->RootNode);
 }
 
-void UQuestProcessor::WaitStage(UQuestNode* StageNode)
+void UQuestProcessor::WaitStage(UQuestRuntimeNode* StageNode)
 {
+	if (bIsResetBegin)
+		return;
+
 	check(StageNode);
 	check(StageNode->OwnerQuest);
 
@@ -73,8 +78,11 @@ void UQuestProcessor::WaitStage(UQuestNode* StageNode)
 	}
 }
 
-void UQuestProcessor::CompleteStage(UQuestNode* StageNode)
+void UQuestProcessor::CompleteStage(UQuestRuntimeNode* StageNode)
 {
+	if (bIsResetBegin)
+		return;
+
 	check(StageNode);
 	check(StageNode->OwnerQuest);
 
@@ -83,8 +91,11 @@ void UQuestProcessor::CompleteStage(UQuestNode* StageNode)
 	WaitStage(StageNode);
 }
 
-void UQuestProcessor::EndQuest(UQuestAsset* Quest, EQuestCompleteStatus Status)
+void UQuestProcessor::EndQuest(UQuestRuntimeAsset* Quest, EQuestCompleteStatus Status)
 {
+	if (bIsResetBegin)
+		return;
+
 	if (!activeQuests.Remove(Quest))
 	{
 		UE_LOG(DialogModuleLog, Warning, TEXT("Failed end quest: quest is not active (%s)"), *Quest->GetFName().ToString());
@@ -101,7 +112,7 @@ void UQuestProcessor::EndQuest(UQuestAsset* Quest, EQuestCompleteStatus Status)
 	OnQuestEnd.Broadcast(Quest, Status);
 }
 
-TArray<UQuestAsset*> UQuestProcessor::GetQuests(EQuestCompleteStatus FilterStatus) const
+TArray<UQuestRuntimeAsset*> UQuestProcessor::GetQuests(EQuestCompleteStatus FilterStatus) const
 {
 	if (FilterStatus == EQuestCompleteStatus::None)
 	{
@@ -115,8 +126,26 @@ TArray<UQuestAsset*> UQuestProcessor::GetQuests(EQuestCompleteStatus FilterStatu
 		return activeQuests;
 	}
 
-	return archiveQuests.FilterByPredicate([FilterStatus](UQuestAsset* quest)
+	return archiveQuests.FilterByPredicate([FilterStatus](UQuestRuntimeAsset* quest)
 	{
 		return quest->Status == FilterStatus;
 	});
+}
+
+void UQuestProcessor::Reset()
+{
+	bIsResetBegin = true;
+
+	for (auto quest : activeQuests)
+	{
+		for (auto stage : quest->ActiveNodes)
+		{
+			stage->CompleteNode();
+		}
+	}
+
+	archiveQuests.Reset();
+	activeQuests.Reset();
+
+	bIsResetBegin = false;
 }

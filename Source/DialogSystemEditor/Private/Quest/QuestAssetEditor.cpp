@@ -201,16 +201,13 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 		auto compileNode = NewObject<UQuestNode>((UObject*)EditedAsset);
 		node->CompileNode = compileNode;
 
-		compileNode->OwnerQuest = Cast<UQuestAsset>(EditedAsset);
 		compileNode->Stage = stageNode->Stage;
 
 		FString ErrorMessage;
 
 		for (auto& Event : compileNode->Stage.Action)
 		{
-			Event.OwnerNode = compileNode;
-
-			if (!Event.Compile(ErrorMessage, needUpdate))
+			if (!Event.Compile(EditedAsset, ErrorMessage, needUpdate))
 			{
 				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + compileNode->Stage.SystemName.ToString() + "\""));
 			}
@@ -218,9 +215,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 
 		for (auto& Condition : compileNode->Stage.FailedPredicate)
 		{
-			Condition.OwnerNode = compileNode;
-
-			if (!Condition.Compile(ErrorMessage, needUpdate))
+			if (!Condition.Compile(EditedAsset, ErrorMessage, needUpdate))
 			{
 				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + compileNode->Stage.SystemName.ToString() + "\""));
 			}
@@ -228,9 +223,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 
 		for (auto& Condition : compileNode->Stage.WaitPredicate)
 		{
-			Condition.OwnerNode = compileNode;
-
-			if (!Condition.Compile(ErrorMessage, needUpdate))
+			if (!Condition.Compile(EditedAsset, ErrorMessage, needUpdate))
 			{
 				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + compileNode->Stage.SystemName.ToString() + "\""));
 			}
@@ -238,9 +231,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 
 		for (auto& Condition : compileNode->Stage.Predicate)
 		{
-			Condition.OwnerNode = compileNode;
-
-			if (!Condition.Compile(ErrorMessage, needUpdate))
+			if (!Condition.Compile(EditedAsset, ErrorMessage, needUpdate))
 			{
 				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + compileNode->Stage.SystemName.ToString() + "\""));
 			}

@@ -71,14 +71,30 @@ class DIALOGSYSTEMRUNTIME_API UQuestNode : public UObject
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	UQuestProcessor* Processor;
 public:
 	UPROPERTY()
-	UQuestAsset* OwnerQuest;
+	TArray<UQuestNode*> Childs;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FQuestStageInfo Stage;
+
+	UQuestRuntimeNode* Load(UQuestProcessor* processor, UQuestRuntimeAsset* quest);
+};
+
+UCLASS()
+class DIALOGSYSTEMRUNTIME_API UQuestRuntimeNode : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	UQuestProcessor* Processor;
 
 	UPROPERTY()
-	TArray<UQuestNode*> Childs;
+	UQuestRuntimeAsset* OwnerQuest;
+
+	UPROPERTY()
+	TArray<UQuestRuntimeNode*> Childs;
 
 	UPROPERTY(BlueprintReadOnly)
 	EQuestCompleteStatus Status;
@@ -86,14 +102,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FQuestStageInfo Stage;
 
-	void Prepare(UQuestProcessor* processor, UQuestAsset* quest);
 	bool TryComplete();
 	bool CkeckForActivate();
 	bool CkeckForComplete();
 	bool CkeckForFailed();
 	void Activate();
 	void CompleteNode();
-	TArray<UQuestNode*> GetNextStage();
+	TArray<UQuestRuntimeNode*> GetNextStage();
 
 	UFUNCTION()
 	void OnChangeStoryKey(const FName& key);

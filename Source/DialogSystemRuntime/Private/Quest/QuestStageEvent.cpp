@@ -11,7 +11,7 @@
 #include "QuestScript.h"
 #include "QuestStageEvent.h"
 
-bool FQuestStageEvent::Compile(FString& ErrorMessage, bool& needUpdate)
+bool FQuestStageEvent::Compile(UQuestAsset* Quest, FString& ErrorMessage, bool& needUpdate)
 {
 	if (EventName.IsNone())
 	{
@@ -28,16 +28,13 @@ bool FQuestStageEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 	switch (CallType)
 	{
 	case EQuestStageEventCallType::QuestScript:
-		if (!OwnerNode || !OwnerNode->OwnerQuest)
-			break;
-
-		if (!OwnerNode->OwnerQuest->QuestScriptClass.IsValid())
+		if (!Quest->QuestScriptClass.IsValid())
 		{
 			ErrorMessage = FString::Printf(TEXT("QuestScript not found, pleass select Quest script class in root node"));
 			return false;
 		}
 
-		ObjectClass = OwnerNode->OwnerQuest->QuestScriptClass.Get();
+		ObjectClass = Quest->QuestScriptClass.Get();
 		break;
 		
 	case EQuestStageEventCallType::Player:
@@ -98,9 +95,9 @@ bool FQuestStageEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 	return true;
 }
 
-bool FQuestStageCondition::Compile(FString& ErrorMessage, bool& needUpdate)
+bool FQuestStageCondition::Compile(UQuestAsset* Quest, FString& ErrorMessage, bool& needUpdate)
 {
-	if (!Super::Compile(ErrorMessage, needUpdate))
+	if (!Super::Compile(Quest, ErrorMessage, needUpdate))
 		return false;
 
 	auto func = ObjectClass->ClassDefaultObject->FindFunction(EventName);
@@ -126,7 +123,7 @@ bool FQuestStageCondition::Compile(FString& ErrorMessage, bool& needUpdate)
 	return true;
 }
 
-UObject* FQuestStageEvent::GetObject(UQuestNode* QuestNode) const
+UObject* FQuestStageEvent::GetObject(UQuestRuntimeNode* QuestNode) const
 {
 	UObject* obj = NULL;
 	auto quest = QuestNode->OwnerQuest;
@@ -182,7 +179,7 @@ UObject* FQuestStageEvent::GetObject(UQuestNode* QuestNode) const
 	return obj;
 }
 
-void FQuestStageEvent::Invoke(UQuestNode* QuestNode)
+void FQuestStageEvent::Invoke(UQuestRuntimeNode* QuestNode)
 {
 	auto obj = GetObject(QuestNode);
 	if (obj != NULL)
@@ -225,7 +222,7 @@ FString FQuestStageEvent::ToString() const
 	return TEXT("None");
 }
 
-bool FQuestStageCondition::InvokeCheck(UQuestNode* QuestNode) const
+bool FQuestStageCondition::InvokeCheck(UQuestRuntimeNode* QuestNode) const
 {
 	auto obj = GetObject(QuestNode);
 

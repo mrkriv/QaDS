@@ -60,7 +60,7 @@ void UStoryKeyManager::SetKeys(const TSet<FName>& keys)
 	UE_LOG(DialogModuleLog, Log, TEXT("Load %d keys to storage"), keys.Num());
 }
 
-void UStoryKeyManager::Clear()
+void UStoryKeyManager::Reset()
 {
 	Database.Reset();
 	OnKeysLoaded.Broadcast(Database.Array());

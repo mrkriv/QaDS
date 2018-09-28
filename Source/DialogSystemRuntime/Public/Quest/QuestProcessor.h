@@ -6,18 +6,20 @@
 #include "QuestProcessor.generated.h"
 
 class UQuestAsset;
+class UQuestRuntimeAsset;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FQuestStartSignature, UQuestAsset*, Quest);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FQuestStageCompleteSignature, UQuestAsset*, Quest, FQuestStageInfo, Stage);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FQuestEndSignature, UQuestAsset*, Quest, EQuestCompleteStatus, QuestStatus);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FQuestStartSignature, UQuestRuntimeAsset*, Quest);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FQuestStageCompleteSignature, UQuestRuntimeAsset*, Quest, FQuestStageInfo, Stage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FQuestEndSignature, UQuestRuntimeAsset*, Quest, EQuestCompleteStatus, QuestStatus);
 
 UCLASS()
 class DIALOGSYSTEMRUNTIME_API UQuestProcessor : public UObject
 {
 	GENERATED_BODY()
 
-	TArray<UQuestAsset*> archiveQuests;
-	TArray<UQuestAsset*> activeQuests;
+	TArray<UQuestRuntimeAsset*> archiveQuests;
+	TArray<UQuestRuntimeAsset*> activeQuests;
+	bool bIsResetBegin;
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Quest")
@@ -38,12 +40,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
 	void StartQuest(TAssetPtr<UQuestAsset> QuestAsset);
 
-	void CompleteStage(UQuestNode* Stage);
-	void WaitStage(UQuestNode* Stage);
+	void CompleteStage(UQuestRuntimeNode* Stage);
+	void WaitStage(UQuestRuntimeNode* Stage);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
-	void EndQuest(UQuestAsset* Quest, EQuestCompleteStatus QuestStatus);
+	void EndQuest(UQuestRuntimeAsset* Quest, EQuestCompleteStatus QuestStatus);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
-	TArray<UQuestAsset*> GetQuests(EQuestCompleteStatus FilterStatus) const;
+	TArray<UQuestRuntimeAsset*> GetQuests(EQuestCompleteStatus FilterStatus) const;
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
+	void Reset();
 };

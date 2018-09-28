@@ -142,26 +142,9 @@ END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 FReply FQuestStageEventCustomization::OnTitleClick()
 {
 	UObject* Property_ObjectClass;
-	UObject* Property_OwnerNode;
-	EQuestStageEventCallType Property_CallType;
-
 	GET_PROPERTY(ObjectClass)->GetValue(Property_ObjectClass);
-	GET_PROPERTY(CallType)->GetValue((uint8&)Property_CallType);
-	GET_PROPERTY(OwnerNode)->GetValue(Property_OwnerNode);
-
-	if (Property_CallType == EQuestStageEventCallType::QuestScript && Property_OwnerNode != NULL)
-	{
-		auto node = Cast<UQuestNode>(Property_OwnerNode);
-
-		if (node == NULL || node->OwnerQuest == NULL || !node->OwnerQuest->QuestScriptClass.IsValid())
-			return FReply::Handled();
-
-		auto sc = Cast<UQuestNode>(Property_OwnerNode)->OwnerQuest->QuestScriptClass.Get();
-
-		if (sc != NULL)
-			FAssetEditorManager::Get().OpenEditorsForAssets(TArray<FName>({ *sc->GetPathName() }));
-	}
-	else if (Property_ObjectClass != NULL)
+	
+	if (Property_ObjectClass != NULL)
 	{
 		FAssetEditorManager::Get().OpenEditorsForAssets(TArray<FName>({ *Property_ObjectClass->GetPathName() }));
 	}

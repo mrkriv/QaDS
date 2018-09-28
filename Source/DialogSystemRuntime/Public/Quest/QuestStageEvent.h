@@ -16,7 +16,7 @@ enum class EQuestStageEventCallType : uint8
 	FindByTag,
 };
 
-class UQuestNode;
+class UQuestRuntimeNode;
 
 USTRUCT(BlueprintType)
 struct DIALOGSYSTEMRUNTIME_API FQuestStageEvent
@@ -41,14 +41,11 @@ public:
 	FString Command;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
-	class UQuestNode* OwnerNode;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
 	TArray<FString> Parameters;
 
-	virtual bool Compile(FString& ErrorMessage, bool& needUpdate);
-	virtual UObject* GetObject(UQuestNode* QuestNode) const;
-	virtual void Invoke(UQuestNode* QuestNode);
+	virtual bool Compile(UQuestAsset* Quest, FString& ErrorMessage, bool& needUpdate);
+	virtual UObject* GetObject(UQuestRuntimeNode* QuestNode) const;
+	virtual void Invoke(UQuestRuntimeNode* QuestNode);
 	virtual ~FQuestStageEvent() {}
 
 	virtual FString ToString() const;
@@ -64,8 +61,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool InvertCondition;
 
-	virtual bool Compile(FString& ErrorMessage, bool& needUpdate) override;
-	virtual bool InvokeCheck(UQuestNode* QuestNode) const;
+	virtual bool Compile(UQuestAsset* Quest, FString& ErrorMessage, bool& needUpdate) override;
+	virtual bool InvokeCheck(UQuestRuntimeNode* QuestNode) const;
 	virtual FString ToString() const override;
 	virtual ~FQuestStageCondition() {}
 

@@ -47,7 +47,7 @@ public:
 	bool RemoveKey(FName Key);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
-	void Clear();
+	void Reset();
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
 	TArray<FName> GetKeys() const;
