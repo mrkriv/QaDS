@@ -41,7 +41,7 @@ void UQuestRuntimeNode::OnChangeStoryKey(const FName& key)
 	}
 }
 
-bool UQuestRuntimeNode::TryComplete() //todo:: use WaitAllOwner
+bool UQuestRuntimeNode::TryComplete()
 {
 	if (CkeckForFailed())
 	{

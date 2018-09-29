@@ -21,9 +21,6 @@ struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
 	FText Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
-	bool WaitAllOwner;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
 	TMap<FName, FString> AditionalData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")

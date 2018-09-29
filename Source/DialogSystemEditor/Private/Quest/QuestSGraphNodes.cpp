@@ -34,7 +34,10 @@ FName SGraphNode_QuestNode::GetIcon() const
 
 	if (node->GetChildNodes().Num() > 1)
 	{
-		return stage.WaitAllOwner ? "DialogSystem.HasAll" : "DialogSystem.HasOne";
+		if(node->Stage.ChangeOderActiveStagesState == EQuestCompleteStatus::Skiped)
+			return "DialogSystem.HasOne";
+
+		return "DialogSystem.HasAll";
 	}
 
 	return "DialogSystem.Stage";
