@@ -68,7 +68,7 @@ void UQuestProcessor::WaitStage(UQuestRuntimeNode* StageNode)
 
 	for (auto stage : stages)
 	{
-		stage->Activate();
+		stage->SetStatus(EQuestCompleteStatus::Active);
 
 		if (stage->TryComplete())
 		{
@@ -140,7 +140,7 @@ void UQuestProcessor::Reset()
 	{
 		for (auto stage : quest->ActiveNodes)
 		{
-			stage->CompleteNode();
+			stage->SetStatus(EQuestCompleteStatus::Skiped);
 		}
 	}
 

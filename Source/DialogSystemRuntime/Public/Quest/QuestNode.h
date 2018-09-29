@@ -53,6 +53,9 @@ struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Failed")
 	TArray<FQuestStageCondition> FailedPredicate;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Failed")
+	bool bFailedQuest = true;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Complete")
 	TArray<FName> GiveKeys;
 
@@ -64,6 +67,9 @@ struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Complete")
 	EQuestCompleteStatus ChangeQuestState;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Complete")
+	EQuestCompleteStatus ChangeOderActiveStagesState;
 };
 
 UCLASS()
@@ -86,6 +92,10 @@ class DIALOGSYSTEMRUNTIME_API UQuestRuntimeNode : public UObject
 {
 	GENERATED_BODY()
 
+	void Activate();
+	void Failed();
+	void Complete();
+	void Deactivate();
 public:
 	UPROPERTY()
 	UQuestProcessor* Processor;
@@ -106,8 +116,7 @@ public:
 	bool CkeckForActivate();
 	bool CkeckForComplete();
 	bool CkeckForFailed();
-	void Activate();
-	void CompleteNode();
+	void SetStatus(EQuestCompleteStatus NewStatus);
 	TArray<UQuestRuntimeNode*> GetNextStage();
 
 	UFUNCTION()

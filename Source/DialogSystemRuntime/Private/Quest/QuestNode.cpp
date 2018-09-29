@@ -30,24 +30,6 @@ UQuestRuntimeNode* UQuestNode::Load(UQuestProcessor* processor, UQuestRuntimeAss
 	return runtimeStage;
 }
 
-void UQuestRuntimeNode::Activate()
-{
-	OwnerQuest->ActiveNodes.Add(this);
-	Status = EQuestCompleteStatus::Active;
-
-	if (TryComplete())
-		return;
-
-	if (Stage.WaitHasKeys.Num() != 0 ||
-		Stage.WaitDontHasKeys.Num() != 0 ||
-		Stage.FailedIfGiveKeys.Num() != 0 ||
-		Stage.FailedIfRemoveKeys.Num() != 0)
-	{
-		Processor->StoryKeyManager->OnKeyRemoveBP.AddDynamic(this, &UQuestRuntimeNode::OnChangeStoryKey);
-		Processor->StoryKeyManager->OnKeyAddBP.AddDynamic(this, &UQuestRuntimeNode::OnChangeStoryKey);
-	}
-}
-
 void UQuestRuntimeNode::OnChangeStoryKey(const FName& key)
 {
 	if (Stage.WaitHasKeys.Contains(key) ||
@@ -63,31 +45,93 @@ bool UQuestRuntimeNode::TryComplete() //todo:: use WaitAllOwner
 {
 	if (CkeckForFailed())
 	{
-		Status = EQuestCompleteStatus::Failed;
-		Processor->EndQuest(OwnerQuest, EQuestCompleteStatus::Failed);
+		SetStatus(EQuestCompleteStatus::Failed);
 	}
 	else
 	{
 		if (!CkeckForComplete())
 			return false;
 
-		Status = EQuestCompleteStatus::Completed;
-
-		for (auto key : Stage.GiveKeys)
-			Processor->StoryKeyManager->AddKey(key);
-
-		for (auto key : Stage.RemoveKeys)
-			Processor->StoryKeyManager->RemoveKey(key);
-
-		for (auto& Event : Stage.Action)
-			Event.Invoke(this);
+		SetStatus(EQuestCompleteStatus::Completed);
 	}
-
-	CompleteNode();
 	return true;
 }
 
-void UQuestRuntimeNode::CompleteNode()
+void UQuestRuntimeNode::SetStatus(EQuestCompleteStatus NewStatus)
+{
+	if (NewStatus == Status)
+		return;
+
+	switch (Status)
+	{
+	case EQuestCompleteStatus::None:
+		break;
+	case EQuestCompleteStatus::Active:
+		Activate();
+		break;
+	case EQuestCompleteStatus::Completed:
+		Complete();
+		Deactivate();
+		break;
+	case EQuestCompleteStatus::Failed:
+		Failed();
+		Deactivate();
+		break;
+	case EQuestCompleteStatus::Skiped:
+		Deactivate();
+		break;
+	}
+}
+
+void UQuestRuntimeNode::Activate()
+{
+	OwnerQuest->ActiveNodes.Add(this);
+
+	if (TryComplete())
+		return;
+
+	if (Stage.WaitHasKeys.Num() != 0 ||
+		Stage.WaitDontHasKeys.Num() != 0 ||
+		Stage.FailedIfGiveKeys.Num() != 0 ||
+		Stage.FailedIfRemoveKeys.Num() != 0)
+	{
+		Processor->StoryKeyManager->OnKeyRemoveBP.AddDynamic(this, &UQuestRuntimeNode::OnChangeStoryKey);
+		Processor->StoryKeyManager->OnKeyAddBP.AddDynamic(this, &UQuestRuntimeNode::OnChangeStoryKey);
+	}
+}
+
+void UQuestRuntimeNode::Failed()
+{
+	if (Stage.bFailedQuest || OwnerQuest->ActiveNodes.Num() == 1)
+	{
+		Processor->EndQuest(OwnerQuest, EQuestCompleteStatus::Failed);
+	}
+}
+
+void UQuestRuntimeNode::Complete()
+{
+	if (Stage.ChangeOderActiveStagesState != EQuestCompleteStatus::None)
+	{
+		for (auto stage : OwnerQuest->ActiveNodes)
+		{
+			if (stage == this)
+				continue;
+
+			stage->SetStatus(Stage.ChangeOderActiveStagesState);
+		}
+	}
+
+	for (auto key : Stage.GiveKeys)
+		Processor->StoryKeyManager->AddKey(key);
+
+	for (auto key : Stage.RemoveKeys)
+		Processor->StoryKeyManager->RemoveKey(key);
+
+	for (auto& Event : Stage.Action)
+		Event.Invoke(this);
+}
+
+void UQuestRuntimeNode::Deactivate()
 {
 	OwnerQuest->ActiveNodes.Remove(this);
 	OwnerQuest->ArchiveNodes.Add(this);
