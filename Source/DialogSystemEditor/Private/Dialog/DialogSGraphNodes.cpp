@@ -40,25 +40,25 @@ void SGraphNode_Phrase::CreateNodeWidget()
 	SGraphNode_QaDSNodeBase::CreateNodeWidget();
 	
 	for (auto key : data.CheckHasKeys)
-		AddTextToContent(ConditionsBox, TEXT("HAS KEY ") + key.ToString(), FColor(170, 255, 0));
+		AddTextToContent(ConditionsBox, TEXT(""), key.ToString(), FColor(170, 255, 0));
 
 	for (auto key : data.CheckDontHasKeys)
-		AddTextToContent(ConditionsBox, TEXT("HAS NOT KEY ") + key.ToString(), FColor(255, 150, 0));
+		AddTextToContent(ConditionsBox, TEXT("!"), key.ToString(), FColor(255, 150, 0));
 
 	for (auto key : data.Predicate)
-		AddTextToContent(ConditionsBox, TEXT("IF ") + key.ToString(), FColor(255, 255, 0));
+		AddTextToContent(ConditionsBox, TEXT("IF"), key.ToString(), FColor(255, 255, 0));
 	
 	if(!data.StartQuest.ToSoftObjectPath().IsNull())
-		AddTextToContent(EventsBox, TEXT("> ") + data.StartQuest.GetAssetName(), FColor(255, 0, 255));
+		AddTextToContent(EventsBox, TEXT("Start Quest "), data.StartQuest.GetAssetName(), FColor(255, 0, 255));
 
 	for (auto key : data.Action)
-		AddTextToContent(EventsBox, TEXT("E ") + key.ToString(), FColor(0, 170, 255));
+		AddTextToContent(EventsBox, TEXT(""), key.ToString(), FColor(0, 170, 255));
 
 	for (auto key : data.GiveKeys)
-		AddTextToContent(EventsBox, TEXT("+ ") + key.ToString(), FColor(0, 255, 0));
+		AddTextToContent(EventsBox, TEXT("+"), key.ToString(), FColor(0, 255, 0));
 
 	for (auto key : data.RemoveKeys)
-		AddTextToContent(EventsBox, TEXT("- ") + key.ToString(), FColor(255, 0, 0));
+		AddTextToContent(EventsBox, TEXT("-"), key.ToString(), FColor(255, 0, 0));
 
 	ConditionsBox->SetVisibility(ConditionsBox->NumSlots() > 0 ? EVisibility::Visible : EVisibility::Collapsed);
 	EventsBox->SetVisibility(EventsBox->NumSlots() > 0 ? EVisibility::Visible : EVisibility::Collapsed);

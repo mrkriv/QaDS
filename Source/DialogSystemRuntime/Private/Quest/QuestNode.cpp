@@ -284,3 +284,23 @@ bool UQuestRuntimeNode::CkeckForFailed()
 
 	return false;
 }
+
+FString FStoryTriggerCondition::ToString() const
+{
+	auto result = TriggerName.ToString() + "(";
+
+	TArray<FString> params;
+	ParamsMasks.GenerateValueArray(params);
+
+	for (int i = 0; i < params.Num(); i++)
+	{
+		if (i != 0)
+			result += ", ";
+
+		result += params[i];
+	}
+
+	result += ")";
+
+	return result;
+}

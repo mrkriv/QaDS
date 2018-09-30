@@ -50,44 +50,55 @@ void SGraphNode_QuestNode::CreateNodeWidget()
 	auto& stage = CastChecked<UQuestStageEdGraphNode>(GraphNode)->Stage;
 
 	for (auto key : stage.CheckHasKeys)
-		AddTextToContent(ConditionsBox, TEXT("HAS KEY ") + key.ToString(), FColor(170, 255, 0));
+		AddTextToContent(ConditionsBox, TEXT(""), key.ToString(), FColor(170, 255, 0));
 
 	for (auto key : stage.CheckDontHasKeys)
-		AddTextToContent(ConditionsBox, TEXT("HAS NOT KEY ") + key.ToString(), FColor(255, 150, 0));
+		AddTextToContent(ConditionsBox, TEXT("!"), key.ToString(), FColor(255, 150, 0));
 
 	for (auto key : stage.Predicate)
-		AddTextToContent(ConditionsBox, TEXT("IF ") + key.ToString(), FColor(255, 255, 0));
+		AddTextToContent(ConditionsBox, TEXT("IF"), key.ToString(), FColor(255, 255, 0));
 
 
 	for (auto key : stage.WaitHasKeys)
-		AddTextToContent(BodyBox, TEXT("Wait Give Key ") + key.ToString(), FColor(170, 255, 0));
+		AddTextToContent(BodyBox, TEXT("Wait give key"), key.ToString(), FColor(170, 255, 0));
 
 	for (auto key : stage.WaitDontHasKeys)
-		AddTextToContent(BodyBox, TEXT("Wait Remove Key ") + key.ToString(), FColor(255, 150, 0));
+		AddTextToContent(BodyBox, TEXT("Wait remove key"), key.ToString(), FColor(255, 150, 0));
 
 	for (auto key : stage.WaitPredicate)
-		AddTextToContent(BodyBox, TEXT("Wait ") + key.ToString(), FColor(255, 255, 0));
+		AddTextToContent(BodyBox, TEXT("Wait"), key.ToString(), FColor(255, 255, 0));
 
+	for (auto key : stage.WaitTriggers)
+		AddTextToContent(BodyBox, TEXT("Wait on"), key.ToString(), FColor(255, 255, 0));
 
-	AddTextToContent(BodyBox, TEXT(""), FColor(0, 0, 0));
+	
 	for (auto key : stage.FailedIfGiveKeys)
-		AddTextToContent(BodyBox, TEXT("Failed if give key ") + key.ToString(), FColor(255, 32, 32));
+		AddTextToContent(BodyBox, TEXT("Failed if give key"), key.ToString(), FColor(255, 32, 32));
 
 	for (auto key : stage.FailedIfRemoveKeys)
-		AddTextToContent(BodyBox, TEXT("Failed if remove key ") + key.ToString(), FColor(255, 32, 32));
+		AddTextToContent(BodyBox, TEXT("Failed if remove key"), key.ToString(), FColor(255, 32, 32));
 
 	for (auto key : stage.FailedPredicate)
-		AddTextToContent(BodyBox, TEXT("Failed if ") + key.ToString(), FColor(255, 32, 32));
+		AddTextToContent(BodyBox, TEXT("Failed if"), key.ToString(), FColor(255, 32, 32));
 
+	for (auto key : stage.FailedTriggers)
+		AddTextToContent(BodyBox, TEXT("Failed on"), key.ToString(), FColor(255, 32, 32));
+
+
+	if (stage.ChangeQuestState != EQuestCompleteStatus::None)
+		AddTextToContent(EventsBox, TEXT("Change quest state"), "", FColor(0, 170, 255));
+
+	if (stage.ChangeOderActiveStagesState != EQuestCompleteStatus::None)
+		AddTextToContent(EventsBox, TEXT("Change oder stages state"), "", FColor(0, 170, 255));
 
 	for (auto key : stage.Action)
-		AddTextToContent(EventsBox, TEXT("E ") + key.ToString(), FColor(0, 170, 255));
+		AddTextToContent(EventsBox, TEXT(""), key.ToString(), FColor(0, 170, 255));
 
 	for (auto key : stage.GiveKeys)
-		AddTextToContent(EventsBox, TEXT("+ ") + key.ToString(), FColor(32, 255, 32));
+		AddTextToContent(EventsBox, TEXT("+"), key.ToString(), FColor(32, 255, 32));
 
 	for (auto key : stage.RemoveKeys)
-		AddTextToContent(EventsBox, TEXT("- ") + key.ToString(), FColor(255, 32, 32));
+		AddTextToContent(EventsBox, TEXT("-"), key.ToString(), FColor(255, 32, 32));
 
 	ConditionsBox->SetVisibility(ConditionsBox->NumSlots() > 0 ? EVisibility::Visible : EVisibility::Collapsed);
 	EventsBox->SetVisibility(EventsBox->NumSlots() > 0 ? EVisibility::Visible : EVisibility::Collapsed);

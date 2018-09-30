@@ -22,6 +22,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<FName, FString> ParamsMasks;
+
+	FString ToString() const;
 };
 
 USTRUCT(BlueprintType)

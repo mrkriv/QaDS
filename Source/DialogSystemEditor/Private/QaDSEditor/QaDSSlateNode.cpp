@@ -305,16 +305,34 @@ void SGraphNode_QaDSNodeBase::AddPin(const TSharedRef<SGraphPin>& PinToAdd)
 	}
 }
 
-void SGraphNode_QaDSNodeBase::AddTextToContent(TSharedPtr<SVerticalBox> Container, FString Text, FColor Color)
+void SGraphNode_QaDSNodeBase::AddTextToContent(TSharedPtr<SVerticalBox> Container, const FString& Prefix, const FString& Text, const FColor& Color)
 {
+	auto prefixColor = Color;
+	prefixColor.A *= 0.7f;
+
 	Container->AddSlot()
 		.HAlign(HAlign_Fill)
 		.VAlign(VAlign_Bottom)
 		.AutoHeight()
 		[
-			SNew(STextBlock)
-			.Text(FText::FromString(Text))
-			.ColorAndOpacity(Color)
+			SNew(SHorizontalBox)
+
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.HAlign(HAlign_Left)
+			[
+				SNew(STextBlock)
+				.Text(FText::FromString(Prefix))
+				.ColorAndOpacity(prefixColor)
+			]
+			+ SHorizontalBox::Slot()
+			.FillWidth(1.0f)
+			.Padding(5.0f, 0.0f)
+			[
+				SNew(STextBlock)
+				.Text(FText::FromString(Text))
+				.ColorAndOpacity(Color)
+			]
 		];
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

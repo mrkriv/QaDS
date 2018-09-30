@@ -45,5 +45,5 @@ class SGraphNode_QaDSNodeBase : public SGraphNode, public FNodePropertyObserver
 	
 	virtual FName GetIcon() const { return ""; }
 	virtual FReply OnClickedIcon();
-	void AddTextToContent(TSharedPtr<SVerticalBox> Container, FString Text, FColor Color);
+	void AddTextToContent(TSharedPtr<SVerticalBox> Container, const FString& Prefix, const FString& Text, const FColor& Color);
 };
