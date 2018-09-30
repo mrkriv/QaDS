@@ -23,13 +23,13 @@ UQuestProcessor* UQuestProcessor::GetQuestProcessor()
 
 void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 {
-	if (!QuestAsset.IsValid())
+	auto quest = QuestAsset.LoadSynchronous();
+	if (quest == NULL)
 	{
 		UE_LOG(DialogModuleLog, Error, TEXT("Failed start new quest: asset is not set"));
 		return;
 	}
 
-	auto quest = QuestAsset.Get();
 	if (quest->RootNode == NULL)
 	{
 		UE_LOG(DialogModuleLog, Error, TEXT("Failed start new quest: not found root node in %s"), *QuestAsset.GetAssetName());
