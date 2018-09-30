@@ -9,6 +9,7 @@
 #include "GraphEditor.h"
 #include "BrushSet.h"
 #include "Runtime/Slate/Public/Widgets/Layout/SBox.h"
+#include "Editor/UnrealEd/Public/Toolkits/AssetEditorManager.h"
 
 //PhraseNode.......................................................................................................
 void SGraphNode_Phrase::Construct(const FArguments& InArgs, UDialogPhraseEdGraphNode* InNode)
@@ -78,6 +79,20 @@ FReply SGraphNode_Phrase::OnClickedIcon()
 	}
 
 	NodeIcon->SetImage(FBrushSet::Get().GetBrush(GetIcon()));
+
+	return FReply::Handled();
+}
+
+//SGraphNode_SubGraph.......................................................................................................
+FReply SGraphNode_SubGraph::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent)
+{
+	auto node = CastChecked<UDialogSubGraphEdGraphNode>(GraphNode);
+	auto& asset = node->TargetDialogAsset;
+
+	if (!asset.IsNull())
+	{
+		FAssetEditorManager::Get().OpenEditorsForAssets(TArray<FName>({ *asset.GetAssetName() }));
+	}
 
 	return FReply::Handled();
 }

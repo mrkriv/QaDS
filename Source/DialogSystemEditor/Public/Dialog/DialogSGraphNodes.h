@@ -28,6 +28,7 @@ class SGraphNode_SubGraph : public SGraphNode_QaDSNodeBase
 {
 public:
 	virtual FName GetIcon() const override { return "DialogSystem.SubGraph"; }
+	virtual FReply OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) override;
 };
 
 //ElseIf.............................................................................................................
