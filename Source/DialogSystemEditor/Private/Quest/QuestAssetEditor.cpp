@@ -149,7 +149,7 @@ UEdGraph* FQuestAssetEditor::CreateGraphFromAsset()
 	auto CustGraph = NewObject<UEdGraph>(EditedAsset, UEdGraph::StaticClass(), NAME_None, RF_Transactional);
 	CustGraph->Schema = UQuestGraphSchema::StaticClass();
 
-	auto root = FQaDSSchemaAction_NewNode::SpawnNodeFromTemplate<UQaDSEdGraphNode>(CustGraph, NewObject<UQuestRootEdGraphNode>(), FVector2D::ZeroVector, false);
+	auto root = FQaDSSchemaAction_NewNode::SpawnNodeFromTemplate<UQuestRootEdGraphNode>(CustGraph, NewObject<UQuestRootEdGraphNode>(), FVector2D::ZeroVector, false);
 	root->AllocateDefaultPins();
 
 	return CustGraph;

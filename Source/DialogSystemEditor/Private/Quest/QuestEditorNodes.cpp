@@ -34,6 +34,7 @@ void UQuestStageEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString,
 //UQuestRootEdGraphNode...........................................................................................
 void UQuestRootEdGraphNode::AllocateDefaultPins()
 {
+	Pins.Reset();
 	CreatePin(EGPD_Output, NAME_None, FName("Output"));
 }
 
