@@ -39,7 +39,7 @@ public:
 	template<typename T>
 	FORCEINLINE void AppendArray(FString tag, FString itemTag, TArray<T> values)
 	{
-		if (values.Num() != 0)
+		if (values.Num() == 0)
 			return;
 
 		auto node = FXmlWriteNode(tag);
@@ -92,7 +92,7 @@ public:
 		auto xml = XmlNode->FindChildNode(tag);
 
 		if (xml != NULL)
-			*this >> outValue;
+			FXmlReadNode(xml) >> outValue;
 	}
 
 	template<typename T>
@@ -104,11 +104,10 @@ public:
 		if (xml == NULL)
 			return;
 
-		auto childReader = FXmlReadNode(xml);
 		for (auto subXml : xml->GetChildrenNodes())
 		{
 			T item;
-			childReader >> item;
+			FXmlReadNode(subXml) >> item;
 
 			outValue.Add(item);
 		}

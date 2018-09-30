@@ -86,15 +86,14 @@ void UQaDSEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDS
 	auto links = reader->Get<TArray<FString>>("links");
 	for (auto id : links)
 	{
+		if (!nodeById.Contains(id))
+			continue;
+
 		auto node = nodeById[id];
+		auto inputPin = node->Pins.FindByPredicate([](UEdGraphPin* pin) { return pin->Direction == EEdGraphPinDirection::EGPD_Input; });
+		auto outputPin = Pins.FindByPredicate([](UEdGraphPin* pin) { return pin->Direction == EEdGraphPinDirection::EGPD_Output; });
 
-		if (node != NULL)
-		{
-			auto inputPin = node->Pins.FindByPredicate([](UEdGraphPin* pin) { return pin->Direction == EEdGraphPinDirection::EGPD_Input; });
-			auto outputPin = Pins.FindByPredicate([](UEdGraphPin* pin) { return pin->Direction == EEdGraphPinDirection::EGPD_Output; });
-
-			if (inputPin != NULL && outputPin != NULL)
-				(*outputPin)->MakeLinkTo(*inputPin);
-		}
+		if (inputPin != NULL && outputPin != NULL)
+			(*outputPin)->MakeLinkTo(*inputPin);
 	}
 }
