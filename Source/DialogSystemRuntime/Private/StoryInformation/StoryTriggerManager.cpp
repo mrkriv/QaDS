@@ -5,18 +5,16 @@
 
 UStoryTriggerManager* UStoryTriggerManager::GetStoryTriggerManager()
 {
-	for (TObjectIterator<UStoryTriggerManager> Itr; Itr;)
-		return *Itr;
-
-	return NewObject<UStoryTriggerManager>();
+	TObjectIterator<UStoryTriggerManager> iter;
+	return iter ? *iter : NewObject<UStoryTriggerManager>();
 }
 
-void UStoryTriggerManager::InvokeTrigger(const FName& TriggerName, const TArray<FString>& Params)
+void UStoryTriggerManager::InvokeTrigger(const FStoryTrigger& Trigger)
 {
-	OnTriggerInvoke.Broadcast(TriggerName, Params);
+	OnTriggerInvoke.Broadcast(Trigger);
 
 	// todo:: check contains TriggerName in setting
 	// todo:: change FName to FTriggerName and add custom editor
 
-	UE_LOG(DialogModuleLog, Log, TEXT("Invoke trigger %s"), *TriggerName.ToString());
+	UE_LOG(DialogModuleLog, Log, TEXT("Invoke trigger %s"), *Trigger.TriggerName.ToString());
 }

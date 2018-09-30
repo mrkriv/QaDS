@@ -32,12 +32,27 @@ UQuestRuntimeNode* UQuestNode::Load(UQuestProcessor* processor, UQuestRuntimeAss
 
 void UQuestRuntimeNode::OnChangeStoryKey(const FName& key)
 {
-	if (Stage.WaitHasKeys.Contains(key) ||
-		Stage.WaitDontHasKeys.Contains(key) ||
+	if (Stage.WaitHasKeys.Contains(key)		 ||
+		Stage.WaitDontHasKeys.Contains(key)  ||
 		Stage.FailedIfGiveKeys.Contains(key) ||
 		Stage.FailedIfRemoveKeys.Contains(key))
 	{
 		TryComplete();
+	}
+}
+
+void UQuestRuntimeNode::OnTrigger(const FStoryTrigger& Trigger)
+{
+	for (auto& cond : Stage.WaitTriggers)
+	{
+		if (MatchTringger(cond, Trigger))
+			break;
+	}
+
+	for (auto& cond : Stage.FailedTriggers)
+	{
+		if (MatchTringger(cond, Trigger))
+			break;
 	}
 }
 
@@ -61,6 +76,8 @@ void UQuestRuntimeNode::SetStatus(EQuestCompleteStatus NewStatus)
 {
 	if (NewStatus == Status)
 		return;
+
+	Status = NewStatus;
 
 	switch (Status)
 	{
@@ -90,13 +107,18 @@ void UQuestRuntimeNode::Activate()
 	if (TryComplete())
 		return;
 
-	if (Stage.WaitHasKeys.Num() != 0 ||
-		Stage.WaitDontHasKeys.Num() != 0 ||
-		Stage.FailedIfGiveKeys.Num() != 0 ||
-		Stage.FailedIfRemoveKeys.Num() != 0)
+	if (Stage.WaitHasKeys.Num()			> 0 ||
+		Stage.WaitDontHasKeys.Num()		> 0 ||
+		Stage.FailedIfGiveKeys.Num()	> 0 ||
+		Stage.FailedIfRemoveKeys.Num()	> 0)
 	{
 		Processor->StoryKeyManager->OnKeyRemoveBP.AddDynamic(this, &UQuestRuntimeNode::OnChangeStoryKey);
 		Processor->StoryKeyManager->OnKeyAddBP.AddDynamic(this, &UQuestRuntimeNode::OnChangeStoryKey);
+	}
+
+	if (Stage.FailedTriggers.Num() > 0 || Stage.WaitTriggers.Num() > 0)
+	{
+		Processor->StoryTriggerManager->OnTriggerInvoke.AddDynamic(this, &UQuestRuntimeNode::OnTrigger);
 	}
 }
 
@@ -140,6 +162,42 @@ void UQuestRuntimeNode::Deactivate()
 
 	Processor->StoryKeyManager->OnKeyRemoveBP.RemoveDynamic(this, &UQuestRuntimeNode::OnChangeStoryKey);
 	Processor->StoryKeyManager->OnKeyAddBP.RemoveDynamic(this, &UQuestRuntimeNode::OnChangeStoryKey);
+	Processor->StoryTriggerManager->OnTriggerInvoke.RemoveDynamic(this, &UQuestRuntimeNode::OnTrigger);
+}
+
+bool UQuestRuntimeNode::MatchTringger(FStoryTriggerCondition& condition, const FStoryTrigger& trigger)
+{
+	if (condition.TriggerName != trigger.TriggerName)
+		return false;
+
+	for (auto kpv : trigger.Params)
+	{
+		if (!condition.ParamsMasks.Contains(kpv.Key))
+			return false;
+
+		auto filter = condition.ParamsMasks[kpv.Key];
+
+		if (!MatchTringgerParam(kpv.Value, filter))
+			return false;
+	}
+
+	condition.TotalCount -= trigger.Count;
+
+	if (condition.TotalCount <= 0)
+		TryComplete();
+
+	return true;
+}
+
+bool UQuestRuntimeNode::MatchTringgerParam(const FString& value, const FString& filter)
+{
+	if (filter == "*")
+		return true;
+
+	if (filter == value)
+		return true;
+
+	return false;
 }
 
 bool UQuestRuntimeNode::CkeckForActivate()
@@ -167,6 +225,12 @@ bool UQuestRuntimeNode::CkeckForActivate()
 
 bool UQuestRuntimeNode::CkeckForComplete()
 {
+	for (auto& cond : Stage.WaitTriggers)
+	{
+		if (cond.TotalCount != 0)
+			return false;
+	}
+
 	for (auto key : Stage.WaitHasKeys)
 	{
 		if (Processor->StoryKeyManager->DontHasKey(key))
@@ -190,6 +254,12 @@ bool UQuestRuntimeNode::CkeckForComplete()
 
 bool UQuestRuntimeNode::CkeckForFailed()
 {
+	for (auto& cond : Stage.FailedTriggers)
+	{
+		if (cond.TotalCount == 0)
+			return true;
+	}
+
 	for (auto key : Stage.FailedIfGiveKeys)
 	{
 		if (Processor->StoryKeyManager->HasKey(key))

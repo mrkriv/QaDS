@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PhysicsVolume.h"
+#include "StoryTriggerManager.h"
 #include "StrotyVolume.generated.h"
 
 UCLASS()
@@ -17,6 +18,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Activate")
 	TArray<FName> RemoveKeys;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Activate")
+	TArray<FStoryTrigger> ActivateTriggers;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Activate")
 	TSoftObjectPtr<class UQuestAsset> StartQuest;

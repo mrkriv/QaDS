@@ -5,10 +5,8 @@
 
 UStoryKeyManager* UStoryKeyManager::GetStoryKeyManager()
 {
-	for (TObjectIterator<UStoryKeyManager> Itr; Itr;)
-		return *Itr;
-
-	return NewObject<UStoryKeyManager>();
+	TObjectIterator<UStoryKeyManager> iter;
+	return iter ? *iter : NewObject<UStoryKeyManager>();
 }
 
 bool UStoryKeyManager::HasKey(FName Key) const

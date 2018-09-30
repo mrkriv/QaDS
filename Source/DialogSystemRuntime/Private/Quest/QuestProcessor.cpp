@@ -5,22 +5,24 @@
 #include "QuestNode.h"
 #include "QuestProcessor.h"
 #include "StoryInformationManager.h"
+#include "StoryTriggerManager.h"
 
 UQuestProcessor* UQuestProcessor::GetQuestProcessor()
 {
-	for (TObjectIterator<UQuestProcessor> Itr; Itr;)
-		return *Itr;
+	TObjectIterator<UQuestProcessor> iter;
+	auto result = iter ? *iter : NewObject<UQuestProcessor>();
 
-	return NewObject<UQuestProcessor>();
+	if (result->StoryKeyManager == NULL)
+		result->StoryKeyManager = UStoryKeyManager::GetStoryKeyManager();
+
+	if (result->StoryTriggerManager == NULL)
+		result->StoryTriggerManager = UStoryTriggerManager::GetStoryTriggerManager();
+
+	return result;
 }
 
 void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 {
-	if (StoryKeyManager == NULL)
-	{
-		StoryKeyManager = UStoryKeyManager::GetStoryKeyManager();
-	}
-
 	if (!QuestAsset.IsValid())
 	{
 		UE_LOG(DialogModuleLog, Error, TEXT("Failed start new quest: asset is not set"));

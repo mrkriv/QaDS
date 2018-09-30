@@ -34,6 +34,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UStoryKeyManager* StoryKeyManager;
 
+	UPROPERTY(BlueprintReadOnly)
+	UStoryTriggerManager* StoryTriggerManager;
+
 	UFUNCTION(BlueprintPure, Category = "Gameplay|Quest")
 	static UQuestProcessor* GetQuestProcessor();
 

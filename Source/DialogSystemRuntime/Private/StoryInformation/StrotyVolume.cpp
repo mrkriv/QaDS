@@ -1,6 +1,7 @@
 #include "DialogSystemRuntime.h"
 #include "StrotyVolume.h"
 #include "StoryInformationManager.h"
+#include "StoryTriggerManager.h"
 #include "QuestProcessor.h"
 #include "QuestAsset.h"
 #include "GameFramework/Pawn.h"
@@ -33,6 +34,15 @@ void AStrotyVolume::Activate()
 		for (auto& key : RemoveKeys)
 		{
 			skm->RemoveKey(key);
+		}
+	}
+	
+	if (ActivateTriggers.Num() > 0)
+	{
+		auto stm = UStoryTriggerManager::GetStoryTriggerManager();
+		for (auto& trigger : ActivateTriggers)
+		{
+			stm->InvokeTrigger(trigger);
 		}
 	}
 

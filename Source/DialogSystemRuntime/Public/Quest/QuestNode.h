@@ -2,9 +2,27 @@
 
 #include "QuestStageEvent.h"
 #include "QuestAsset.h"
+#include "StoryTriggerManager.h"
 #include "QuestNode.generated.h"
 
 class UQuestProcessor;
+
+USTRUCT(BlueprintType)
+struct DIALOGSYSTEMRUNTIME_API FStoryTriggerCondition
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName TriggerName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int TotalCount = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<FName, FString> ParamsMasks;
+};
 
 USTRUCT(BlueprintType)
 struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
@@ -39,6 +57,9 @@ struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
 	TArray<FName> WaitDontHasKeys;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
+	TArray<FStoryTriggerCondition> WaitTriggers;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Task")
 	TArray<FQuestStageCondition> WaitPredicate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Failed")
@@ -46,6 +67,9 @@ struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Failed")
 	TArray<FName> FailedIfRemoveKeys;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Failed")
+	TArray<FStoryTriggerCondition> FailedTriggers;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Failed")
 	TArray<FQuestStageCondition> FailedPredicate;
@@ -93,6 +117,14 @@ class DIALOGSYSTEMRUNTIME_API UQuestRuntimeNode : public UObject
 	void Failed();
 	void Complete();
 	void Deactivate();
+
+	bool CkeckForActivate();
+	bool CkeckForComplete();
+	bool CkeckForFailed();
+
+	bool MatchTringger(FStoryTriggerCondition& condition, const FStoryTrigger& trigger);
+	bool MatchTringgerParam(const FString& value, const FString& filter);
+
 public:
 	UPROPERTY()
 	UQuestProcessor* Processor;
@@ -110,12 +142,13 @@ public:
 	FQuestStageInfo Stage;
 
 	bool TryComplete();
-	bool CkeckForActivate();
-	bool CkeckForComplete();
-	bool CkeckForFailed();
 	void SetStatus(EQuestCompleteStatus NewStatus);
 	TArray<UQuestRuntimeNode*> GetNextStage();
 
+private:
 	UFUNCTION()
 	void OnChangeStoryKey(const FName& key);
+
+	UFUNCTION()
+	void OnTrigger(const FStoryTrigger& Trigger);
 };
