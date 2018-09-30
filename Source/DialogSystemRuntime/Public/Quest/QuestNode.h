@@ -133,6 +133,9 @@ public:
 	UQuestRuntimeAsset* OwnerQuest;
 
 	UPROPERTY()
+	UQuestNode* BaseQuestNode;
+
+	UPROPERTY()
 	TArray<UQuestRuntimeNode*> Childs;
 
 	UPROPERTY(BlueprintReadOnly)

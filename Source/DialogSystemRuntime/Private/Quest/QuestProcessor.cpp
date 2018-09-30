@@ -37,15 +37,15 @@ void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 	}
 
 	auto runtimeQuest = quest->Load(this);
+	runtimeQuest->Status = EQuestCompleteStatus::Active;
+
 	auto stages = runtimeQuest->RootNode->GetNextStage();
 	if (stages.Num() == 0)
 	{
 		UE_LOG(DialogModuleLog, Error, TEXT("Failed start new quest: not found valid stage in %s"), *QuestAsset.GetAssetName());
 		return;
 	}
-
-	runtimeQuest->Status = EQuestCompleteStatus::Active;
-
+	
 	activeQuests.Add(runtimeQuest);
 	OnQuestStart.Broadcast(runtimeQuest);
 
