@@ -4,3 +4,4 @@
 #include "DialogNodes/DialogPhraseNode.h"
 #include "DialogNodes/DialogSubGraphNode.h"
 #include "DialogNodes/DialogElseIfNode.h"
+#include "DialogNodes/DialogJumpNode.h"
