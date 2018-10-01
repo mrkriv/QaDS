@@ -12,7 +12,13 @@ class DIALOGSYSTEMRUNTIME_API AStrotyVolume : public APhysicsVolume
 
 	virtual void ActorEnteredVolume(class AActor* Other) override;
 
-public:	
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
+	TArray<FName> CheckHasKeys;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
+	TArray<FName> CheckDontHasKeys;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Activate")
 	TArray<FName> GiveKeys;
 
@@ -29,5 +35,8 @@ public:
 	bool bDestroySelf = true;
 
 	UFUNCTION(BlueprintCallable)
-	void Activate();
+	virtual bool CanActivate(class AActor* Other);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void Activate();
 };

@@ -6,6 +6,28 @@
 #include "QuestAsset.h"
 #include "GameFramework/Pawn.h"
 
+bool AStrotyVolume::CanActivate(AActor* Other)
+{
+	if (CheckHasKeys.Num() + CheckDontHasKeys.Num() > 0)
+	{
+		auto skm = UStoryKeyManager::GetStoryKeyManager();
+
+		for (auto& key : CheckHasKeys)
+		{
+			if (skm->DontHasKey(key))
+				return false;
+		}
+
+		for (auto& key : CheckDontHasKeys)
+		{
+			if (skm->HasKey(key))
+				return false;
+		}
+	}
+
+	return true;
+}
+
 void AStrotyVolume::ActorEnteredVolume(AActor* Other)
 {
 	Super::ActorEnteredVolume(Other);
@@ -14,7 +36,8 @@ void AStrotyVolume::ActorEnteredVolume(AActor* Other)
 
 	if (playerCharacter != NULL && Other == playerCharacter)
 	{
-		Activate();
+		if (CanActivate(Other))
+			Activate();
 	}
 }
 
