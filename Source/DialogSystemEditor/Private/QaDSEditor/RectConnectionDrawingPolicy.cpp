@@ -29,10 +29,7 @@ void FRectConnectionDrawingPolicy::DrawPreviewConnector(const FGeometry& PinGeom
 	FConnectionParams Params;
 	DetermineWiringStyle(Pin, NULL, Params);
 
-	if (Pin->Direction == EEdGraphPinDirection::EGPD_Output)
-		DrawSplineWithArrow(FGeometryHelper::FindClosestPointOnGeom(PinGeometry, EndPoint), EndPoint, Params);
-	else
-		DrawSplineWithArrow(FGeometryHelper::FindClosestPointOnGeom(PinGeometry, StartPoint), StartPoint, Params);
+	DrawConnection(WireLayerID, StartPoint, EndPoint, Params);
 }
 
 void FRectConnectionDrawingPolicy::DetermineWiringStyle(UEdGraphPin* OutputPin, UEdGraphPin* InputPin, FConnectionParams& Params)
@@ -46,71 +43,65 @@ void FRectConnectionDrawingPolicy::DetermineWiringStyle(UEdGraphPin* OutputPin, 
 		ApplyHoverDeemphasis(OutputPin, InputPin, Params.WireThickness, Params.WireColor);
 }
 
-void FRectConnectionDrawingPolicy::DrawSplineWithArrow(const FVector2D& StartAnchorPoint, const FVector2D& EndAnchorPoint, const FConnectionParams& Params)
+void FRectConnectionDrawingPolicy::DrawSplineWithArrow(const FGeometry& StartGeom, const FGeometry& EndGeom, const FConnectionParams& Params)
 {
-	auto LineSeparationAmount = 2.5f;
+	auto padding = 40.0f * ZoomFactor;
 
-	auto DeltaPos = EndAnchorPoint - StartAnchorPoint;
-	auto UnitDelta = DeltaPos.GetSafeNormal();
-	auto Normal = FVector2D(DeltaPos.Y, -DeltaPos.X).GetSafeNormal();
+	auto StartSize = StartGeom.GetDrawSize();
+	auto StartPS = StartGeom.AbsolutePosition + FVector2D(padding, 0);
+	auto StartPC = StartGeom.AbsolutePosition + FVector2D(StartSize.X * 0.5f, StartSize.Y * 0.5f);
+	auto StartPE = StartGeom.AbsolutePosition + FVector2D(StartSize.X - padding, StartSize.Y);
 
-	auto DirectionBias = Normal * LineSeparationAmount;
-	auto LengthBias = ArrowRadius.X * UnitDelta;
-	auto StartPoint = StartAnchorPoint + DirectionBias + LengthBias;
-	auto EndPoint = EndAnchorPoint + DirectionBias - LengthBias;
+	auto EndSize = StartGeom.GetDrawSize();
+	auto EndPS = EndGeom.AbsolutePosition + FVector2D(padding, 0);
+	auto EndPC = EndGeom.AbsolutePosition + FVector2D(EndSize.X * 0.5f, EndSize.Y * 0.5f);
+	auto EndPE = EndGeom.AbsolutePosition + FVector2D(EndSize.X - padding, EndSize.Y);
 
-	FVector2D CenterLeft;
-	FVector2D CenterRight;
+	auto center = (StartPC + EndPC) * 0.5f;
 
-	if (Normal.X < 0)
+	auto StartAnchor = FVector2D(FMath::Clamp(center.X, StartPS.X, StartPE.X), StartPC.Y);
+	auto EndAnchor = FVector2D(FMath::Clamp(center.X, EndPS.X, EndPE.X), EndPC.Y);
+
+	DrawSplineWithArrow(StartAnchor, EndAnchor, Params);
+}
+
+void FRectConnectionDrawingPolicy::DrawSplineWithArrow(const FVector2D& StartPoint, const FVector2D& EndPoint, const FConnectionParams& Params)
+{
+	if (StartPoint.Y < EndPoint.Y)
 	{
-		CenterLeft = FVector2D(EndPoint.X + (StartPoint.X - EndPoint.X) / 2, StartPoint.Y);
-		CenterLeft = FVector2D(EndPoint.X + (StartPoint.X - EndPoint.X) / 2, EndPoint.Y);
-
-		DrawConnection(WireLayerID, StartPoint, EndPoint, Params);
-	}
-	else
-	{
-		CenterLeft = FVector2D(StartPoint.X, StartPoint.Y + (EndPoint.Y - StartPoint.Y) / 2);
-		CenterRight = FVector2D(EndPoint.X, StartPoint.Y + (EndPoint.Y - StartPoint.Y) / 2);
-
-		if (Normal.Y > 0)
-		{
-			StartPoint.X += 25;
-			EndPoint.X -= 25;
-		}
-		else if (Normal.Y < 0)
-		{
-			StartPoint.X -= 25;
-			EndPoint.X += 25;
-		}
+		auto CenterLeft = FVector2D(StartPoint.X, StartPoint.Y + (EndPoint.Y - StartPoint.Y) / 2);
+		auto CenterRight = FVector2D(EndPoint.X, StartPoint.Y + (EndPoint.Y - StartPoint.Y) / 2);
 
 		DrawConnection(WireLayerID, StartPoint, CenterLeft, Params);
 		DrawConnection(WireLayerID, CenterRight, CenterLeft, Params);
 		DrawConnection(WireLayerID, CenterRight, EndPoint, Params);
 	}
+	else if (StartPoint.Y > EndPoint.Y)
+	{
+		auto newParams = FConnectionParams(Params);
+		newParams.WireColor *= 0.6f;
 
-	auto ArrowDrawPos = EndPoint - CenterLeft;//((StartPoint + EndPoint) ) / 2;
-	auto AngleInRadians = FMath::Atan2(DeltaPos.Y, DeltaPos.X);
+		auto d = 20.0f * ZoomFactor;
+		auto p1 = FVector2D(StartPoint.X, StartPoint.Y + d);
+		auto p2 = FVector2D(EndPoint.X + (StartPoint.X - EndPoint.X) * 0.5f, p1.Y);
+		auto p3 = FVector2D(p2.X, EndPoint.Y - d);
+		auto p4 = FVector2D(EndPoint.X, p3.Y);
 
-	FSlateDrawElement::MakeRotatedBox(
-		DrawElementsList,
-		ArrowLayerID,
-		FPaintGeometry(ArrowDrawPos, ArrowImage->ImageSize * ZoomFactor, ZoomFactor),
-		ArrowImage,
-		ESlateDrawEffect::None,
-		AngleInRadians,
-		TOptional<FVector2D>(),
-		FSlateDrawElement::RelativeToElement,
-		Params.WireColor
-	);
+		DrawConnection(WireLayerID, StartPoint, p1, newParams);
+		DrawConnection(WireLayerID, p1, p2, newParams);
+		DrawConnection(WireLayerID, p2, p3, newParams);
+		DrawConnection(WireLayerID, p3, p4, newParams);
+		DrawConnection(WireLayerID, p4, EndPoint, newParams);
+	}
+	else
+	{
+		DrawConnection(WireLayerID, StartPoint, EndPoint, Params);
+	}
 }
 
 void FRectConnectionDrawingPolicy::DrawConnection(int32 LayerId, const FVector2D& Start, const FVector2D& End, const FConnectionParams& Params)
 {
-	auto Delta = End - Start;
-	auto NormDelta = Delta.GetSafeNormal();
-
+	auto NormDelta = (End - Start).GetSafeNormal();
 	auto P0Tangent = NormDelta;
 	auto P1Tangent = NormDelta;
 
