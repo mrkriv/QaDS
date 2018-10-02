@@ -147,6 +147,11 @@ void UQuestRuntimeNode::Complete()
 		}
 	}
 
+	if (Stage.ChangeQuestState != EQuestCompleteStatus::None)
+	{
+		Processor->EndQuest(OwnerQuest, Stage.ChangeQuestState);
+	}
+
 	for (auto key : Stage.GiveKeys)
 		Processor->StoryKeyManager->AddKey(key);
 

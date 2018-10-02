@@ -15,10 +15,7 @@ UQuestAssetFactory::UQuestAssetFactory(const FObjectInitializer& ObjectInitializ
 
 UObject* UQuestAssetFactory::FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
 {
-	UQuestAsset* asset = NewObject<UQuestAsset>(InParent, Class, Name, Flags | RF_Transactional);
-	asset->Name = Name;
-
-	return asset;
+	return NewObject<UQuestAsset>(InParent, Class, Name, Flags | RF_Transactional);
 }
 
 bool UQuestAssetFactory::CanCreateNew() const

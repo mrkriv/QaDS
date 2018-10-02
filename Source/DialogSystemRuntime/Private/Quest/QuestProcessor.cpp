@@ -30,6 +30,18 @@ void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 		return;
 	}
 
+	if (quest->bIsSingltone)
+	{
+		for (auto activeQuest : activeQuests)
+		{
+			if (activeQuest->GetFName() == quest->GetFName())
+			{
+				UE_LOG(DialogModuleLog, Log, TEXT("Quest %s already active"), *QuestAsset.GetAssetName());
+				return;
+			}
+		}
+	}
+
 	if (quest->RootNode == NULL)
 	{
 		UE_LOG(DialogModuleLog, Error, TEXT("Failed start new quest: not found root node in %s"), *QuestAsset.GetAssetName());
@@ -88,7 +100,10 @@ void UQuestProcessor::CompleteStage(UQuestRuntimeNode* StageNode)
 	check(StageNode);
 	check(StageNode->OwnerQuest);
 
-	OnStageComplete.Broadcast(StageNode->OwnerQuest, StageNode->Stage);
+	if (StageNode->Stage.bGenerateEvents) //&& !StageNode->Stage.Caption.IsEmpty() /*|| Setting.bGenerateEventForEmptyQuestNode */) // todo:: add setting
+	{
+		OnStageComplete.Broadcast(StageNode->OwnerQuest, StageNode->Stage);
+	}
 
 	WaitStage(StageNode);
 }
@@ -108,7 +123,6 @@ void UQuestProcessor::EndQuest(UQuestRuntimeAsset* Quest, EQuestCompleteStatus S
 	{
 		Quest->Status = Status;
 	}
-
 	archiveQuests.Add(Quest);
 
 	OnQuestEnd.Broadcast(Quest, Status);

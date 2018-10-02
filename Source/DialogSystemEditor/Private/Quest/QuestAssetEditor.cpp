@@ -209,7 +209,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 		{
 			if (!Event.Compile(EditedAsset, ErrorMessage, needUpdate))
 			{
-				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + compileNode->Stage.SystemName.ToString() + "\""));
+				CompileLogResults.Error(*(ErrorMessage));
 			}
 		}
 
@@ -217,7 +217,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 		{
 			if (!Condition.Compile(EditedAsset, ErrorMessage, needUpdate))
 			{
-				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + compileNode->Stage.SystemName.ToString() + "\""));
+				CompileLogResults.Error(*(ErrorMessage));
 			}
 		}
 
@@ -225,7 +225,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 		{
 			if (!Condition.Compile(EditedAsset, ErrorMessage, needUpdate))
 			{
-				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + compileNode->Stage.SystemName.ToString() + "\""));
+				CompileLogResults.Error(*(ErrorMessage));
 			}
 		}
 
@@ -233,7 +233,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 		{
 			if (!Condition.Compile(EditedAsset, ErrorMessage, needUpdate))
 			{
-				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + compileNode->Stage.SystemName.ToString() + "\""));
+				CompileLogResults.Error(*(ErrorMessage));
 			}
 		}
 	}

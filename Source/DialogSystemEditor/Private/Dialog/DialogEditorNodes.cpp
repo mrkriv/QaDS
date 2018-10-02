@@ -34,7 +34,7 @@ void operator>>(const FXmlReadNode& node, FDialogPhraseEvent& value)
 	node.TryGet("command", value.Command);
 	node.TryGet("params", value.Parameters);
 
-	value.ObjectClass=FindObject<UClass>(ANY_PACKAGE, *node.Get("class"));
+	value.ObjectClass = FindObject<UClass>(ANY_PACKAGE, *node.Get("class"));
 }
 
 //FDialogPhraseCondition..........................................................................................................
@@ -58,6 +58,7 @@ UDialogPhraseEdGraphNode::UDialogPhraseEdGraphNode()
 
 void UDialogPhraseEdGraphNode::AllocateDefaultPins()
 {
+	Pins.Reset();
 	CreatePin(EGPD_Input, NAME_None, FName("Input"));
 	CreatePin(EGPD_Output, NAME_None, FName("Output"));
 }

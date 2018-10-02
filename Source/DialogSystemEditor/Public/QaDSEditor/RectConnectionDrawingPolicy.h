@@ -4,10 +4,6 @@
 
 class FRectConnectionDrawingPolicy : public FConnectionDrawingPolicy
 {
-protected:
-	UEdGraph* GraphObj;
-	TMap<UEdGraphNode*, int32> NodeWidgetMap;
-
 public:
 	FRectConnectionDrawingPolicy(int32 InBackLayerID, int32 InFrontLayerID, float ZoomFactor, const FSlateRect& InClippingRect, FSlateWindowElementList& InDrawElements, UEdGraph* InGraphObj);
 

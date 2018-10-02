@@ -26,13 +26,13 @@ class DIALOGSYSTEMRUNTIME_API UQuestAsset : public UDataAsset
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FName Name;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText Title;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText Description;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bIsSingltone = true;
 	
 	UPROPERTY()
 	UQuestNode* RootNode;

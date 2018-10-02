@@ -6,21 +6,11 @@
 
 FRectConnectionDrawingPolicy::FRectConnectionDrawingPolicy(int32 InBackLayerID, int32 InFrontLayerID, float ZoomFactor, const FSlateRect& InClippingRect, FSlateWindowElementList& InDrawElements, UEdGraph* InGraphObj)
 : FConnectionDrawingPolicy(InBackLayerID, InFrontLayerID, ZoomFactor, InClippingRect, InDrawElements)
-, GraphObj(InGraphObj)
 {
 }
 
 void FRectConnectionDrawingPolicy::Draw(TMap<TSharedRef<SWidget>, FArrangedWidget>& InPinGeometries, FArrangedChildren& ArrangedNodes)
 {
-	//Collect node geometry
-	//NodeWidgetMap.Empty();
-	//for (int32 NodeIndex = 0; NodeIndex < ArrangedNodes.Num(); ++NodeIndex)
-	//{
-	//	FArrangedWidget& CurWidget = ArrangedNodes[NodeIndex];
-	//	TSharedRef<SGraphNode> ChildNode = StaticCastSharedRef<SGraphNode>(CurWidget.Widget);
-	//	NodeWidgetMap.Add(ChildNode->GetNodeObj(), NodeIndex);
-	//}
-
 	FConnectionDrawingPolicy::Draw(InPinGeometries, ArrangedNodes);
 }
 
@@ -81,7 +71,7 @@ void FRectConnectionDrawingPolicy::DrawSplineWithArrow(const FVector2D& StartPoi
 		auto newParams = FConnectionParams(Params);
 		newParams.WireColor *= 0.6f;
 
-		auto d = 20.0f * ZoomFactor;
+		auto d = 25.0f * ZoomFactor;
 		auto p1 = FVector2D(StartPoint.X, StartPoint.Y + d);
 		auto p2 = FVector2D(EndPoint.X + (StartPoint.X - EndPoint.X) * 0.5f, p1.Y);
 		auto p3 = FVector2D(p2.X, EndPoint.Y - d);
@@ -101,6 +91,16 @@ void FRectConnectionDrawingPolicy::DrawSplineWithArrow(const FVector2D& StartPoi
 
 void FRectConnectionDrawingPolicy::DrawConnection(int32 LayerId, const FVector2D& Start, const FVector2D& End, const FConnectionParams& Params)
 {
+	//auto gridSize = 8;
+
+	auto start = Start;
+	//start.X -= (int)(start.X) % gridSize;
+	//start.Y -= (int)(start.Y) % gridSize;
+
+	auto end = End;
+	//end.X -= (int)(end.X) % gridSize;
+	//end.Y -= (int)(end.Y) % gridSize;
+
 	auto NormDelta = (End - Start).GetSafeNormal();
 	auto P0Tangent = NormDelta;
 	auto P1Tangent = NormDelta;
@@ -108,8 +108,8 @@ void FRectConnectionDrawingPolicy::DrawConnection(int32 LayerId, const FVector2D
 	FSlateDrawElement::MakeDrawSpaceSpline(
 		DrawElementsList,
 		LayerId,
-		Start, P0Tangent,
-		End, P1Tangent,
+		start, P0Tangent,
+		end, P1Tangent,
 		Params.WireThickness,
 		ESlateDrawEffect::None,
 		Params.WireColor

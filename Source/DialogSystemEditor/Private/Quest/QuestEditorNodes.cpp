@@ -10,6 +10,7 @@
 //UQuestStageEdGraphNode...........................................................................................
 void UQuestStageEdGraphNode::AllocateDefaultPins()
 {
+	Pins.Reset();
 	CreatePin(EGPD_Input, NAME_None, FName("Input"));
 	CreatePin(EGPD_Output, NAME_None, FName("Output"));
 }

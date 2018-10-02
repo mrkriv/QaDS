@@ -32,9 +32,6 @@ struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
-	FName SystemName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
 	FText Caption;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
@@ -42,6 +39,9 @@ struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
 	TMap<FName, FString> AditionalData;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
+	bool bGenerateEvents = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Conditions")
 	TArray<FName> CheckHasKeys;
