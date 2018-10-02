@@ -24,8 +24,6 @@ Supported version is 4.20, this is not release version!
 | PhraseNode id dialog  		| done 	
 | RootNode id dialog  			| done 	
 | SubDialogNode id dialog  		| done 	
-| ElseIfNode id dialog  		| 		
-| JumpNode id dialog  			| 		
 | Export dialog to xml  		| done	
 | Import dialog from xml  		| done
 | Import dialog from STALKER :D	| done 	
@@ -40,7 +38,7 @@ Supported version is 4.20, this is not release version!
 | QuestStageNode 		    	| done
 | Trigger names control 	    | 
 | StrotyVolume		 	 	    | done
-| Cancel quest stage action    	| 
+| Cancel quest stage action    	| done
 | Find in quest graph  	    	| 
 | Export quest to xml  			| 		
 | Import quest from xml  		| 		

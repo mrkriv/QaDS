@@ -53,8 +53,23 @@ TSharedRef<FSlateStyleSet> FBrushSet::Create()
 
 	for (auto file : Files)
 	{
-		auto name = FName(*("DialogSystem." + FPaths::GetBaseFilename(file)));
-		StyleSet->Set(name, new FSlateImageBrush(FPaths::Combine(dir, file), FVector2D(24, 24)));
+		auto name = "DialogSystem." + FPaths::GetBaseFilename(file);
+		auto spectator = 0;
+		auto size = FVector2D(24, 24);
+
+		if (name.FindLastChar('_', spectator))
+		{
+			auto numberStr = name.Right(name.Len() - spectator - 1);
+			auto number = FCString::Atoi(*numberStr);
+
+			if (number > 2 && number < 256)
+			{
+				size.X = number;
+				size.Y = number;
+			}
+		}
+
+		StyleSet->Set(FName(*name), new FSlateImageBrush(FPaths::Combine(dir, file), size));
 	}
 
 	return StyleSet.ToSharedRef();

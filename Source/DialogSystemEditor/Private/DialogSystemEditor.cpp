@@ -60,7 +60,7 @@ void FDialogSystemEditorModule::StartupModule()
 	auto developerCategory = MenuStructure.GetDeveloperToolsMiscCategory();
 	auto& SpawnerEntry = FGlobalTabmanager::Get()->RegisterNomadTabSpawner("StoryKeyWindow", FOnSpawnTab::CreateRaw(this, &FDialogSystemEditorModule::SpawnStoryKeyTab))
 		.SetDisplayName(LOCTEXT("StoryKey", "Story Key"))
-		.SetIcon(FSlateIcon("DialogSystem", "DialogSystem.StoryKeyIcon"));
+		.SetIcon(FSlateIcon("DialogSystem", "DialogSystem.StoryKeyIcon_16"));
 
 	SpawnerEntry.SetGroup(developerCategory);
 }
