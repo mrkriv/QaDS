@@ -24,7 +24,7 @@ void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseEvent>& t
 
 	subNode.AppendArray("params", "param", value.Parameters);
 
-	node.Childrens.Add(node);
+	node.Childrens.Add(subNode);
 }
 
 void operator>>(const FXmlReadNode& node, FDialogPhraseEvent& value)
@@ -193,6 +193,7 @@ FXmlWriteNode UDialogRootEdGraphNode::SaveToXml() const
 
 void UDialogRootEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
+	Super::LoadInXml(reader, nodeById);
 }
 
 FText UDialogRootEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const

@@ -27,7 +27,7 @@ Supported version is 4.20, this is not release version!
 | ElseIfNode id dialog  		| 		
 | JumpNode id dialog  			| 		
 | Export dialog to xml  		| done	
-| Import dialog from xml  		| 		
+| Import dialog from xml  		| done
 | Import dialog from STALKER :D	| done 	
 | Find in dialog graph  		| 
 | Load story key is game  		| 

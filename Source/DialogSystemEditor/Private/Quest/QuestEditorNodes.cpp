@@ -30,6 +30,7 @@ FXmlWriteNode UQuestStageEdGraphNode::SaveToXml() const
 
 void UQuestStageEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
+	Super::LoadInXml(reader, nodeById);
 }
 
 //UQuestRootEdGraphNode...........................................................................................
@@ -51,4 +52,5 @@ FXmlWriteNode UQuestRootEdGraphNode::SaveToXml() const
 
 void UQuestRootEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById)
 {
+	Super::LoadInXml(reader, nodeById);
 }
