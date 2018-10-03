@@ -37,15 +37,32 @@ public:
 	}
 
 	template<typename T>
-	FORCEINLINE void AppendArray(FString tag, FString itemTag, TArray<T> values)
+	FORCEINLINE void Append(FString tag, TArray<T> values)
 	{
 		if (values.Num() == 0)
 			return;
+
+		auto itemTag = tag.Left(tag.Len() - 1);
 
 		auto node = FXmlWriteNode(tag);
 		for (auto& value : values)
 		{
 			node.Append(itemTag, value);
+		}
+
+		Childrens.Add(node);
+	}
+
+	template<typename T>
+	FORCEINLINE void Append(FString tag, TMap<FName, T> values)
+	{
+		if (values.Num() == 0)
+			return;
+
+		auto node = FXmlWriteNode(tag);
+		for (auto& kpv : values)
+		{
+			node.Append(kpv.Key.ToString(), kpv.Value);
 		}
 
 		Childrens.Add(node);
@@ -110,6 +127,24 @@ public:
 			FXmlReadNode(subXml) >> item;
 
 			outValue.Add(item);
+		}
+	}
+
+	template<typename T>
+	FORCEINLINE void TryGet(const FString& tag, TMap<FName, T>& outValue) const
+	{
+		auto xml = XmlNode->FindChildNode(tag);
+		outValue.Reset();
+
+		if (xml == NULL)
+			return;
+
+		for (auto subXml : xml->GetChildrenNodes())
+		{
+			T item;
+			FXmlReadNode(subXml) >> item;
+
+			outValue.Add(*subXml->GetTag(), item);
 		}
 	}
 };

@@ -8,48 +8,6 @@
 #include "DialogAsset.h"
 #include "XmlFile.h"
 
-//FDialogPhraseEvent..........................................................................................................
-void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseEvent>& tuple)
-{
-	auto subNode = FXmlWriteNode(tuple.Tag);
-	auto& value = tuple.Value;
-
-	subNode.Append("type", (int)value.CallType);
-	subNode.Append("event", value.EventName);
-	subNode.Append("tag", value.FindTag);
-	subNode.Append("command", value.Command);
-
-	if (value.ObjectClass != NULL)
-		subNode.Append("class", value.ObjectClass->GetFullName());
-
-	subNode.AppendArray("params", "param", value.Parameters);
-
-	node.Childrens.Add(subNode);
-}
-
-void operator>>(const FXmlReadNode& node, FDialogPhraseEvent& value)
-{
-	node.TryGet("type", (int&)value.CallType);
-	node.TryGet("tag", value.FindTag);
-	node.TryGet("command", value.Command);
-	node.TryGet("params", value.Parameters);
-
-	value.ObjectClass = FindObject<UClass>(ANY_PACKAGE, *node.Get("class"));
-}
-
-//FDialogPhraseCondition..........................................................................................................
-void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseCondition>& tuple)
-{
-	node << FXmlWriteTuple<FDialogPhraseEvent>(tuple.Tag, tuple.Value);
-	node.Childrens.Last().Append("invert", tuple.Value.InvertCondition);
-}
-
-void operator>>(const FXmlReadNode& node, FDialogPhraseCondition& value)
-{
-	node >> (FDialogPhraseEvent&)value;
-	node.TryGet("invert", value.InvertCondition);
-}
-
 //PhraseNode..........................................................................................................
 UDialogPhraseEdGraphNode::UDialogPhraseEdGraphNode()
 {
@@ -82,14 +40,15 @@ FXmlWriteNode UDialogPhraseEdGraphNode::SaveToXml() const
 		node.Append("time", Data.PhraseManualTime);
 
 	if (Data.StartQuest.IsValid())
-		node.Append("quest", Data.StartQuest.GetLongPackageName());
+		node.Append("quest", Data.StartQuest.ToSoftObjectPath().ToString());
 
-	node.AppendArray("give_keys", "key", Data.GiveKeys);
-	node.AppendArray("remove_keys", "key", Data.RemoveKeys);
-	node.AppendArray("check_has_keys", "key", Data.CheckHasKeys);
-	node.AppendArray("check_dont_has_keys", "key", Data.CheckDontHasKeys);
-	node.AppendArray("actions", "action", Data.Action);
-	node.AppendArray("predicates", "predicate", Data.Predicate);
+	node.Append("aditionals", Data.AditionalData);
+	node.Append("give_keys", Data.GiveKeys);
+	node.Append("remove_keys", Data.RemoveKeys);
+	node.Append("check_has_keys", Data.CheckHasKeys);
+	node.Append("check_dont_has_keys", Data.CheckDontHasKeys);
+	node.Append("actions", Data.Action);
+	node.Append("predicates", Data.Predicate);
 	
 	return node;
 }
@@ -102,6 +61,7 @@ void UDialogPhraseEdGraphNode::LoadInXml(FXmlReadNode* reader, const TMap<FStrin
 	reader->TryGet("source", (int&)Data.Source);
 	reader->TryGet("time", Data.PhraseManualTime);
 
+	reader->TryGet("aditionals", Data.AditionalData);
 	reader->TryGet("give_keys", Data.GiveKeys);
 	reader->TryGet("remove_keys", Data.RemoveKeys);
 	reader->TryGet("check_has_keys", Data.CheckHasKeys);
@@ -204,4 +164,46 @@ FText UDialogRootEdGraphNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 bool UDialogRootEdGraphNode::CanUserDeleteNode() const
 {
 	return false;
+}
+
+//FDialogPhraseEvent..........................................................................................................
+void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseEvent>& tuple)
+{
+	auto subNode = FXmlWriteNode(tuple.Tag);
+	auto& value = tuple.Value;
+
+	subNode.Append("type", (int)value.CallType);
+	subNode.Append("event", value.EventName);
+	subNode.Append("tag", value.FindTag);
+	subNode.Append("command", value.Command);
+
+	if (value.ObjectClass != NULL)
+		subNode.Append("class", value.ObjectClass->GetFullName());
+
+	subNode.Append("params", value.Parameters);
+
+	node.Childrens.Add(subNode);
+}
+
+void operator>>(const FXmlReadNode& node, FDialogPhraseEvent& value)
+{
+	node.TryGet("type", (int&)value.CallType);
+	node.TryGet("tag", value.FindTag);
+	node.TryGet("command", value.Command);
+	node.TryGet("params", value.Parameters);
+
+	value.ObjectClass = FindObject<UClass>(ANY_PACKAGE, *node.Get("class"));
+}
+
+//FDialogPhraseCondition..........................................................................................................
+void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FDialogPhraseCondition>& tuple)
+{
+	node << FXmlWriteTuple<FDialogPhraseEvent>(tuple.Tag, tuple.Value);
+	node.Childrens.Last().Append("invert", tuple.Value.InvertCondition);
+}
+
+void operator>>(const FXmlReadNode& node, FDialogPhraseCondition& value)
+{
+	node >> (FDialogPhraseEvent&)value;
+	node.TryGet("invert", value.InvertCondition);
 }

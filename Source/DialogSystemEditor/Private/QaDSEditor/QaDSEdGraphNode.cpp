@@ -71,7 +71,7 @@ FXmlWriteNode UQaDSEdGraphNode::SaveToXml() const
 	node.Append("x", NodePosX);
 	node.Append("y", NodePosY);
 
-	node.AppendArray("links", "link", GetChildNodes());
+	node.Append("links", GetChildNodes());
 
 	return node;
 }
