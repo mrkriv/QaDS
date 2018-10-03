@@ -2,6 +2,8 @@
 #include "EngineUtils.h"
 #include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
 #include "StoryInformationManager.h"
+#include "Serialization/MemoryWriter.h"
+#include "Serialization/MemoryReader.h"
 
 UStoryKeyManager* UStoryKeyManager::GetStoryKeyManager()
 {
@@ -65,4 +67,27 @@ void UStoryKeyManager::Reset()
 	OnKeysLoadedBP.Broadcast(Database.Array());
 
 	UE_LOG(DialogModuleLog, Log, TEXT("Clear storage"));
+}
+
+FArchive& operator<<(FArchive& Ar, UStoryKeyManager& A)
+{
+	return Ar << A.Database;
+}
+
+TArray<uint8> UStoryKeyManager::SaveToBinary()
+{
+	TArray<uint8> result;
+	FMemoryWriter writter(result);
+	writter << *this;
+
+	return result;
+}
+
+void UStoryKeyManager::LoadFromBinary(const TArray<uint8>& Data)
+{
+	FMemoryReader reader(Data);
+	reader << *this;
+
+	OnKeysLoaded.Broadcast(Database.Array());
+	OnKeysLoadedBP.Broadcast(Database.Array());
 }

@@ -28,12 +28,12 @@ class DIALOGSYSTEMRUNTIME_API UStoryTriggerManager : public UObject
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintAssignable, Category = "Gameplay|StoryKey")
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Triggers")
 	FStoryTriggerInvokeSignature OnTriggerInvoke;
 
-	UFUNCTION(BlueprintPure, Category = "Gameplay|StoryKey")
+	UFUNCTION(BlueprintPure, Category = "Gameplay|Triggers")
 	static UStoryTriggerManager* GetStoryTriggerManager();
 
-	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|Triggers")
 	void InvokeTrigger(const FStoryTrigger& Trigger);
 };

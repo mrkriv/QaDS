@@ -50,6 +50,7 @@ void FQuestAssetEditor::InitQuestAssetEditor(const EToolkitMode::Type Mode, cons
 		EditedAsset->UpdateGraph = CreateGraphFromAsset();
 	
 	GraphEditor = CreateGraphEditorWidget(EditedAsset->UpdateGraph);
+	EdGraph = EditedAsset->UpdateGraph;
 
 	const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout("QuestEditor_Layout")
 		->AddArea
@@ -196,6 +197,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 	if (rootNode != NULL)
 	{
 		node->CompileNode = NewObject<UQuestNode>(EditedAsset);
+		node->CompileNode->Stage.UID = node->NodeGuid;
 	}
 	else if (stageNode != NULL)
 	{
@@ -203,6 +205,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 		node->CompileNode = compileNode;
 
 		compileNode->Stage = stageNode->Stage;
+		compileNode->Stage.UID = node->NodeGuid;
 
 		FString ErrorMessage;
 

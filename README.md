@@ -25,7 +25,7 @@ Supported version is 4.20, this is not release version!
 | Import dialog from STALKER :D	| done 	
 | Find in dialog graph  		| 
 | Story key		 	 			| ---
-| Load/Save story key   		| 
+| Load/Save story key   		| done 	
 | Story key viewer  			| done 	
 | Story key navigator  			|
 | Quest		 	 				| ---

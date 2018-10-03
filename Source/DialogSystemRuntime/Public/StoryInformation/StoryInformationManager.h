@@ -54,4 +54,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
 	void SetKeys(const TSet<FName>& keys);
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
+	TArray<uint8> SaveToBinary();
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
+	void LoadFromBinary(const TArray<uint8>& Data);
+
+	friend FArchive& operator<<(FArchive& Ar, UStoryKeyManager& A);
 };
