@@ -16,6 +16,7 @@
 #include "HAL/PlatformApplicationMisc.h"
 #include "Kismet2/DebuggerCommands.h"
 #include "ScopedTransaction.h"
+#include "BrushSet.h"
 #include "QaDSGraphSchema.h"
 
 #define LOCTEXT_NAMESPACE "QuestGraph"
@@ -118,17 +119,17 @@ void FQuestAssetEditor::BuildToolbar(FToolBarBuilder &builder)
 {
 	auto iconCompile = FSlateIcon(FEditorStyle::GetStyleSetName(), "AssetEditor.ReimportAsset", "AssetEditor.ReimportAsset.Small");
 	auto iconFind = FSlateIcon(FEditorStyle::GetStyleSetName(), "Kismet.Tabs.FindResults");
-	auto iconExport = FSlateIcon(FEditorStyle::GetStyleSetName(), "");
-	auto iconImport = FSlateIcon(FEditorStyle::GetStyleSetName(), "");
+	auto iconExport = FSlateIcon(FEditorStyle::GetStyleSetName(), "DialogSystem.Export_48");
+	auto iconImport = FSlateIcon(FEditorStyle::GetStyleSetName(), "DialogSystem.Import_48");
 
 	builder.AddSeparator();
 	builder.AddToolBarButton(FQuestCommands::Get().Compile, NAME_None, FText::FromString("Compile"), FText::FromString("Compile this Quest"), iconCompile, NAME_None);
 	//builder.AddSeparator(); 
 	//builder.AddToolBarButton(FQuestCommands::Get().Find, NAME_None, FText::FromString("Find"), FText::FromString("Open find Quest"), iconFind, NAME_None);
 	//builder.AddSeparator(); 
-	//builder.AddToolBarButton(FQuestCommands::Get().Export, NAME_None, FText::FromString("Export"), FText::FromString("Export graph to file"), iconImport, NAME_None);
-	//builder.AddToolBarButton(FQuestCommands::Get().Import, NAME_None, FText::FromString("Import"), FText::FromString("Imoprt graph from file"), iconExport, NAME_None);
-	//builder.AddSeparator();
+	builder.AddToolBarButton(FQuestCommands::Get().Export, NAME_None, FText::FromString("Export"), FText::FromString("Export graph to file"), iconImport, NAME_None);
+	builder.AddToolBarButton(FQuestCommands::Get().Import, NAME_None, FText::FromString("Import"), FText::FromString("Imoprt graph from file"), iconExport, NAME_None);
+	builder.AddSeparator();
 
 	FPlayWorldCommands::BuildToolbar(builder);
 }

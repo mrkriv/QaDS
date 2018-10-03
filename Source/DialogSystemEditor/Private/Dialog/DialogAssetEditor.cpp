@@ -17,6 +17,7 @@
 #include "Kismet2/DebuggerCommands.h"
 #include "ScopedTransaction.h"
 #include "DialogGraphSchema.h"
+#include "BrushSet.h"
 #include "QaDSGraphSchema.h"
 
 #define LOCTEXT_NAMESPACE "DialogGraph"
@@ -113,8 +114,8 @@ void FDialogAssetEditor::BuildToolbar(FToolBarBuilder &builder)
 {
 	auto iconCompile = FSlateIcon(FEditorStyle::GetStyleSetName(), "AssetEditor.ReimportAsset", "AssetEditor.ReimportAsset.Small");
 	auto iconFind = FSlateIcon(FEditorStyle::GetStyleSetName(), "Kismet.Tabs.FindResults");
-	auto iconExport = FSlateIcon(FEditorStyle::GetStyleSetName(), "");
-	auto iconImport = FSlateIcon(FEditorStyle::GetStyleSetName(), "");
+	auto iconExport = FSlateIcon(FEditorStyle::GetStyleSetName(), "DialogSystem.Export_48");
+	auto iconImport = FSlateIcon(FEditorStyle::GetStyleSetName(), "DialogSystem.Import_48");
 
 	builder.AddSeparator();
 	builder.AddToolBarButton(FDialogCommands::Get().Compile, NAME_None, FText::FromString("Compile"), FText::FromString("Compile this dialog"), iconCompile, NAME_None);

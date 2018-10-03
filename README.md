@@ -40,8 +40,8 @@ Supported version is 4.20, this is not release version!
 | StrotyVolume		 	 	    | done
 | Cancel quest stage action    	| done
 | Find in quest graph  	    	| 
-| Export quest to xml  			| 		
-| Import quest from xml  		| 		
+| Export quest to xml  			| done	
+| Import quest from xml  		| done	
 | Interface for items and inventory | 
 | Cleanup code  				|   	
 | Use color graph  				| 		

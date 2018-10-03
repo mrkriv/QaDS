@@ -8,6 +8,13 @@
 class UEdGraphPin;
 class FXmlNode;
 
+FORCEINLINE void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FQuestStageEvent>& tuple);
+FORCEINLINE void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FQuestStageCondition>& tuple);
+FORCEINLINE void operator<<(FXmlWriteNode& node, const FXmlWriteTuple<FStoryTriggerCondition>& tuple);
+FORCEINLINE void operator>>(const FXmlReadNode& node, FQuestStageEvent& value);
+FORCEINLINE void operator>>(const FXmlReadNode& node, FQuestStageCondition& value);
+FORCEINLINE void operator>>(const FXmlReadNode& node, FStoryTriggerCondition& value);
+
 UCLASS()
 class DIALOGSYSTEMEDITOR_API UQuestEdGraphNode : public UQaDSEdGraphNode
 {
@@ -45,6 +52,4 @@ class DIALOGSYSTEMEDITOR_API UQuestRootEdGraphNode : public UQuestEdGraphNode
 public:
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 	virtual void AllocateDefaultPins() override;
-	virtual FXmlWriteNode SaveToXml() const;
-	virtual void LoadInXml(FXmlReadNode* reader, const TMap<FString, UQaDSEdGraphNode*>& nodeById);
 };
