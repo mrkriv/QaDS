@@ -43,7 +43,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
 	TArray<FString> Parameters;
 
-	virtual bool Compile(UQuestAsset* Quest, FString& ErrorMessage, bool& needUpdate);
+	virtual bool Compile(UQuestAsset* Quest, FString& ErrorMessage);
 	virtual UObject* GetObject(UQuestRuntimeNode* QuestNode) const;
 	virtual void Invoke(UQuestRuntimeNode* QuestNode);
 	virtual ~FQuestStageEvent() {}
@@ -61,7 +61,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool InvertCondition;
 
-	virtual bool Compile(UQuestAsset* Quest, FString& ErrorMessage, bool& needUpdate) override;
+	virtual bool Compile(UQuestAsset* Quest, FString& ErrorMessage) override;
 	virtual bool InvokeCheck(UQuestRuntimeNode* QuestNode) const;
 	virtual FString ToString() const override;
 	virtual ~FQuestStageCondition() {}

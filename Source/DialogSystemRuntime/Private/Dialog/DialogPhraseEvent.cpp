@@ -11,7 +11,7 @@
 #include "DialogScript.h"
 #include "DialogPhraseEvent.h"
 
-bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& needUpdate)
+bool FDialogPhraseEvent::Compile(FString& ErrorMessage)
 {
 	if (EventName.IsNone())
 	{
@@ -76,9 +76,6 @@ bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 		params.Add(*PropIt);
 	}
 
-	if(params.Num() != Parameters.Num())
-		needUpdate = true;
-
 	while (params.Num() < Parameters.Num())
 	{
 		Parameters.RemoveAt(Parameters.Num() - 1);
@@ -99,9 +96,9 @@ bool FDialogPhraseEvent::Compile(FString& ErrorMessage, bool& needUpdate)
 	return true;
 }
 
-bool FDialogPhraseCondition::Compile(FString& ErrorMessage, bool& needUpdate)
+bool FDialogPhraseCondition::Compile(FString& ErrorMessage)
 {
-	if (!Super::Compile(ErrorMessage, needUpdate))
+	if (!Super::Compile(ErrorMessage))
 		return false;
 
 	auto func = ObjectClass->ClassDefaultObject->FindFunction(EventName);

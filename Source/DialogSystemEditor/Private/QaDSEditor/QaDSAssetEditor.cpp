@@ -269,6 +269,13 @@ void FQaDSAssetEditor::CompileExecute()
 
 	CompileLogResults.EndEvent();
 	CompilerResultsListing->AddMessages(CompileLogResults.Messages);
+
+
+	auto selected = GraphEditor->GetSelectedNodes();
+	GraphEditor->ClearSelectionSet();
+
+	for (auto n : selected.Array())
+		GraphEditor->SetNodeSelection(Cast<UEdGraphNode>(n), true);
 }
 
 void FQaDSAssetEditor::ResetCompilePhrase(UQaDSEdGraphNode* Node)
@@ -465,7 +472,7 @@ void FQaDSAssetEditor::DeleteSelectedDuplicatableNodes()
 
 	for (FGraphPanelSelectionSet::TConstIterator SelectedIter(OldSelectedNodes); SelectedIter; ++SelectedIter)
 	{
-		UEdGraphNode* Node = Cast<UEdGraphNode>(*SelectedIter);
+		auto Node = Cast<UEdGraphNode>(*SelectedIter);
 
 		if ((Node != NULL) && Node->CanDuplicateNode())
 			GraphEditor->SetNodeSelection(Node, true);
@@ -496,19 +503,6 @@ void FQaDSAssetEditor::OnGraphChanged(const FEdGraphEditAction& Action)
 
 void FQaDSAssetEditor::OnPropertyChanged(const FPropertyChangedEvent& Event)
 {
-	//todo
-	if (Event.MemberProperty->GetFName().ToString() == TEXT("Action") &&
-		Event.Property->GetFName().ToString() == TEXT("EventName") ||
-		Event.MemberProperty->GetFName().ToString() == TEXT("CustomCondition") &&
-		Event.Property->GetFName().ToString() == TEXT("EventName"))
-	{
-		auto selected = GraphEditor->GetSelectedNodes();
-		GraphEditor->ClearSelectionSet();
-
-		for (auto n : selected.Array())
-			GraphEditor->SetNodeSelection(Cast<UEdGraphNode>(n), true);
-	}
-
 	if (GetDefault<UQaDSSettings>()->AutoCompile)
 		CompileExecute();
 }

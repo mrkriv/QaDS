@@ -45,7 +45,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Phrase")
 	TArray<FString> Parameters;
 
-	virtual bool Compile(FString& ErrorMessage, bool& needUpdate);
+	virtual bool Compile(FString& ErrorMessage);
 	virtual UObject* GetObject(class UDialogProcessor* Implementer) const;
 	virtual void Invoke(class UDialogProcessor* Implementer);
 	virtual ~FDialogPhraseEvent() {}
@@ -63,7 +63,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool InvertCondition;
 
-	virtual bool Compile(FString& ErrorMessage, bool& needUpdate) override;
+	virtual bool Compile(FString& ErrorMessage) override;
 	virtual bool InvokeCheck(class UDialogProcessor* Implementer) const;
 	virtual FString ToString() const override;
 	virtual ~FDialogPhraseCondition() {}

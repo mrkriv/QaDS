@@ -178,7 +178,6 @@ FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 		return node->NodeGuid;
 
 	node->SetCompile();
-	bool needUpdate = false;
 
 	FQuestNode questNode;
 	questNode.Stage.UID = node->NodeGuid;
@@ -192,7 +191,7 @@ FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 		FString ErrorMessage;
 		for (auto& Event : questNode.Stage.Action)
 		{
-			if (!Event.Compile(EditedAsset, ErrorMessage, needUpdate))
+			if (!Event.Compile(EditedAsset, ErrorMessage))
 			{
 				CompileLogResults.Error(*(ErrorMessage));
 			}
@@ -200,7 +199,7 @@ FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 
 		for (auto& Condition : questNode.Stage.FailedPredicate)
 		{
-			if (!Condition.Compile(EditedAsset, ErrorMessage, needUpdate))
+			if (!Condition.Compile(EditedAsset, ErrorMessage))
 			{
 				CompileLogResults.Error(*(ErrorMessage));
 			}
@@ -208,7 +207,7 @@ FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 
 		for (auto& Condition : questNode.Stage.WaitPredicate)
 		{
-			if (!Condition.Compile(EditedAsset, ErrorMessage, needUpdate))
+			if (!Condition.Compile(EditedAsset, ErrorMessage))
 			{
 				CompileLogResults.Error(*(ErrorMessage));
 			}
@@ -216,7 +215,7 @@ FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 
 		for (auto& Condition : questNode.Stage.Predicate)
 		{
-			if (!Condition.Compile(EditedAsset, ErrorMessage, needUpdate))
+			if (!Condition.Compile(EditedAsset, ErrorMessage))
 			{
 				CompileLogResults.Error(*(ErrorMessage));
 			}
@@ -234,23 +233,6 @@ FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 		questNode.Childs.Add(Compile(child));
 	}
 
-	if (needUpdate && PropertyEditor.IsValid())
-	{
-		for (auto& obj : PropertyEditor->GetSelectedObjects())
-		{
-			if (obj == node)
-			{
-				auto selected = GraphEditor->GetSelectedNodes();
-				GraphEditor->ClearSelectionSet();
-
-				for (auto n : selected.Array())
-					GraphEditor->SetNodeSelection(Cast<UEdGraphNode>(n), true);
-
-				break;
-			}
-		}
-	}
-	
 	EditedAsset->Nodes.Add(node->NodeGuid, questNode);
 	return node->NodeGuid;
 }

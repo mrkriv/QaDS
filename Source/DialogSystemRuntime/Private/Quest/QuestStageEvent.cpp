@@ -11,7 +11,7 @@
 #include "QuestScript.h"
 #include "QuestStageEvent.h"
 
-bool FQuestStageEvent::Compile(UQuestAsset* Quest, FString& ErrorMessage, bool& needUpdate)
+bool FQuestStageEvent::Compile(UQuestAsset* Quest, FString& ErrorMessage)
 {
 	if (EventName.IsNone())
 	{
@@ -72,9 +72,6 @@ bool FQuestStageEvent::Compile(UQuestAsset* Quest, FString& ErrorMessage, bool& 
 		params.Add(*PropIt);
 	}
 
-	if(params.Num() != Parameters.Num())
-		needUpdate = true;
-
 	while (params.Num() < Parameters.Num())
 	{
 		Parameters.RemoveAt(Parameters.Num() - 1);
@@ -95,9 +92,9 @@ bool FQuestStageEvent::Compile(UQuestAsset* Quest, FString& ErrorMessage, bool& 
 	return true;
 }
 
-bool FQuestStageCondition::Compile(UQuestAsset* Quest, FString& ErrorMessage, bool& needUpdate)
+bool FQuestStageCondition::Compile(UQuestAsset* Quest, FString& ErrorMessage)
 {
-	if (!Super::Compile(Quest, ErrorMessage, needUpdate))
+	if (!Super::Compile(Quest, ErrorMessage))
 		return false;
 
 	auto func = ObjectClass->ClassDefaultObject->FindFunction(EventName);

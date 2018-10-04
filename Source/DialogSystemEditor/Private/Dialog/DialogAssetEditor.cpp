@@ -173,7 +173,6 @@ UDialogNode* FDialogAssetEditor::Compile(UDialogEdGraphNode* node)
 	auto rootNode = Cast<UDialogRootEdGraphNode>(node);
 	auto subGraphNode = Cast<UDialogSubGraphEdGraphNode>(node);
 	auto elseIfNode = Cast<UDialogElseIfEdGraphNode>(node);
-	bool needUpdate = false;
 
 	if (rootNode != NULL)
 	{
@@ -209,7 +208,7 @@ UDialogNode* FDialogAssetEditor::Compile(UDialogEdGraphNode* node)
 		{
 			Event.OwnerNode = compileNode;
 
-			if (!Event.Compile(ErrorMessage, needUpdate))
+			if (!Event.Compile(ErrorMessage))
 			{
 				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + data.Text.ToString() + "\""));
 			}
@@ -219,7 +218,7 @@ UDialogNode* FDialogAssetEditor::Compile(UDialogEdGraphNode* node)
 		{
 			Condition.OwnerNode = compileNode;
 
-			if (!Condition.Compile(ErrorMessage, needUpdate))
+			if (!Condition.Compile(ErrorMessage))
 			{
 				CompileLogResults.Error(*(ErrorMessage + "\tIn node \"" + data.Text.ToString() + "\""));
 			}
@@ -256,24 +255,7 @@ UDialogNode* FDialogAssetEditor::Compile(UDialogEdGraphNode* node)
 		if (dialogPhrase != NULL)
 			node->CompileNode->Childs.Add(Compile(dialogPhrase));
 	}
-
-	if (needUpdate && PropertyEditor.IsValid())
-	{
-		for (auto& obj : PropertyEditor->GetSelectedObjects())
-		{
-			if (obj == node)
-			{
-				auto selected = GraphEditor->GetSelectedNodes();
-				GraphEditor->ClearSelectionSet();
-
-				for (auto n : selected.Array())
-					GraphEditor->SetNodeSelection(Cast<UEdGraphNode>(n), true);
-
-				break;
-			}
-		}
-	}
-
+	
 	return node->CompileNode;
 }
 
