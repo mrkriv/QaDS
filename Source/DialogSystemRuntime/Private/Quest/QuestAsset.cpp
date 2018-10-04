@@ -2,42 +2,53 @@
 #include "QuestProcessor.h"
 #include "QuestAsset.h"
 
-FQuestRuntimeAssetArchive UQuestRuntimeAsset::Save()
+FQuestRuntimeAssetArchive::FQuestRuntimeAssetArchive(UQuestRuntimeAsset* RuntimeAsset)
 {
-	FQuestRuntimeAssetArchive result;
+	AssetName = FSoftObjectPath(RuntimeAsset->Asset).GetAssetPathString();
+	Status = RuntimeAsset->Status;
 
-	result.AssetName = FSoftObjectPath(Asset).GetAssetPathString();
-	result.Status = Status;
+	for (auto node : RuntimeAsset->ActiveNodes)
+		ActiveNodes.Add(node);
 
-	for (auto node : ActiveNodes)
-		result.ActiveNodes.Add(node->Stage.UID);
+	for (auto node : RuntimeAsset->ArchiveNodes)
+		ArchiveNodes.Add(node);
+}
 
-	for (auto node : ArchiveNodes)
-		result.ActiveNodes.Add(node->Stage.UID);
+FQuestRuntimeNodeArchive::FQuestRuntimeNodeArchive(UQuestRuntimeNode* RuntimeNode)
+{
+	UID = RuntimeNode->Stage.UID;
+	Status = RuntimeNode->Status;
+	//Progress = RuntimeNode->GetProgress();
 
-	return result;
+	for (auto& trigger : RuntimeNode->Stage.WaitTriggers)
+	{
+		WaitTriggers.Add(trigger.TotalCount);
+	}
+
+	for (auto& trigger : RuntimeNode->Stage.FailedTriggers)
+	{
+		FailedTriggers.Add(trigger.TotalCount);
+	}
 }
 
 UQuestRuntimeAsset* FQuestRuntimeAssetArchive::Load()
 {
-	auto result = NewObject<UQuestRuntimeAsset>();
+	auto runtimeAsset = NewObject<UQuestRuntimeAsset>();
 
-	result->Asset = TSoftObjectPtr<UQuestAsset>(AssetName).LoadSynchronous();
-	result->Status = Status;
+	runtimeAsset->Asset = TSoftObjectPtr<UQuestAsset>(AssetName).LoadSynchronous();
+	runtimeAsset->Status = Status;
 
-	for (auto uid : ActiveNodes)
+	for (auto ar : ActiveNodes)
 	{
-		auto assetNode = result->Asset->Nodes[uid];
-		result->ActiveNodes.Add(assetNode.Load(result));
+		ar.Load(runtimeAsset);
 	}
 
-	for (auto uid : ArchiveNodes)
+	for (auto ar : ArchiveNodes)
 	{
-		auto assetNode = result->Asset->Nodes[uid];
-		result->ArchiveNodes.Add(assetNode.Load(result));
+		ar.Load(runtimeAsset);
 	}
 
-	return result;
+	return runtimeAsset;
 }
 
 FArchive& operator<<(FArchive& Ar, FQuestRuntimeAssetArchive& A)
@@ -47,4 +58,34 @@ FArchive& operator<<(FArchive& Ar, FQuestRuntimeAssetArchive& A)
 		<< A.ActiveNodes
 		<< A.ArchiveNodes
 		<< A.Status;
+}
+
+UQuestRuntimeNode* FQuestRuntimeNodeArchive::Load(UQuestRuntimeAsset* RuntimeAsset)
+{
+	auto node = RuntimeAsset->Asset->Nodes[UID].Load(RuntimeAsset);
+
+	node->SetStatus(Status);
+	//todo:: node->SetProgress 
+
+	for (auto i = 0; i < WaitTriggers.Num(); i++)
+	{
+		node->Stage.WaitTriggers[i].TotalCount = WaitTriggers[i];
+	}
+
+	for (auto i = 0; i < FailedTriggers.Num(); i++)
+	{
+		node->Stage.FailedTriggers[i].TotalCount = FailedTriggers[i];
+	}
+
+	return node;
+}
+
+FArchive& operator<<(FArchive& Ar, FQuestRuntimeNodeArchive& A)
+{
+	return Ar
+		<< A.UID
+		<< A.Status
+		<< A.Progress
+		<< A.WaitTriggers
+		<< A.FailedTriggers;
 }

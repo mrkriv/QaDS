@@ -40,17 +40,37 @@ public:
 };
 
 USTRUCT(BlueprintType)
+struct DIALOGSYSTEMRUNTIME_API FQuestRuntimeNodeArchive
+{
+	GENERATED_BODY()
+
+	FGuid UID;
+	int Progress;
+	EQuestCompleteStatus Status;
+	TArray<int> WaitTriggers;
+	TArray<int> FailedTriggers;
+
+	FQuestRuntimeNodeArchive() {}
+	FQuestRuntimeNodeArchive(class UQuestRuntimeNode* RuntimeNode);
+
+	class UQuestRuntimeNode* Load(class UQuestRuntimeAsset* Asset);
+	friend FArchive& operator<<(FArchive& Ar, FQuestRuntimeNodeArchive& A);
+};
+
+USTRUCT(BlueprintType)
 struct DIALOGSYSTEMRUNTIME_API FQuestRuntimeAssetArchive
 {
 	GENERATED_BODY()
 
 	FString AssetName;
-	TArray<FGuid> ActiveNodes;
-	TArray<FGuid> ArchiveNodes;
+	TArray<FQuestRuntimeNodeArchive> ActiveNodes;
+	TArray<FQuestRuntimeNodeArchive> ArchiveNodes;
 	EQuestCompleteStatus Status;
 
-	class UQuestRuntimeAsset* Load();
+	FQuestRuntimeAssetArchive() {}
+	FQuestRuntimeAssetArchive(class UQuestRuntimeAsset* RuntimeAsset);
 
+	class UQuestRuntimeAsset* Load();
 	friend FArchive& operator<<(FArchive& Ar, FQuestRuntimeAssetArchive& A);
 };
 
@@ -74,6 +94,4 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UQuestAsset* Asset;
-
-	FQuestRuntimeAssetArchive Save();
 };

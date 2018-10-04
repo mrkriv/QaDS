@@ -167,12 +167,12 @@ FArchive& operator<<(FArchive& Ar, UQuestProcessor& A)
 	{
 		for (auto quest : A.archiveQuests)
 		{
-			archiveQuestsArchive.Add(quest->Save());
+			archiveQuestsArchive.Add(quest);
 		}
 
 		for (auto quest : A.activeQuests)
 		{
-			activeQuestsArchive.Add(quest->Save());
+			activeQuestsArchive.Add(quest);
 		}
 	}
 
