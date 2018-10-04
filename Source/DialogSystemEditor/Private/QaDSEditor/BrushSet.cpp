@@ -7,27 +7,14 @@
 #include "SlateGameResources.h" 
 #include "SlateStyle.h"
 
-TSharedPtr<FSlateStyleSet> FBrushSet::NodeStyleInstance = NULL;
+TSharedPtr<FSlateStyleSet> FBrushSet::Instance = NULL;
 
 void FBrushSet::Register()
 {
-	if (!NodeStyleInstance.IsValid())
-	{
-		NodeStyleInstance = Create();
-		FSlateStyleRegistry::RegisterSlateStyle(*NodeStyleInstance);
-	}
-}
+	if (Instance.IsValid())
+		return;
 
-void FBrushSet::Unregister()
-{
-	FSlateStyleRegistry::UnRegisterSlateStyle(*NodeStyleInstance);
-	ensure(NodeStyleInstance.IsUnique());
-	NodeStyleInstance.Reset();
-}
-
-TSharedRef<FSlateStyleSet> FBrushSet::Create()
-{
-	TSharedPtr<FSlateStyleSet>  StyleSet = MakeShareable(new FSlateStyleSet("DialogSystem"));
+	Instance = MakeShareable(new FSlateStyleSet("DialogSystem"));
 
 	auto dir = FPaths::ConvertRelativePathToFull(IPluginManager::Get().FindPlugin(TEXT("DialogSystem"))->GetBaseDir() / "Resources" / "Icons");
 	auto find_mask = dir / TEXT("*.png");
@@ -35,27 +22,11 @@ TSharedRef<FSlateStyleSet> FBrushSet::Create()
 	TArray<FString> Files;
 	IFileManager::Get().FindFiles(Files, *find_mask, true, false);
 
-#define ImageBrush(Name, Size) new FSlateImageBrush(dir / Name + ".png", FVector2D(Size, Size))
-
-	StyleSet->Set("ClassIcon.DialogAsset", ImageBrush("DialogAsset_16", 16.0f));
-	StyleSet->Set("ClassThumbnail.DialogAsset", ImageBrush("DialogAsset_128", 64.0f));
-
-	StyleSet->Set("ClassIcon.DialogScript", ImageBrush("DialogScript_16", 16.0f));
-	StyleSet->Set("ClassThumbnail.DialogScript", ImageBrush("DialogScript_128", 64.0f));
-
-	StyleSet->Set("ClassIcon.QuestAsset", ImageBrush("QuestAsset_16", 16.0f));
-	StyleSet->Set("ClassThumbnail.QuestAsset", ImageBrush("QuestAsset_128", 64.0f));
-
-	StyleSet->Set("ClassIcon.QuestScript", ImageBrush("QuestScript_16", 16.0f));
-	StyleSet->Set("ClassThumbnail.QuestScript", ImageBrush("QuestScript_128", 64.0f));
-
-#undef ImageBrush
-
 	for (auto file : Files)
 	{
 		auto name = "DialogSystem." + FPaths::GetBaseFilename(file);
 		auto spectator = 0;
-		auto size = FVector2D(24, 24);
+		auto size = 24;
 
 		if (name.FindLastChar('_', spectator))
 		{
@@ -64,15 +35,39 @@ TSharedRef<FSlateStyleSet> FBrushSet::Create()
 
 			if (number > 2 && number < 256)
 			{
-				size.X = number;
-				size.Y = number;
+				size = number;
 			}
 		}
 
-		StyleSet->Set(FName(*name), new FSlateImageBrush(FPaths::Combine(dir, file), size));
+		AddImage(FName(*name), FPaths::Combine(dir , file), size);
 	}
 
-	return StyleSet.ToSharedRef();
+	AddImage("ClassIcon.DialogAsset", dir / "DialogAsset_16.png", 16.0f);
+	AddImage("ClassThumbnail.DialogAsset", dir / "DialogAsset_64.png", 64.0f);
+
+	AddImage("ClassIcon.DialogScript", dir / "DialogScript_16.png", 16.0f);
+	AddImage("ClassThumbnail.DialogScript", dir / "DialogScript_64.png", 64.0f);
+
+	AddImage("ClassIcon.QuestAsset", dir / "QuestAsset_16.png", 16.0f);
+	AddImage("ClassThumbnail.QuestAsset", dir / "QuestAsset_64.png", 64.0f);
+
+	AddImage("ClassIcon.QuestScript", dir / "QuestScript_16.png", 16.0f);
+	AddImage("ClassThumbnail.QuestScript", dir / "QuestScript_64.png", 64.0f);
+
+	FSlateStyleRegistry::RegisterSlateStyle(*Instance);
+}
+
+void FBrushSet::AddImage(FName name, FString file, float size)
+{
+	if (Instance.IsValid())
+		Instance->Set(name, new FSlateImageBrush(file, FVector2D(size, size)));
+}
+
+void FBrushSet::Unregister()
+{
+	FSlateStyleRegistry::UnRegisterSlateStyle(*Instance);
+	ensure(Instance.IsUnique());
+	Instance.Reset();
 }
 
 void FBrushSet::ReloadTextures()
@@ -82,5 +77,5 @@ void FBrushSet::ReloadTextures()
 
 const ISlateStyle& FBrushSet::Get()
 {
-	return *NodeStyleInstance;
+	return *Instance;
 }

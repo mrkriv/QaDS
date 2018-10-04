@@ -15,8 +15,8 @@ public:
 	static void Unregister();
 	static void ReloadTextures();
 	static const ISlateStyle& Get();
+	static void AddImage(FName name, FString file, float size);
 
 private:
-	static TSharedRef<class FSlateStyleSet> Create();
-	static TSharedPtr<class FSlateStyleSet> NodeStyleInstance;
+	static TSharedPtr<class FSlateStyleSet> Instance; 
 };
