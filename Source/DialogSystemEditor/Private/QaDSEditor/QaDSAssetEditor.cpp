@@ -273,7 +273,7 @@ void FQaDSAssetEditor::CompileExecute()
 
 void FQaDSAssetEditor::ResetCompilePhrase(UQaDSEdGraphNode* Node)
 {
-	if (Node->GetCompile() == NULL)
+	if (!Node->IsCompile())
 		return;
 
 	Node->ResetCompile();

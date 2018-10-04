@@ -7,6 +7,7 @@
 
 class UQuestAsset;
 class UQuestRuntimeAsset;
+class UStoryKeyManager;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FQuestStartSignature, UQuestRuntimeAsset*, Quest);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FQuestStageCompleteSignature, UQuestRuntimeAsset*, Quest, FQuestStageInfo, Stage);
@@ -54,4 +55,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
 	void Reset();
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
+	TArray<uint8> SaveToBinary();
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
+	void LoadFromBinary(const TArray<uint8>& Data);
+
+	friend FArchive& operator<<(FArchive& Ar, UQuestProcessor& A);
 };

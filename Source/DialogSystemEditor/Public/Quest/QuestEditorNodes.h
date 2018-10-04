@@ -16,25 +16,11 @@ FORCEINLINE void operator>>(const FXmlReadNode& node, FQuestStageCondition& valu
 FORCEINLINE void operator>>(const FXmlReadNode& node, FStoryTriggerCondition& value);
 
 UCLASS()
-class DIALOGSYSTEMEDITOR_API UQuestEdGraphNode : public UQaDSEdGraphNode
+class DIALOGSYSTEMEDITOR_API UQuestStageEdGraphNode : public UQaDSEdGraphNode
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
-	UQuestNode* CompileNode;
-
-	virtual UObject* GetCompile() override { return CompileNode; }
-	virtual void ResetCompile() override { CompileNode = NULL; }
-};
-
-UCLASS()
-class DIALOGSYSTEMEDITOR_API UQuestStageEdGraphNode : public UQuestEdGraphNode
-{
-	GENERATED_BODY()
-
-public:
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FQuestStageInfo Stage;
 
@@ -45,7 +31,7 @@ public:
 };
 
 UCLASS()
-class DIALOGSYSTEMEDITOR_API UQuestRootEdGraphNode : public UQuestEdGraphNode
+class DIALOGSYSTEMEDITOR_API UQuestRootEdGraphNode : public UQaDSEdGraphNode
 {
 	GENERATED_BODY()
 

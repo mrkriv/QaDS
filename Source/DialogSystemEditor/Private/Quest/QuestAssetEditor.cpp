@@ -135,7 +135,7 @@ void FQuestAssetEditor::BuildToolbar(FToolBarBuilder &builder)
 	FPlayWorldCommands::BuildToolbar(builder);
 }
 
-UQuestEdGraphNode* FQuestAssetEditor::GetRootNode()
+UQuestRootEdGraphNode* FQuestAssetEditor::GetRootNode()
 {
 	for (auto node : GraphEditor->GetCurrentGraph()->Nodes)
 	{
@@ -157,21 +157,6 @@ UEdGraph* FQuestAssetEditor::CreateGraphFromAsset()
 	return CustGraph;
 }
 
-void FQuestAssetEditor::ResetCompilePhrase(UQuestEdGraphNode* Node)
-{
-	if (Node->CompileNode == NULL)
-		return;
-
-	Node->CompileNode = NULL;
-
-	for (auto& child : Node->GetChildNodes())
-	{
-		auto childPhrase = Cast<UQuestEdGraphNode>(child);
-		if (childPhrase)
-			ResetCompilePhrase(childPhrase);
-	}
-}
-
 void FQuestAssetEditor::Compile()
 {
 	auto rootNode = GetRootNode();
@@ -182,34 +167,30 @@ void FQuestAssetEditor::Compile()
 	}
 
 	ResetCompilePhrase(rootNode);
+
+	EditedAsset->Nodes.Reset();
 	EditedAsset->RootNode = Compile(rootNode);
 }
 
-UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
+FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 {
-	if (node->CompileNode != NULL)
-		return node->CompileNode;
+	if (node->IsCompile())
+		return node->NodeGuid;
 
-	auto stageNode = Cast<UQuestStageEdGraphNode>(node);
-	auto rootNode = Cast<UQuestRootEdGraphNode>(node);
+	node->SetCompile();
 	bool needUpdate = false;
 
-	if (rootNode != NULL)
-	{
-		node->CompileNode = NewObject<UQuestNode>(EditedAsset);
-		node->CompileNode->Stage.UID = node->NodeGuid;
-	}
-	else if (stageNode != NULL)
-	{
-		auto compileNode = NewObject<UQuestNode>((UObject*)EditedAsset);
-		node->CompileNode = compileNode;
+	FQuestNode questNode;
+	questNode.Stage.UID = node->NodeGuid;
 
-		compileNode->Stage = stageNode->Stage;
-		compileNode->Stage.UID = node->NodeGuid;
+	auto stageNode = Cast<UQuestStageEdGraphNode>(node);
+	if (stageNode != NULL)
+	{
+		stageNode->Stage.UID = node->NodeGuid;
+		questNode.Stage = stageNode->Stage;
 
 		FString ErrorMessage;
-
-		for (auto& Event : compileNode->Stage.Action)
+		for (auto& Event : questNode.Stage.Action)
 		{
 			if (!Event.Compile(EditedAsset, ErrorMessage, needUpdate))
 			{
@@ -217,7 +198,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 			}
 		}
 
-		for (auto& Condition : compileNode->Stage.FailedPredicate)
+		for (auto& Condition : questNode.Stage.FailedPredicate)
 		{
 			if (!Condition.Compile(EditedAsset, ErrorMessage, needUpdate))
 			{
@@ -225,7 +206,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 			}
 		}
 
-		for (auto& Condition : compileNode->Stage.WaitPredicate)
+		for (auto& Condition : questNode.Stage.WaitPredicate)
 		{
 			if (!Condition.Compile(EditedAsset, ErrorMessage, needUpdate))
 			{
@@ -233,7 +214,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 			}
 		}
 
-		for (auto& Condition : compileNode->Stage.Predicate)
+		for (auto& Condition : questNode.Stage.Predicate)
 		{
 			if (!Condition.Compile(EditedAsset, ErrorMessage, needUpdate))
 			{
@@ -250,9 +231,7 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 
 	for (auto& child : childs)
 	{
-		auto questNode = Cast<UQuestEdGraphNode>(child);
-		if (questNode != NULL)
-			node->CompileNode->Childs.Add(Compile(questNode));
+		questNode.Childs.Add(Compile(child));
 	}
 
 	if (needUpdate && PropertyEditor.IsValid())
@@ -271,8 +250,9 @@ UQuestNode* FQuestAssetEditor::Compile(UQuestEdGraphNode* node)
 			}
 		}
 	}
-
-	return node->CompileNode;
+	
+	EditedAsset->Nodes.Add(node->NodeGuid, questNode);
+	return node->NodeGuid;
 }
 
 

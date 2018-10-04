@@ -6,30 +6,30 @@
 
 TArray<UQuestRuntimeNode*> UQuestRuntimeNode::GetNextStage()
 {
-	if (Childs.Num() == 0)
+	if (childCahe.Num() == 0)
 	{
-		for (auto child : BaseQuestNode->Childs)
+		for (auto child : Childs)
 		{
-			Childs.Add(child->Load(Processor, OwnerQuest));
+			auto node = OwnerQuest->Asset->Nodes[child].Load(OwnerQuest);
+			childCahe.Add(node);
 		}
 	}
 
-	return Childs.FilterByPredicate([=](UQuestRuntimeNode* node)
+	return childCahe.FilterByPredicate([=](UQuestRuntimeNode* node)
 	{
 		return node->CkeckForActivate();
 	});
 }
 
-UQuestRuntimeNode* UQuestNode::Load(UQuestProcessor* processor, UQuestRuntimeAsset* quest)
+UQuestRuntimeNode* FQuestNode::Load(UQuestRuntimeAsset* quest)
 {
 	check(quest);
-	check(processor);
 
 	auto runtimeStage = NewObject<UQuestRuntimeNode>();
-	runtimeStage->Processor = processor;
+	runtimeStage->Processor = UQuestProcessor::GetQuestProcessor();
 	runtimeStage->OwnerQuest = quest;
+	runtimeStage->Childs = Childs;
 	runtimeStage->Stage = Stage;
-	runtimeStage->BaseQuestNode = this;
 
 	return runtimeStage;
 }

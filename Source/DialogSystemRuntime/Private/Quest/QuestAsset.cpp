@@ -2,16 +2,49 @@
 #include "QuestProcessor.h"
 #include "QuestAsset.h"
 
-UQuestRuntimeAsset* UQuestAsset::Load(UQuestProcessor* processor)
+FQuestRuntimeAssetArchive UQuestRuntimeAsset::Save()
 {
-	check(processor);
-	check(RootNode);
+	FQuestRuntimeAssetArchive result;
 
-	auto runtime = NewObject<UQuestRuntimeAsset>();
+	result.AssetName = FSoftObjectPath(Asset).GetAssetPathString();
+	result.Status = Status;
 
-	runtime->RootNode = RootNode->Load(processor, runtime);
-	// todo:: create runtime->QuestScript
-	runtime->Asset = this;
+	for (auto node : ActiveNodes)
+		result.ActiveNodes.Add(node->Stage.UID);
 
-	return runtime;
+	for (auto node : ArchiveNodes)
+		result.ActiveNodes.Add(node->Stage.UID);
+
+	return result;
+}
+
+UQuestRuntimeAsset* FQuestRuntimeAssetArchive::Load()
+{
+	auto result = NewObject<UQuestRuntimeAsset>();
+
+	result->Asset = TSoftObjectPtr<UQuestAsset>(AssetName).LoadSynchronous();
+	result->Status = Status;
+
+	for (auto uid : ActiveNodes)
+	{
+		auto assetNode = result->Asset->Nodes[uid];
+		result->ActiveNodes.Add(assetNode.Load(result));
+	}
+
+	for (auto uid : ArchiveNodes)
+	{
+		auto assetNode = result->Asset->Nodes[uid];
+		result->ArchiveNodes.Add(assetNode.Load(result));
+	}
+
+	return result;
+}
+
+FArchive& operator<<(FArchive& Ar, FQuestRuntimeAssetArchive& A)
+{
+	return Ar
+		<< A.AssetName
+		<< A.ActiveNodes
+		<< A.ArchiveNodes
+		<< A.Status;
 }

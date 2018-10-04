@@ -1,23 +1,13 @@
 #pragma once
 
 #include "Engine/DataAsset.h"
+#include "QuestNode.h"
 #include "QuestAsset.generated.h"
 
-class UQuestNode;
 class UQuestRuntimeNode;
 class AQuestScript;
 class UQuestRuntimeAsset;
 class UQuestProcessor;
-
-UENUM(BlueprintType)
-enum class EQuestCompleteStatus : uint8
-{
-	None,
-	Active,
-	Failed,
-	Completed,
-	Skiped
-};
 
 UCLASS(Blueprintable)
 class DIALOGSYSTEMRUNTIME_API UQuestAsset : public UDataAsset
@@ -35,7 +25,10 @@ public:
 	bool bIsSingltone = true;
 	
 	UPROPERTY()
-	UQuestNode* RootNode;
+	FGuid RootNode;
+
+	UPROPERTY()
+	TMap<FGuid, FQuestNode> Nodes;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "QuestScript"))
 	TAssetSubclassOf<AQuestScript> QuestScriptClass;
@@ -44,22 +37,32 @@ public:
 	UPROPERTY()
 	class UEdGraph* UpdateGraph;
 #endif	// WITH_EDITORONLY_DATA
+};
 
-	UQuestRuntimeAsset* Load(UQuestProcessor* processor);
+USTRUCT(BlueprintType)
+struct DIALOGSYSTEMRUNTIME_API FQuestRuntimeAssetArchive
+{
+	GENERATED_BODY()
+
+	FString AssetName;
+	TArray<FGuid> ActiveNodes;
+	TArray<FGuid> ArchiveNodes;
+	EQuestCompleteStatus Status;
+
+	class UQuestRuntimeAsset* Load();
+
+	friend FArchive& operator<<(FArchive& Ar, FQuestRuntimeAssetArchive& A);
 };
 
 UCLASS(Blueprintable)
-class DIALOGSYSTEMRUNTIME_API UQuestRuntimeAsset : public UDataAsset
+class DIALOGSYSTEMRUNTIME_API UQuestRuntimeAsset : public UObject
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(BlueprintReadOnly)
 	EQuestCompleteStatus Status;
-
-	UPROPERTY()
-	UQuestRuntimeNode* RootNode;
-
+	
 	UPROPERTY(BlueprintReadOnly)
 	TArray<UQuestRuntimeNode*> ArchiveNodes;
 
@@ -71,4 +74,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UQuestAsset* Asset;
+
+	FQuestRuntimeAssetArchive Save();
 };

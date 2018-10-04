@@ -1,11 +1,18 @@
 #pragma once
 
 #include "QuestStageEvent.h"
-#include "QuestAsset.h"
 #include "StoryTriggerManager.h"
 #include "QuestNode.generated.h"
 
-class UQuestProcessor;
+UENUM(BlueprintType)
+enum class EQuestCompleteStatus : uint8
+{
+	None,
+	Active,
+	Failed,
+	Completed,
+	Skiped
+};
 
 USTRUCT(BlueprintType)
 struct DIALOGSYSTEMRUNTIME_API FStoryTriggerCondition
@@ -30,6 +37,9 @@ USTRUCT(BlueprintType)
 struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
 {
 	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Stage")
+	FGuid UID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
 	FText Caption;
@@ -95,25 +105,26 @@ struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
 	EQuestCompleteStatus ChangeOderActiveStagesState;
 };
 
-UCLASS()
-class DIALOGSYSTEMRUNTIME_API UQuestNode : public UObject
+USTRUCT(BlueprintType)
+struct DIALOGSYSTEMRUNTIME_API FQuestNode
 {
 	GENERATED_BODY()
 
-public:
 	UPROPERTY()
-	TArray<UQuestNode*> Childs;
+	TArray<FGuid> Childs;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FQuestStageInfo Stage;
 
-	UQuestRuntimeNode* Load(UQuestProcessor* processor, UQuestRuntimeAsset* quest);
+	class UQuestRuntimeNode* Load(class UQuestRuntimeAsset* quest);
 };
 
 UCLASS()
 class DIALOGSYSTEMRUNTIME_API UQuestRuntimeNode : public UObject
 {
 	GENERATED_BODY()
+
+	TArray<UQuestRuntimeNode*> childCahe;
 
 	void Activate();
 	void Failed();
@@ -129,16 +140,13 @@ class DIALOGSYSTEMRUNTIME_API UQuestRuntimeNode : public UObject
 
 public:
 	UPROPERTY()
-	UQuestProcessor* Processor;
+	class UQuestProcessor* Processor;
 
 	UPROPERTY()
-	UQuestRuntimeAsset* OwnerQuest;
+	class UQuestRuntimeAsset* OwnerQuest;
 
 	UPROPERTY()
-	UQuestNode* BaseQuestNode;
-
-	UPROPERTY()
-	TArray<UQuestRuntimeNode*> Childs;
+	TArray<FGuid> Childs;
 
 	UPROPERTY(BlueprintReadOnly)
 	EQuestCompleteStatus Status;

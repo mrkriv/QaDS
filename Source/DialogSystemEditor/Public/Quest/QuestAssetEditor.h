@@ -17,11 +17,10 @@ protected:
 	FName GetEditorName() const override;
 
 	UEdGraph* CreateGraphFromAsset();
-	UQuestEdGraphNode* GetRootNode();
+	UQuestRootEdGraphNode* GetRootNode();
 
 	void Compile() override;
-	void ResetCompilePhrase(UQuestEdGraphNode* Node);
-	UQuestNode* Compile(UQuestEdGraphNode* Node);
+	FGuid Compile(UQaDSEdGraphNode* Node);
 };
 
 struct DIALOGSYSTEMEDITOR_API FQuestCommands : public TCommands<FQuestCommands>

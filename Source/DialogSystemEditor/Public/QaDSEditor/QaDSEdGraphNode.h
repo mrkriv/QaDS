@@ -20,10 +20,13 @@ class DIALOGSYSTEMEDITOR_API UQaDSEdGraphNode : public UEdGraphNode
 
 public:
 	TSharedPtr<FNodePropertyObserver> PropertyObserver;
+	bool bIsCompile;
 
-	virtual UObject* GetCompile() { return NULL; } // todo:: remove this
+	virtual bool IsCompile() { return bIsCompile; }
+	virtual void ResetCompile() { bIsCompile = false; }
+	virtual void SetCompile() { bIsCompile = true; }
+
 	//virtual UQaDSEdGraphNode* Compile(UQaDSEdGraphNode* owner) {} //todo:: compile in virtual methods
-	virtual void ResetCompile() {}
 	virtual int GetOrder() const;
 	TArray<UQaDSEdGraphNode*> GetChildNodes() const;
 

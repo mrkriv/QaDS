@@ -6,6 +6,8 @@
 #include "QuestProcessor.h"
 #include "StoryInformationManager.h"
 #include "StoryTriggerManager.h"
+#include "Serialization/MemoryWriter.h"
+#include "Serialization/MemoryReader.h"
 
 UQuestProcessor* UQuestProcessor::GetQuestProcessor()
 {
@@ -41,27 +43,17 @@ void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 			}
 		}
 	}
-
-	if (quest->RootNode == NULL)
-	{
-		UE_LOG(DialogModuleLog, Error, TEXT("Failed start new quest: not found root node in %s"), *QuestAsset.GetAssetName());
-		return;
-	}
-
-	auto runtimeQuest = quest->Load(this);
-	runtimeQuest->Status = EQuestCompleteStatus::Active;
-
-	auto stages = runtimeQuest->RootNode->GetNextStage();
-	if (stages.Num() == 0)
-	{
-		UE_LOG(DialogModuleLog, Error, TEXT("Failed start new quest: not found valid stage in %s"), *QuestAsset.GetAssetName());
-		return;
-	}
 	
+	auto runtimeQuest = NewObject<UQuestRuntimeAsset>();
+	runtimeQuest->Status = EQuestCompleteStatus::Active;
+	// todo:: create runtime->QuestScript
+	runtimeQuest->Asset = quest;
+
 	activeQuests.Add(runtimeQuest);
 	OnQuestStart.Broadcast(runtimeQuest);
 
-	WaitStage(runtimeQuest->RootNode);
+	auto root = quest->Nodes[quest->RootNode].Load(runtimeQuest);
+	WaitStage(root);
 }
 
 void UQuestProcessor::WaitStage(UQuestRuntimeNode* StageNode)
@@ -164,4 +156,58 @@ void UQuestProcessor::Reset()
 	activeQuests.Reset();
 
 	bIsResetBegin = false;
+}
+
+FArchive& operator<<(FArchive& Ar, UQuestProcessor& A)
+{
+	TArray<FQuestRuntimeAssetArchive> archiveQuestsArchive;
+	TArray<FQuestRuntimeAssetArchive> activeQuestsArchive;
+
+	if (Ar.IsSaving())
+	{
+		for (auto quest : A.archiveQuests)
+		{
+			archiveQuestsArchive.Add(quest->Save());
+		}
+
+		for (auto quest : A.activeQuests)
+		{
+			activeQuestsArchive.Add(quest->Save());
+		}
+	}
+
+	Ar << archiveQuestsArchive << activeQuestsArchive;
+
+	if (Ar.IsLoading())
+	{
+		A.archiveQuests.Reset();
+		A.activeQuests.Reset();
+
+		for (auto& archive : archiveQuestsArchive)
+		{
+			A.archiveQuests.Add(archive.Load());
+		}
+
+		for (auto& archive : activeQuestsArchive)
+		{
+			A.activeQuests.Add(archive.Load());
+		}
+	}
+
+	return Ar;
+}
+
+TArray<uint8> UQuestProcessor::SaveToBinary()
+{
+	TArray<uint8> result;
+	FMemoryWriter writter(result);
+	writter << *this;
+
+	return result;
+}
+
+void UQuestProcessor::LoadFromBinary(const TArray<uint8>& Data)
+{
+	FMemoryReader reader(Data);
+	reader << *this;
 }
