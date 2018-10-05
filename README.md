@@ -17,6 +17,8 @@ Supported version is 4.20
 
 ### Example
 
+[Example project](https://github.com/mrkriv/ExampleQaDS/tree/master)
+
 ![In game](https://raw.githubusercontent.com/mrkriv/QaDS/master/docs/images/DialogExample.png)
 ![In game](https://raw.githubusercontent.com/mrkriv/QaDS/master/docs/images/QuestList.png)
 
