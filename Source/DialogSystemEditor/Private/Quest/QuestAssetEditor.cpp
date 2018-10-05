@@ -36,11 +36,6 @@ FName FQuestAssetEditor::GetEditorName() const
 	return TEXT("Quest"); 
 }
 
-UObject* FQuestAssetEditor::GetEditedAsset() const
-{
-	return EditedAsset;
-}
-
 void FQuestAssetEditor::InitQuestAssetEditor(const EToolkitMode::Type Mode, const TSharedPtr< class IToolkitHost >& InitToolkitHost, UQuestAsset* Object)
 {
 	FAssetEditorManager::Get().CloseOtherEditors(Object, this);
@@ -51,53 +46,6 @@ void FQuestAssetEditor::InitQuestAssetEditor(const EToolkitMode::Type Mode, cons
 	
 	GraphEditor = CreateGraphEditorWidget(EditedAsset->UpdateGraph);
 	EdGraph = EditedAsset->UpdateGraph;
-
-	const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout("QuestEditor_Layout")
-		->AddArea
-		(
-			FTabManager::NewPrimaryArea()
-			->SetOrientation(Orient_Vertical)
-			->Split
-			(
-				FTabManager::NewStack()
-				->SetSizeCoefficient(0.1f)
-				->SetHideTabWell(true)
-				->AddTab(GetToolbarTabId(), ETabState::OpenedTab)
-			)
-			->Split
-			(
-				FTabManager::NewSplitter()
-				->SetOrientation(Orient_Horizontal)
-				->SetSizeCoefficient(0.9f)
-				->Split
-				(
-					FTabManager::NewSplitter()
-					->SetOrientation(Orient_Vertical)
-					->SetSizeCoefficient(0.3f)
-					->Split
-					(
-						FTabManager::NewStack()
-						->SetSizeCoefficient(0.75f)
-						->SetHideTabWell(false)
-						->AddTab(FQaDSAssetEditorTabs::DetailsID, ETabState::OpenedTab)
-					)
-					->Split
-					(
-						FTabManager::NewStack()
-						->SetSizeCoefficient(0.25f)
-						->SetHideTabWell(false)
-						->AddTab(FQaDSAssetEditorTabs::CompilerResultsID, ETabState::ClosedTab)
-					)
-				)
-				->Split
-				(
-					FTabManager::NewStack()
-					->SetSizeCoefficient(0.7f)
-					->SetHideTabWell(false)
-					->AddTab(FQaDSAssetEditorTabs::GraphEditorID, ETabState::OpenedTab)
-				)
-			)
-		);
 
 	ToolkitCommands = MakeShareable(new FUICommandList);
 	ToolkitCommands->Append(FPlayWorldCommands::GlobalPlayWorldActions.ToSharedRef());
@@ -110,7 +58,7 @@ void FQuestAssetEditor::InitQuestAssetEditor(const EToolkitMode::Type Mode, cons
 	ToolbarExtender->AddToolBarExtension("Asset", EExtensionHook::After, ToolkitCommands, FToolBarExtensionDelegate::CreateRaw(this, &FQuestAssetEditor::BuildToolbar));
 	AddToolbarExtender(ToolbarExtender);
 
-	InitAssetEditor(Mode, InitToolkitHost, QuestEditorAppName, StandaloneDefaultLayout, true, true, Object);
+	InitAssetEditor(Mode, InitToolkitHost, QuestEditorAppName, GetDefaultLayout(), true, true, Object);
 
 	OnGraphChangedDelegateHandle = GraphEditor->GetCurrentGraph()->AddOnGraphChangedHandler(FOnGraphChanged::FDelegate::CreateRaw(this, &FQuestAssetEditor::OnGraphChanged));
 	bGraphStateChanged = true;
@@ -127,7 +75,7 @@ void FQuestAssetEditor::BuildToolbar(FToolBarBuilder &builder)
 	builder.AddToolBarButton(FQuestCommands::Get().Compile, NAME_None, FText::FromString("Compile"), FText::FromString("Compile this Quest"), iconCompile, NAME_None);
 	//builder.AddSeparator(); 
 	//builder.AddToolBarButton(FQuestCommands::Get().Find, NAME_None, FText::FromString("Find"), FText::FromString("Open find Quest"), iconFind, NAME_None);
-	//builder.AddSeparator(); 
+	builder.AddSeparator(); 
 	builder.AddToolBarButton(FQuestCommands::Get().Export, NAME_None, FText::FromString("Export"), FText::FromString("Export graph to file"), iconImport, NAME_None);
 	builder.AddToolBarButton(FQuestCommands::Get().Import, NAME_None, FText::FromString("Import"), FText::FromString("Imoprt graph from file"), iconExport, NAME_None);
 	builder.AddSeparator();
@@ -179,17 +127,17 @@ FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 
 	node->SetCompile();
 
-	FQuestNode questNode;
-	questNode.Stage.UID = node->NodeGuid;
+	FQuestStageInfo stage;
+	stage.UID = node->NodeGuid;
 
 	auto stageNode = Cast<UQuestStageEdGraphNode>(node);
 	if (stageNode != NULL)
 	{
 		stageNode->Stage.UID = node->NodeGuid;
-		questNode.Stage = stageNode->Stage;
+		stage = stageNode->Stage;
 
 		FString ErrorMessage;
-		for (auto& Event : questNode.Stage.Action)
+		for (auto& Event : stage.Action)
 		{
 			if (!Event.Compile(EditedAsset, ErrorMessage))
 			{
@@ -197,7 +145,7 @@ FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 			}
 		}
 
-		for (auto& Condition : questNode.Stage.FailedPredicate)
+		for (auto& Condition : stage.FailedPredicate)
 		{
 			if (!Condition.Compile(EditedAsset, ErrorMessage))
 			{
@@ -205,7 +153,7 @@ FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 			}
 		}
 
-		for (auto& Condition : questNode.Stage.WaitPredicate)
+		for (auto& Condition : stage.WaitPredicate)
 		{
 			if (!Condition.Compile(EditedAsset, ErrorMessage))
 			{
@@ -213,7 +161,7 @@ FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 			}
 		}
 
-		for (auto& Condition : questNode.Stage.Predicate)
+		for (auto& Condition : stage.Predicate)
 		{
 			if (!Condition.Compile(EditedAsset, ErrorMessage))
 			{
@@ -228,12 +176,15 @@ FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 		return a.GetOrder() < b.GetOrder();
 	});
 
+	TArray<FGuid> joins;
 	for (auto& child : childs)
 	{
-		questNode.Childs.Add(Compile(child));
+		joins.Add(Compile(child));
 	}
 
-	EditedAsset->Nodes.Add(node->NodeGuid, questNode);
+	EditedAsset->Nodes.Add(node->NodeGuid, stage);
+	EditedAsset->Joins.Add(node->NodeGuid, joins);
+
 	return node->NodeGuid;
 }
 

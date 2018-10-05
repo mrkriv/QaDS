@@ -68,6 +68,7 @@ protected:
 	TSharedRef<SDockTab> SpawnTab_Viewport(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnTab_CompilerResults(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& Args);
+	TSharedRef<FTabManager::FLayout> GetDefaultLayout();
 
 	void OnGraphChanged(const FEdGraphEditAction& Action);
 	void OnPropertyChanged(const FPropertyChangedEvent& Event);
@@ -92,5 +93,4 @@ protected:
 	void ResetCompilePhrase(UQaDSEdGraphNode* Node);
 
 	virtual void Compile() = 0;
-	virtual UObject* GetEditedAsset() const = 0;
 };

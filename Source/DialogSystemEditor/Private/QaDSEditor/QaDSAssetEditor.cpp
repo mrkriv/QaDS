@@ -31,6 +31,56 @@ const FName FQaDSAssetEditorTabs::DetailsID(TEXT("Details"));
 const FName FQaDSAssetEditorTabs::GraphEditorID(TEXT("Viewport"));
 const FName FQaDSAssetEditorTabs::CompilerResultsID(TEXT("CompilerResults"));
 
+TSharedRef<FTabManager::FLayout> FQaDSAssetEditor::GetDefaultLayout()
+{
+	return FTabManager::NewLayout(*(GetEditorName().ToString() + "Editor_Layout"))
+		->AddArea
+		(
+			FTabManager::NewPrimaryArea()
+			->SetOrientation(Orient_Vertical)
+			->Split
+			(
+				FTabManager::NewStack()
+				->SetSizeCoefficient(0.1f)
+				->SetHideTabWell(true)
+				->AddTab(GetToolbarTabId(), ETabState::OpenedTab)
+			)
+			->Split
+			(
+				FTabManager::NewSplitter()
+				->SetOrientation(Orient_Horizontal)
+				->SetSizeCoefficient(0.9f)
+				->Split
+				(
+					FTabManager::NewSplitter()
+					->SetOrientation(Orient_Vertical)
+					->SetSizeCoefficient(0.3f)
+					->Split
+					(
+						FTabManager::NewStack()
+						->SetSizeCoefficient(0.75f)
+						->SetHideTabWell(false)
+						->AddTab(FQaDSAssetEditorTabs::DetailsID, ETabState::OpenedTab)
+					)
+					->Split
+					(
+						FTabManager::NewStack()
+						->SetSizeCoefficient(0.25f)
+						->SetHideTabWell(false)
+						->AddTab(FQaDSAssetEditorTabs::CompilerResultsID, ETabState::ClosedTab)
+					)
+				)
+				->Split
+				(
+					FTabManager::NewStack()
+					->SetSizeCoefficient(0.7f)
+					->SetHideTabWell(false)
+					->AddTab(FQaDSAssetEditorTabs::GraphEditorID, ETabState::OpenedTab)
+				)
+			)
+		);
+}
+
 void FQaDSAssetEditor::RegisterTabSpawners(const TSharedRef<FTabManager>& InTabManager)
 {
 	WorkspaceMenuCategory = InTabManager->AddLocalWorkspaceMenuCategory(FText::FromString(GetEditorName().ToString() + " Editor"));
@@ -165,7 +215,7 @@ void FQaDSAssetEditor::OnSelectedNodesChanged(const TSet<UObject*>& NewSelection
 	}
 
 	if(SelectedObjects.Num() == 0)
-		SelectedObjects.Add(GetEditedAsset());
+		SelectedObjects.Add(EditedAsset);
 
 	if(PropertyEditor.IsValid())
 		PropertyEditor->SetObjects(SelectedObjects);
@@ -389,7 +439,7 @@ void FQaDSAssetEditor::PasteNodesHere(const FVector2D& Location)
 	FString TextToImport;
 	FPlatformApplicationMisc::ClipboardPaste(TextToImport);
 
-	if (GetEditedAsset() == NULL)
+	if (EditedAsset == NULL)
 		return;
 
 	TSet<UEdGraphNode*> PastedNodes;

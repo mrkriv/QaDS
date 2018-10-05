@@ -37,11 +37,6 @@ FName FDialogAssetEditor::GetEditorName() const
 	return TEXT("Dialog"); 
 }
 
-UObject* FDialogAssetEditor::GetEditedAsset() const
-{
-	return EditedAsset;
-}
-
 void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, const TSharedPtr< class IToolkitHost >& InitToolkitHost, UDialogAsset* Object)
 {
 	FAssetEditorManager::Get().CloseOtherEditors(Object, this);
@@ -52,46 +47,6 @@ void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, co
 	
 	GraphEditor = CreateGraphEditorWidget(EditedAsset->UpdateGraph);
 	EdGraph = EditedAsset->UpdateGraph;
-
-	const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout("DialogEditor_Layout")
-		->AddArea
-		(
-			FTabManager::NewPrimaryArea()
-			->SetOrientation(Orient_Vertical)
-			->Split
-			(
-				FTabManager::NewStack()
-				->SetSizeCoefficient(0.1f)
-				->SetHideTabWell(true)
-				->AddTab(GetToolbarTabId(), ETabState::OpenedTab)
-			)
-			->Split
-			(
-				FTabManager::NewSplitter()
-				->SetOrientation(Orient_Horizontal)
-				->SetSizeCoefficient(0.8f)
-				->Split
-				(
-					FTabManager::NewStack()
-					->SetSizeCoefficient(0.8f)
-					->SetHideTabWell(false)
-					->AddTab(FQaDSAssetEditorTabs::GraphEditorID, ETabState::OpenedTab)
-				)
-				->Split
-				(
-					FTabManager::NewStack()
-					->SetSizeCoefficient(0.2f)
-					->SetHideTabWell(false)
-					->AddTab(FQaDSAssetEditorTabs::DetailsID, ETabState::OpenedTab)
-				)
-			)
-			->Split
-			(
-				FTabManager::NewStack()
-				->SetSizeCoefficient(0.1f)
-				->AddTab(FQaDSAssetEditorTabs::CompilerResultsID, ETabState::ClosedTab)
-			)
-		);
 
 	ToolkitCommands = MakeShareable(new FUICommandList);
 	ToolkitCommands->Append(FPlayWorldCommands::GlobalPlayWorldActions.ToSharedRef());
@@ -104,7 +59,7 @@ void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, co
 	ToolbarExtender->AddToolBarExtension("Asset", EExtensionHook::After, ToolkitCommands, FToolBarExtensionDelegate::CreateRaw(this, &FDialogAssetEditor::BuildToolbar));
 	AddToolbarExtender(ToolbarExtender);
 
-	InitAssetEditor(Mode, InitToolkitHost, DialogEditorAppName, StandaloneDefaultLayout, true, true, Object);
+	InitAssetEditor(Mode, InitToolkitHost, DialogEditorAppName, GetDefaultLayout(), true, true, Object);
 
 	OnGraphChangedDelegateHandle = GraphEditor->GetCurrentGraph()->AddOnGraphChangedHandler(FOnGraphChanged::FDelegate::CreateRaw(this, &FDialogAssetEditor::OnGraphChanged));
 	bGraphStateChanged = true;

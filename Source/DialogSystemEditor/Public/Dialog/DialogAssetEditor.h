@@ -17,7 +17,6 @@ public:
 	void BuildToolbar(FToolBarBuilder &builder);
 
 protected:
-	UObject* GetEditedAsset() const override;
 	FName GetEditorName() const override;
 
 	UEdGraph* CreateGraphFromAsset();
