@@ -10,8 +10,7 @@ TArray<UQuestRuntimeNode*> UQuestRuntimeNode::GetNextStage()
 	{
 		for (auto child : Childs)
 		{
-			auto node = OwnerQuest->Asset->Nodes[child].Load(OwnerQuest);
-			childCahe.Add(node);
+			childCahe.Add(OwnerQuest->LoadNode(child));
 		}
 	}
 
@@ -19,19 +18,6 @@ TArray<UQuestRuntimeNode*> UQuestRuntimeNode::GetNextStage()
 	{
 		return node->CkeckForActivate();
 	});
-}
-
-UQuestRuntimeNode* FQuestNode::Load(UQuestRuntimeAsset* quest)
-{
-	check(quest);
-
-	auto runtimeStage = NewObject<UQuestRuntimeNode>();
-	runtimeStage->Processor = UQuestProcessor::GetQuestProcessor();
-	runtimeStage->OwnerQuest = quest;
-	runtimeStage->Childs = Childs;
-	runtimeStage->Stage = Stage;
-
-	return runtimeStage;
 }
 
 void UQuestRuntimeNode::OnChangeStoryKey(const FName& key)

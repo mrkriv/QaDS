@@ -105,20 +105,6 @@ struct DIALOGSYSTEMRUNTIME_API FQuestStageInfo
 	EQuestCompleteStatus ChangeOderActiveStagesState;
 };
 
-USTRUCT(BlueprintType)
-struct DIALOGSYSTEMRUNTIME_API FQuestNode
-{
-	GENERATED_BODY()
-
-	UPROPERTY()
-	TArray<FGuid> Childs;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FQuestStageInfo Stage;
-
-	class UQuestRuntimeNode* Load(class UQuestRuntimeAsset* quest);
-};
-
 UCLASS()
 class DIALOGSYSTEMRUNTIME_API UQuestRuntimeNode : public UObject
 {

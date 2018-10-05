@@ -15,6 +15,10 @@ class DIALOGSYSTEMRUNTIME_API UQuestAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	FGuid RootNode;
+	TMap<FGuid, FQuestStageInfo> Nodes;
+	TMap<FGuid, TArray<FGuid>> Joins;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText Title;
 
@@ -23,12 +27,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bIsSingltone = true;
-	
-	UPROPERTY()
-	FGuid RootNode;
-
-	UPROPERTY()
-	TMap<FGuid, FQuestNode> Nodes;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "QuestScript"))
 	TAssetSubclassOf<AQuestScript> QuestScriptClass;
@@ -36,7 +34,7 @@ public:
 #if WITH_EDITORONLY_DATA
 	UPROPERTY()
 	class UEdGraph* UpdateGraph;
-#endif	// WITH_EDITORONLY_DATA
+#endif
 };
 
 USTRUCT(BlueprintType)
@@ -94,4 +92,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UQuestAsset* Asset;
+
+	class UQuestRuntimeNode* LoadNode(FGuid uid);
 };

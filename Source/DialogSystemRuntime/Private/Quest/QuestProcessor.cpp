@@ -52,7 +52,7 @@ void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 	activeQuests.Add(runtimeQuest);
 	OnQuestStart.Broadcast(runtimeQuest);
 
-	auto root = quest->Nodes[quest->RootNode].Load(runtimeQuest);
+	auto root = runtimeQuest->LoadNode(quest->RootNode);
 	WaitStage(root);
 }
 
