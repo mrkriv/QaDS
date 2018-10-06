@@ -36,7 +36,7 @@ void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 	{
 		for (auto activeQuest : activeQuests)
 		{
-			if (activeQuest->GetFName() == quest->GetFName())
+			if (activeQuest->Asset->GetFullName() == quest->GetFullName())
 			{
 				UE_LOG(DialogModuleLog, Log, TEXT("Quest %s already active"), *QuestAsset.GetAssetName());
 				return;
@@ -61,7 +61,12 @@ void UQuestProcessor::WaitStage(UQuestRuntimeNode* StageNode)
 	if (bIsResetBegin)
 		return;
 
-	check(StageNode);
+	if (StageNode == NULL)
+	{
+		UE_LOG(DialogModuleLog, Error, TEXT("Failed jump to null quest stage"));
+		return;
+	}
+
 	check(StageNode->OwnerQuest);
 
 	auto stages = StageNode->GetNextStage();
@@ -92,12 +97,16 @@ void UQuestProcessor::CompleteStage(UQuestRuntimeNode* StageNode)
 	check(StageNode);
 	check(StageNode->OwnerQuest);
 
+	if(!activeQuests.Contains(StageNode->OwnerQuest))
+		return;
+
 	if (StageNode->Stage.bGenerateEvents) //&& !StageNode->Stage.Caption.IsEmpty() /*|| Setting.bGenerateEventForEmptyQuestNode */) // todo:: add setting
 	{
 		OnStageComplete.Broadcast(StageNode->OwnerQuest, StageNode->Stage);
 	}
 
-	WaitStage(StageNode);
+	if(StageNode->Status == EQuestCompleteStatus::Completed)
+		WaitStage(StageNode);
 }
 
 void UQuestProcessor::EndQuest(UQuestRuntimeAsset* Quest, EQuestCompleteStatus Status)

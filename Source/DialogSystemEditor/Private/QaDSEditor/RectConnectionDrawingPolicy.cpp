@@ -69,7 +69,7 @@ void FRectConnectionDrawingPolicy::DrawSplineWithArrow(const FVector2D& StartPoi
 	else if (StartPoint.Y > EndPoint.Y)
 	{
 		auto newParams = FConnectionParams(Params);
-		newParams.WireColor *= 0.6f;
+		newParams.WireColor *= 0.3f;
 
 		auto d = 25.0f * ZoomFactor;
 		auto p1 = FVector2D(StartPoint.X, StartPoint.Y + d);

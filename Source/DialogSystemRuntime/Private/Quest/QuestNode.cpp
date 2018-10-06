@@ -124,7 +124,8 @@ void UQuestRuntimeNode::Complete()
 {
 	if (Stage.ChangeOderActiveStagesState != EQuestCompleteStatus::None)
 	{
-		for (auto stage : OwnerQuest->ActiveNodes)
+		auto nodes = OwnerQuest->ActiveNodes;
+		for (auto stage : nodes)
 		{
 			if (stage == this)
 				continue;
@@ -278,7 +279,7 @@ bool UQuestRuntimeNode::CkeckForFailed()
 
 FString FStoryTriggerCondition::ToString() const
 {
-	auto result = TriggerName.ToString() + "(";
+	auto result = TriggerName.ToString() + "[";
 
 	TArray<FString> params;
 	ParamsMasks.GenerateValueArray(params);
@@ -291,7 +292,10 @@ FString FStoryTriggerCondition::ToString() const
 		result += params[i];
 	}
 
-	result += ")";
+	result += "]";
+
+	if(TotalCount > 1)
+		result += " x" + FString::FromInt(TotalCount);
 
 	return result;
 }

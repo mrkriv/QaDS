@@ -176,10 +176,10 @@ FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 		return a.GetOrder() < b.GetOrder();
 	});
 
-	TArray<FGuid> joins;
+	FQuestStageJoin joins;
 	for (auto& child : childs)
 	{
-		joins.Add(Compile(child));
+		joins.UIDs.Add(Compile(child));
 	}
 
 	EditedAsset->Nodes.Add(node->NodeGuid, stage);
@@ -189,4 +189,4 @@ FGuid FQuestAssetEditor::Compile(UQaDSEdGraphNode* node)
 }
 
 
-#undef LOCTEXT_NAMESPACE
+#undef LOCTEXT_NAMESPACEw
