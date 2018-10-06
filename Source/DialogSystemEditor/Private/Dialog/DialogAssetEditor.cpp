@@ -121,8 +121,10 @@ void FDialogAssetEditor::Compile()
 
 UDialogNode* FDialogAssetEditor::Compile(UDialogEdGraphNode* node)
 {
-	if (node->CompileNode != NULL)
+	if (node->IsCompile())
 		return node->CompileNode;
+
+	node->SetCompile();
 
 	auto phraseNode = Cast<UDialogPhraseEdGraphNode>(node);
 	auto rootNode = Cast<UDialogRootEdGraphNode>(node);

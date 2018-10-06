@@ -553,6 +553,12 @@ void FQaDSAssetEditor::OnGraphChanged(const FEdGraphEditAction& Action)
 
 void FQaDSAssetEditor::OnPropertyChanged(const FPropertyChangedEvent& Event)
 {
+	if (Event.ChangeType & EPropertyChangeType::Unspecified)
+		return;
+
+	if(Event.Property->GetCPPType().StartsWith("E")) // skip enum
+		return;
+
 	if (GetDefault<UQaDSSettings>()->AutoCompile)
 		CompileExecute();
 }

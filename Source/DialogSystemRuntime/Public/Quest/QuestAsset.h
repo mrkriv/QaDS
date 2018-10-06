@@ -9,15 +9,29 @@ class AQuestScript;
 class UQuestRuntimeAsset;
 class UQuestProcessor;
 
+USTRUCT()
+struct DIALOGSYSTEMRUNTIME_API FQuestStageJoin
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TArray<FGuid> UIDs;
+};
+
 UCLASS(Blueprintable)
 class DIALOGSYSTEMRUNTIME_API UQuestAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
+	UPROPERTY()
 	FGuid RootNode;
+
+	UPROPERTY()
 	TMap<FGuid, FQuestStageInfo> Nodes;
-	TMap<FGuid, TArray<FGuid>> Joins;
+
+	UPROPERTY()
+	TMap<FGuid, FQuestStageJoin> Joins;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText Title;

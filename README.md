@@ -1,6 +1,5 @@
-### DialogPlugin
+### Quest and Dialog System
 Plugin for Unreal Engine 4 adding a dialogue and quest system.
-
 Supported version is 4.20
 
 Плагин для Unreal Engine 4 добавляющий диалоговую и квестовую систему.
@@ -12,18 +11,21 @@ Supported version is 4.20
  - Вызов blueprint скриптов из диалога или задания
  - Система ключей (StoryKey) для динамического управления заданиями и диалогами
  - Гибкая система, позволяющая создавать задания и диалоги похожие на те, что вы видели в Skyrim, The Witcher, STALKER и т.д.
+ - Вложенные диалоги
  - Поддержка сохранения и загрузки внутри игры
  - Импорт и экспорт графов в XML
 
 ### Example
 
-![In game](https://raw.githubusercontent.com/mrkriv/DialogPlugin/master/docs/images/DialogExample.png)
-![In game](https://raw.githubusercontent.com/mrkriv/DialogPlugin/master/docs/images/QuestList.png)
+[Example project](https://github.com/mrkriv/ExampleQaDS/tree/master)
 
-![In editor](https://raw.githubusercontent.com/mrkriv/DialogPlugin/master/docs/images/DialogGraph1.png)
-![In editor](https://raw.githubusercontent.com/mrkriv/DialogPlugin/master/docs/images/DialogGraph2.png)
-![In editor](https://raw.githubusercontent.com/mrkriv/DialogPlugin/master/docs/images/QuestGraph.png)
+![In game](https://raw.githubusercontent.com/mrkriv/QaDS/master/docs/images/DialogExample.png)
+![In game](https://raw.githubusercontent.com/mrkriv/QaDS/master/docs/images/QuestList.png)
+
+![In editor](https://raw.githubusercontent.com/mrkriv/QaDS/master/docs/images/DialogGraph1.png)
+![In editor](https://raw.githubusercontent.com/mrkriv/QaDS/master/docs/images/DialogGraph2.png)
+![In editor](https://raw.githubusercontent.com/mrkriv/QaDS/master/docs/images/QuestGraph.png)
 
 ### Roadmap
 
-https://github.com/mrkriv/DialogPlugin/projects/1
+https://github.com/mrkriv/QaDS/projects/1
