@@ -13,7 +13,7 @@ UQuestRuntimeNode* UQuestRuntimeAsset::LoadNode(FGuid uid)
 	auto runtimeStage = NewObject<UQuestRuntimeNode>();
 	runtimeStage->Processor = UQuestProcessor::GetQuestProcessor();
 	runtimeStage->OwnerQuest = this;
-	runtimeStage->Childs = Asset->Joins[uid];
+	runtimeStage->Childs = Asset->Joins[uid].UIDs;
 	runtimeStage->Stage = Asset->Nodes[uid];
 
 	return runtimeStage;
