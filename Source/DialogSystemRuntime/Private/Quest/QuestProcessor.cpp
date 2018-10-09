@@ -7,6 +7,7 @@
 #include "QuestScript.h"
 #include "StoryInformationManager.h"
 #include "StoryTriggerManager.h"
+#include "QaDSSettings.h"
 #include "Serialization/MemoryWriter.h"
 #include "Serialization/MemoryReader.h"
 
@@ -107,7 +108,13 @@ void UQuestProcessor::CompleteStage(UQuestRuntimeNode* StageNode)
 	if(!activeQuests.Contains(StageNode->OwnerQuest))
 		return;
 
-	if (StageNode->Stage.bGenerateEvents) //&& !StageNode->Stage.Caption.IsEmpty() /*|| Setting.bGenerateEventForEmptyQuestNode */) // todo:: add setting
+	auto isNeedEvents = StageNode->Stage.bGenerateEvents;
+	isNeedEvents = !StageNode->Stage.Caption.IsEmpty();
+
+	auto isEmpty = StageNode->Stage.Caption.IsEmpty();
+	auto generateForEmpty = !GetDefault<UQaDSSettings>()->bDontGenerateEventForEmptyQuestNode;
+
+	if (generateForEmpty && StageNode->Stage.bGenerateEvents || !generateForEmpty && !isEmpty)
 	{
 		OnStageComplete.Broadcast(StageNode->OwnerQuest, StageNode->Stage);
 	}
@@ -197,6 +204,7 @@ FArchive& operator<<(FArchive& Ar, UQuestProcessor& A)
 	}
 
 	Ar << archiveQuestsArchive << activeQuestsArchive;
+	//todo:: save QuestScript
 
 	if (Ar.IsLoading())
 	{
