@@ -70,8 +70,14 @@ void UQuestProcessor::WaitStage(UQuestRuntimeNode* StageNode)
 	check(StageNode->OwnerQuest);
 
 	auto stages = StageNode->GetNextStage();
+	auto isOptionalOnly = true;
 
-	if (stages.Num() == 0)
+	for (auto stage : stages)
+	{
+		stage->Stage.bIsOptional &= isOptionalOnly;
+	}
+
+	if (stages.Num() == 0 || isOptionalOnly)
 	{
 		EndQuest(StageNode->OwnerQuest, EQuestCompleteStatus::Completed);
 		return;
