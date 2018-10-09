@@ -14,4 +14,7 @@ public:
 
 	UPROPERTY(config, EditAnywhere, Category = Quest)
 	bool bDontGenerateEventForEmptyQuestNode = true;
+
+	UPROPERTY(config, EditAnywhere, Category = Quest)
+	bool bUseQuestArchive = true;
 };

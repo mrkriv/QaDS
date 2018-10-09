@@ -113,7 +113,7 @@ void UQuestProcessor::CompleteStage(UQuestRuntimeNode* StageNode)
 
 	auto isEmpty = StageNode->Stage.Caption.IsEmpty();
 	auto generateForEmpty = !GetDefault<UQaDSSettings>()->bDontGenerateEventForEmptyQuestNode;
-
+	
 	if (generateForEmpty && StageNode->Stage.bGenerateEvents || !generateForEmpty && !isEmpty)
 	{
 		OnStageComplete.Broadcast(StageNode->OwnerQuest, StageNode->Stage);
@@ -139,10 +139,13 @@ void UQuestProcessor::EndQuest(UQuestRuntimeAsset* Quest, EQuestCompleteStatus S
 		Quest->Status = Status;
 	}
 
-	Quest->DestroyScript();
+	if (GetDefault<UQaDSSettings>()->bUseQuestArchive)
+	{
+		archiveQuests.Add(Quest);
+	}
 
-	archiveQuests.Add(Quest);
 	OnQuestEnd.Broadcast(Quest, Status);
+	Quest->DestroyScript();
 }
 
 TArray<UQuestRuntimeAsset*> UQuestProcessor::GetQuests(EQuestCompleteStatus FilterStatus) const
@@ -192,9 +195,12 @@ FArchive& operator<<(FArchive& Ar, UQuestProcessor& A)
 
 	if (Ar.IsSaving())
 	{
-		for (auto quest : A.archiveQuests)
+		if (GetDefault<UQaDSSettings>()->bUseQuestArchive)
 		{
-			archiveQuestsArchive.Add(quest);
+			for (auto quest : A.archiveQuests)
+			{
+				archiveQuestsArchive.Add(quest);
+			}
 		}
 
 		for (auto quest : A.activeQuests)
@@ -211,9 +217,12 @@ FArchive& operator<<(FArchive& Ar, UQuestProcessor& A)
 		A.archiveQuests.Reset();
 		A.activeQuests.Reset();
 
-		for (auto& archive : archiveQuestsArchive)
+		if (GetDefault<UQaDSSettings>()->bUseQuestArchive)
 		{
-			A.archiveQuests.Add(archive.Load());
+			for (auto& archive : archiveQuestsArchive)
+			{
+				A.archiveQuests.Add(archive.Load());
+			}
 		}
 
 		for (auto& active : activeQuestsArchive)
