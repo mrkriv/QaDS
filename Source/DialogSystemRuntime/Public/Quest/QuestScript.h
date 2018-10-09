@@ -8,4 +8,7 @@ class DIALOGSYSTEMRUNTIME_API AQuestScript : public AInfo
 	GENERATED_BODY()
 
 public:
+
+	UPROPERTY(BlueprintReadOnly)
+	class UQuestRuntimeAsset* Quest;
 };

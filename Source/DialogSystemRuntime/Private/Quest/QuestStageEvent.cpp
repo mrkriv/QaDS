@@ -128,17 +128,17 @@ UObject* FQuestStageEvent::GetObject(UQuestRuntimeNode* QuestNode) const
 	switch (CallType)
 	{
 	case EQuestStageEventCallType::QuestScript:
-		obj = Cast<UObject>(quest->QuestScript);
+		obj = Cast<UObject>(quest->Script);
 		break;
 
 	case EQuestStageEventCallType::Player:
-		if (quest->QuestScript == NULL)
+		if (quest->Script == NULL)
 		{
 			UE_LOG(DialogModuleLog, Warning, TEXT("Need QuestScript for EQuestStageEventCallType::Player in %s"), *quest->GetPathName());
 			return NULL;
 		}
 
-		obj = UGameplayStatics::GetPlayerCharacter(quest->QuestScript->GetWorld(), 0);
+		obj = UGameplayStatics::GetPlayerCharacter(quest->Script->GetWorld(), 0);
 		break;
 
 	case EQuestStageEventCallType::FindByTag:

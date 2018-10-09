@@ -4,6 +4,7 @@
 #include "QuestAsset.h"
 #include "QuestNode.h"
 #include "QuestProcessor.h"
+#include "QuestScript.h"
 #include "StoryInformationManager.h"
 #include "StoryTriggerManager.h"
 #include "Serialization/MemoryWriter.h"
@@ -46,8 +47,8 @@ void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
 	
 	auto runtimeQuest = NewObject<UQuestRuntimeAsset>();
 	runtimeQuest->Status = EQuestCompleteStatus::Active;
-	// todo:: create runtime->QuestScript
 	runtimeQuest->Asset = quest;
+	runtimeQuest->CreateScript();
 
 	activeQuests.Add(runtimeQuest);
 	OnQuestStart.Broadcast(runtimeQuest);
@@ -130,8 +131,10 @@ void UQuestProcessor::EndQuest(UQuestRuntimeAsset* Quest, EQuestCompleteStatus S
 	{
 		Quest->Status = Status;
 	}
-	archiveQuests.Add(Quest);
 
+	Quest->DestroyScript();
+
+	archiveQuests.Add(Quest);
 	OnQuestEnd.Broadcast(Quest, Status);
 }
 
@@ -165,6 +168,8 @@ void UQuestProcessor::Reset()
 		{
 			stage->SetStatus(EQuestCompleteStatus::Skiped);
 		}
+
+		quest->DestroyScript();
 	}
 
 	archiveQuests.Reset();
@@ -203,9 +208,11 @@ FArchive& operator<<(FArchive& Ar, UQuestProcessor& A)
 			A.archiveQuests.Add(archive.Load());
 		}
 
-		for (auto& archive : activeQuestsArchive)
+		for (auto& active : activeQuestsArchive)
 		{
-			A.activeQuests.Add(archive.Load());
+			auto quest = active.Load();
+			quest->CreateScript();
+			A.activeQuests.Add(quest);
 		}
 	}
 

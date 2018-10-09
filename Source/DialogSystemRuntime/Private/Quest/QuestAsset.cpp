@@ -1,6 +1,24 @@
 #include "DialogSystemRuntime.h"
 #include "QuestProcessor.h"
 #include "QuestAsset.h"
+#include "QuestScript.h"
+
+void UQuestRuntimeAsset::CreateScript()
+{
+	if (!Asset->QuestScriptClass.IsNull())
+	{
+		Script = GetWorld()->SpawnActor<AQuestScript>(Asset->QuestScriptClass.Get());
+		Script->Quest = this;
+	}
+}
+
+void UQuestRuntimeAsset::DestroyScript()
+{
+	if (Script != NULL && !Script->IsActorBeingDestroyed())
+	{
+		Script->Destroy();
+	}
+}
 
 UQuestRuntimeNode* UQuestRuntimeAsset::LoadNode(FGuid uid)
 {

@@ -102,10 +102,12 @@ public:
 	TArray<UQuestRuntimeNode*> ActiveNodes;
 
 	UPROPERTY(BlueprintReadOnly)
-	AQuestScript* QuestScript;
+	AQuestScript* Script;
 
 	UPROPERTY(BlueprintReadOnly)
 	UQuestAsset* Asset;
 
 	class UQuestRuntimeNode* LoadNode(FGuid uid);
+	void CreateScript();
+	void DestroyScript();
 };
