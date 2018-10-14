@@ -3,10 +3,17 @@
 #include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
 #include "StoryTriggerManager.h"
 
+UStoryTriggerManager* UStoryTriggerManager::Instance;
+
+UStoryTriggerManager* UStoryTriggerManager::CreateTriggerManager(UObject* WorldContextObject)
+{
+	Instance = NewObject<UStoryTriggerManager>(WorldContextObject);
+	return Instance;
+}
+
 UStoryTriggerManager* UStoryTriggerManager::GetStoryTriggerManager()
 {
-	TObjectIterator<UStoryTriggerManager> iter;
-	return iter ? *iter : NewObject<UStoryTriggerManager>();
+	return Instance;
 }
 
 void UStoryTriggerManager::InvokeTrigger(const FStoryTrigger& Trigger)

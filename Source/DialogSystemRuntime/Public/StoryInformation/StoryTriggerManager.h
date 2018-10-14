@@ -27,12 +27,17 @@ class DIALOGSYSTEMRUNTIME_API UStoryTriggerManager : public UObject
 {
 	GENERATED_BODY()
 
+	static UStoryTriggerManager* Instance;
+
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Triggers")
 	FStoryTriggerInvokeSignature OnTriggerInvoke;
 
 	UFUNCTION(BlueprintPure, Category = "Gameplay|Triggers")
 	static UStoryTriggerManager* GetStoryTriggerManager();
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|Triggers", meta = (WorldContext = "WorldContextObject"))
+	static UStoryTriggerManager* CreateTriggerManager(UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Triggers")
 	void InvokeTrigger(const FStoryTrigger& Trigger);

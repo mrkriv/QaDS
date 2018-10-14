@@ -16,6 +16,7 @@ enum class EQuestStageEventCallType : uint8
 	FindByTag,
 };
 
+class UQuestAsset;
 class UQuestRuntimeNode;
 
 USTRUCT(BlueprintType)

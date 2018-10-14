@@ -7,8 +7,10 @@ void UQuestRuntimeAsset::CreateScript()
 {
 	if (!Asset->QuestScriptClass.IsNull())
 	{
-		Script = GetWorld()->SpawnActor<AQuestScript>(Asset->QuestScriptClass.Get());
-		Script->Quest = this;
+		Script = UQuestProcessor::GetQuestProcessor()->GetWorld()->SpawnActor<AQuestScript>(Asset->QuestScriptClass.Get());
+
+		if (Script)
+			Script->Quest = this;
 	}
 }
 
@@ -82,7 +84,6 @@ UQuestRuntimeNode* FQuestRuntimeNodeArchive::Load(UQuestRuntimeAsset* RuntimeAss
 {
 	auto node = RuntimeAsset->LoadNode(UID);
 	node->SetStatus(Status);
-	//todo:: node->SetProgress 
 
 	for (auto i = 0; i < WaitTriggers.Num(); i++)
 	{

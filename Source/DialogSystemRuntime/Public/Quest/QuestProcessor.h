@@ -18,10 +18,12 @@ class DIALOGSYSTEMRUNTIME_API UQuestProcessor : public UObject
 {
 	GENERATED_BODY()
 
+	static UQuestProcessor* Instance;
+
 	TArray<UQuestRuntimeAsset*> archiveQuests;
 	TArray<UQuestRuntimeAsset*> activeQuests;
 	bool bIsResetBegin;
-
+	
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay|Quest")
 	FQuestStartSignature OnQuestStart;
@@ -40,6 +42,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Gameplay|Quest")
 	static UQuestProcessor* GetQuestProcessor();
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest", meta = (WorldContext = "WorldContextObject"))
+	static UQuestProcessor* CreateQuestProcessor(UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
 	void StartQuest(TAssetPtr<UQuestAsset> QuestAsset);

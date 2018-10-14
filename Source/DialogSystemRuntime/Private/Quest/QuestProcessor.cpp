@@ -11,18 +11,26 @@
 #include "Serialization/MemoryWriter.h"
 #include "Serialization/MemoryReader.h"
 
+UQuestProcessor* UQuestProcessor::Instance;
+
+UQuestProcessor* UQuestProcessor::CreateQuestProcessor(UObject* WorldContextObject)
+{
+	Instance = NewObject<UQuestProcessor>(WorldContextObject);
+	return Instance;
+}
+
 UQuestProcessor* UQuestProcessor::GetQuestProcessor()
 {
-	TObjectIterator<UQuestProcessor> iter;
-	auto result = iter ? *iter : NewObject<UQuestProcessor>();
+	if (Instance == NULL)
+		return NULL;
 
-	if (result->StoryKeyManager == NULL)
-		result->StoryKeyManager = UStoryKeyManager::GetStoryKeyManager();
+	if (Instance->StoryKeyManager == NULL)
+		Instance->StoryKeyManager = UStoryKeyManager::GetStoryKeyManager();
 
-	if (result->StoryTriggerManager == NULL)
-		result->StoryTriggerManager = UStoryTriggerManager::GetStoryTriggerManager();
+	if (Instance->StoryTriggerManager == NULL)
+		Instance->StoryTriggerManager = UStoryTriggerManager::GetStoryTriggerManager();
 
-	return result;
+	return Instance;
 }
 
 void UQuestProcessor::StartQuest(TAssetPtr<UQuestAsset> QuestAsset)
@@ -76,7 +84,7 @@ void UQuestProcessor::WaitStage(UQuestRuntimeNode* StageNode)
 
 	for (auto stage : stages)
 	{
-		stage->Stage.bIsOptional &= isOptionalOnly;
+		isOptionalOnly &= stage->Stage.bIsOptional;
 	}
 
 	if (stages.Num() == 0 || isOptionalOnly)

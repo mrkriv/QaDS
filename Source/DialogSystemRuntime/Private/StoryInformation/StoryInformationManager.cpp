@@ -5,10 +5,17 @@
 #include "Serialization/MemoryWriter.h"
 #include "Serialization/MemoryReader.h"
 
+UStoryKeyManager* UStoryKeyManager::Instance;
+
+UStoryKeyManager* UStoryKeyManager::CreateStoryKeyManager(UObject* WorldContextObject)
+{
+	Instance = NewObject<UStoryKeyManager>(WorldContextObject);
+	return Instance;
+}
+
 UStoryKeyManager* UStoryKeyManager::GetStoryKeyManager()
 {
-	TObjectIterator<UStoryKeyManager> iter;
-	return iter ? *iter : NewObject<UStoryKeyManager>();
+	return Instance;
 }
 
 bool UStoryKeyManager::HasKey(FName Key) const

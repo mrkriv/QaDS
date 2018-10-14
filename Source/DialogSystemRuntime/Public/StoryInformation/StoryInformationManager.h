@@ -14,6 +14,7 @@ class DIALOGSYSTEMRUNTIME_API UStoryKeyManager : public UObject
 {
 	GENERATED_BODY()
 
+	static UStoryKeyManager* Instance;
 	TSet<FName> Database;
 
 public:
@@ -33,6 +34,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Gameplay|StoryKey")
 	static UStoryKeyManager* GetStoryKeyManager();
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey", meta = (WorldContext = "WorldContextObject"))
+	static UStoryKeyManager* CreateStoryKeyManager(UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintPure, Category = "Gameplay|StoryKey")
 	bool HasKey(FName Key) const;
