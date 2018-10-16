@@ -7,7 +7,7 @@ void UQuestRuntimeAsset::CreateScript()
 {
 	if (!Asset->QuestScriptClass.IsNull())
 	{
-		Script = UQuestProcessor::GetQuestProcessor()->GetWorld()->SpawnActor<AQuestScript>(Asset->QuestScriptClass.Get());
+		Script = UQuestProcessor::GetQuestProcessor(this)->GetWorld()->SpawnActor<AQuestScript>(Asset->QuestScriptClass.Get());
 
 		if (Script)
 			Script->Quest = this;
@@ -31,7 +31,7 @@ UQuestRuntimeNode* UQuestRuntimeAsset::LoadNode(FGuid uid)
 	}
 
 	auto runtimeStage = NewObject<UQuestRuntimeNode>();
-	runtimeStage->Processor = UQuestProcessor::GetQuestProcessor();
+	runtimeStage->Processor = UQuestProcessor::GetQuestProcessor(this);
 	runtimeStage->OwnerQuest = this;
 	runtimeStage->Childs = Asset->Joins[uid].UIDs;
 	runtimeStage->Stage = Asset->Nodes[uid];

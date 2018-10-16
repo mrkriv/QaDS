@@ -10,7 +10,7 @@ bool AStrotyVolume::CanActivate(AActor* Other)
 {
 	if (CheckHasKeys.Num() + CheckDontHasKeys.Num() > 0)
 	{
-		auto skm = UStoryKeyManager::GetStoryKeyManager();
+		auto skm = UStoryKeyManager::GetStoryKeyManager(this);
 
 		for (auto& key : CheckHasKeys)
 		{
@@ -47,7 +47,7 @@ void AStrotyVolume::Activate()
 
 	if (RemoveKeys.Num() + GiveKeys.Num() > 0)
 	{
-		auto skm = UStoryKeyManager::GetStoryKeyManager();
+		auto skm = UStoryKeyManager::GetStoryKeyManager(this);
 
 		for (auto& key : GiveKeys)
 		{
@@ -62,7 +62,7 @@ void AStrotyVolume::Activate()
 	
 	if (ActivateTriggers.Num() > 0)
 	{
-		auto stm = UStoryTriggerManager::GetStoryTriggerManager();
+		auto stm = UStoryTriggerManager::GetStoryTriggerManager(this);
 		for (auto& trigger : ActivateTriggers)
 		{
 			stm->InvokeTrigger(trigger);
@@ -71,7 +71,7 @@ void AStrotyVolume::Activate()
 
 	if (!StartQuest.IsNull())
 	{
-		auto questProcesstor = UQuestProcessor::GetQuestProcessor();
+		auto questProcesstor = UQuestProcessor::GetQuestProcessor(this);
 		questProcesstor->StartQuest(StartQuest);
 	}
 

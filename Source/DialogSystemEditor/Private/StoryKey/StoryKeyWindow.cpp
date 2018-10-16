@@ -118,7 +118,7 @@ void SStoryKeyWindow::Tick(const FGeometry& AllottedGeometry, double InCurrentTi
 {
 	SCompoundWidget::Tick(AllottedGeometry, InCurrentTime, DeltaTime);
 
-	auto newKeyManager = UStoryKeyManager::GetStoryKeyManager();
+	auto newKeyManager = UStoryKeyManager::GetStoryKeyManager(NULL);
 	if (newKeyManager != NULL && newKeyManager != keyManager)
 	{
 		keyManager = newKeyManager;

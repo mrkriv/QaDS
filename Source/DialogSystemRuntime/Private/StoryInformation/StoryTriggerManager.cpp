@@ -3,17 +3,22 @@
 #include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
 #include "StoryTriggerManager.h"
 
-UStoryTriggerManager* UStoryTriggerManager::Instance;
+UStoryTriggerManager* UStoryTriggerManager::Instance = NULL;
 
-UStoryTriggerManager* UStoryTriggerManager::CreateTriggerManager(UObject* WorldContextObject)
+UStoryTriggerManager* UStoryTriggerManager::GetStoryTriggerManager(UObject* WorldContextObject)
 {
-	Instance = NewObject<UStoryTriggerManager>(WorldContextObject);
+	if (Instance == NULL)
+		Instance = NewObject<UStoryTriggerManager>(WorldContextObject);
+	
 	return Instance;
 }
 
-UStoryTriggerManager* UStoryTriggerManager::GetStoryTriggerManager()
+void UStoryTriggerManager::BeginDestroy()
 {
-	return Instance;
+	Super::BeginDestroy();
+
+	if (Instance == this)
+		Instance = NULL;
 }
 
 void UStoryTriggerManager::InvokeTrigger(const FStoryTrigger& Trigger)

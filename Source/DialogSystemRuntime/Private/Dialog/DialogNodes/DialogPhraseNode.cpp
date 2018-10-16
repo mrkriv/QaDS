@@ -20,7 +20,7 @@ void UDialogPhraseNode::Invoke(UDialogProcessor* processor)
 	
 	if (!Data.StartQuest.ToSoftObjectPath().IsNull())
 	{
-		UQuestProcessor::GetQuestProcessor()->StartQuest(Data.StartQuest.ToSoftObjectPath().TryLoad());
+		UQuestProcessor::GetQuestProcessor(processor)->StartQuest(Data.StartQuest.ToSoftObjectPath().TryLoad());
 	}
 	
 	if (Data.Source == EDialogPhraseSource::Player)

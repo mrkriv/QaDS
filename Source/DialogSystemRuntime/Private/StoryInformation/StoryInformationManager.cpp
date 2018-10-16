@@ -5,17 +5,22 @@
 #include "Serialization/MemoryWriter.h"
 #include "Serialization/MemoryReader.h"
 
-UStoryKeyManager* UStoryKeyManager::Instance;
+UStoryKeyManager* UStoryKeyManager::Instance = NULL;
 
-UStoryKeyManager* UStoryKeyManager::CreateStoryKeyManager(UObject* WorldContextObject)
+UStoryKeyManager* UStoryKeyManager::GetStoryKeyManager(UObject* WorldContextObject)
 {
-	Instance = NewObject<UStoryKeyManager>(WorldContextObject);
+	if (Instance == NULL)
+		Instance = NewObject<UStoryKeyManager>(WorldContextObject);
+
 	return Instance;
 }
 
-UStoryKeyManager* UStoryKeyManager::GetStoryKeyManager()
+void UStoryKeyManager::BeginDestroy()
 {
-	return Instance;
+	Super::BeginDestroy();
+
+	if (Instance == this)
+		Instance = NULL;
 }
 
 bool UStoryKeyManager::HasKey(FName Key) const

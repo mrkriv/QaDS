@@ -39,7 +39,7 @@ UDialogProcessor* UDialogProcessor::CreateDialogProcessor(UDialogAsset* DialogAs
 
 void UDialogProcessor::StartDialog()
 {
-	StoryKeyManager = UStoryKeyManager::GetStoryKeyManager();
+	StoryKeyManager = UStoryKeyManager::GetStoryKeyManager(this);
 	SetCurrentNode(Asset->RootNode);
 }
 

@@ -32,11 +32,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay|StoryKey")
 	FStoryKeysChangeSignatureBP OnKeysLoadedBP;
 
-	UFUNCTION(BlueprintPure, Category = "Gameplay|StoryKey")
-	static UStoryKeyManager* GetStoryKeyManager();
-
-	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey", meta = (WorldContext = "WorldContextObject"))
-	static UStoryKeyManager* CreateStoryKeyManager(UObject* WorldContextObject);
+	UFUNCTION(BlueprintPure, Category = "Gameplay|StoryKey", meta = (WorldContext = "WorldContextObject"))
+	static UStoryKeyManager* GetStoryKeyManager(UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintPure, Category = "Gameplay|StoryKey")
 	bool HasKey(FName Key) const;
@@ -64,6 +61,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|StoryKey")
 	void LoadFromBinary(const TArray<uint8>& Data);
+
+	virtual void BeginDestroy() override;
 
 	friend FArchive& operator<<(FArchive& Ar, UStoryKeyManager& A);
 };

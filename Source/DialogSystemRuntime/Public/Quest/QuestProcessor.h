@@ -40,11 +40,8 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UStoryTriggerManager* StoryTriggerManager;
 
-	UFUNCTION(BlueprintPure, Category = "Gameplay|Quest")
-	static UQuestProcessor* GetQuestProcessor();
-
-	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest", meta = (WorldContext = "WorldContextObject"))
-	static UQuestProcessor* CreateQuestProcessor(UObject* WorldContextObject);
+	UFUNCTION(BlueprintPure, Category = "Gameplay|Quest", meta = (WorldContext = "WorldContextObject"))
+	static UQuestProcessor* GetQuestProcessor(UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
 	void StartQuest(TAssetPtr<UQuestAsset> QuestAsset);
@@ -66,6 +63,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay|Quest")
 	void LoadFromBinary(const TArray<uint8>& Data);
+
+	virtual void BeginDestroy() override;
 
 	friend FArchive& operator<<(FArchive& Ar, UQuestProcessor& A);
 };
