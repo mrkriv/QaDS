@@ -7,9 +7,12 @@
 #include "GraphEditorActions.h"
 #include "RectConnectionDrawingPolicy.h"
 #include "QuestGraphSchema.h"
+
+#include "DialogEditorNodes.h"
 #include "QaDSGraphSchema.h"
-#include "Runtime/Slate/Public/Framework/MultiBox/MultiBoxBuilder.h"
+#include "Developer/ToolMenus/Public/ToolMenuSection.h"
 #include "QuestEditorNodes.h"
+#include "ToolMenu.h"
 
 #define LOCTEXT_NAMESPACE "FQuestSystemModule"
 
@@ -40,23 +43,25 @@ void UQuestGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
 		ContextMenuBuilder.AddAction(Action);
 }
 
-void UQuestGraphSchema::GetContextMenuActions(const UEdGraph* CurrentGraph, const UEdGraphNode* InGraphNode, const UEdGraphPin* InGraphPin, FMenuBuilder* MenuBuilder, bool bIsDebugging) const
+void UQuestGraphSchema::GetContextMenuActions(class UToolMenu* Menu, class UGraphNodeContextMenuContext* Context) const
 {
-	MenuBuilder->AddMenuEntry(FGenericCommands::Get().Delete);
-	MenuBuilder->AddMenuEntry(FGenericCommands::Get().Cut);
-	MenuBuilder->AddMenuEntry(FGenericCommands::Get().Copy);
-	MenuBuilder->AddMenuEntry(FGenericCommands::Get().Paste);
-	MenuBuilder->AddMenuEntry(FGenericCommands::Get().SelectAll);
+	FToolMenuSection Section = Menu->AddSection("Edit");
+	
+	Section.AddMenuEntry(FGenericCommands::Get().Delete);
+	Section.AddMenuEntry(FGenericCommands::Get().Cut);
+	Section.AddMenuEntry(FGenericCommands::Get().Copy);
+	Section.AddMenuEntry(FGenericCommands::Get().Paste);
+	Section.AddMenuEntry(FGenericCommands::Get().SelectAll);
+	
+	if (!Cast<UDialogRootEdGraphNode>(Context->Node))
+		Section.AddMenuEntry(FGenericCommands::Get().Duplicate);
 
-	if (!Cast<UDialogRootEdGraphNode>(InGraphNode))
-		MenuBuilder->AddMenuEntry(FGenericCommands::Get().Duplicate);
-
-	if (InGraphPin)
-		MenuBuilder->AddMenuEntry(FGraphEditorCommands::Get().BreakPinLinks);
+	if (Context->Pin)
+		Section.AddMenuEntry(FGraphEditorCommands::Get().BreakPinLinks);
 	else
-		MenuBuilder->AddMenuEntry(FGraphEditorCommands::Get().BreakNodeLinks);
+		Section.AddMenuEntry(FGraphEditorCommands::Get().BreakNodeLinks);
 
-	Super::GetContextMenuActions(CurrentGraph, InGraphNode, InGraphPin, MenuBuilder, bIsDebugging);
+	Super::GetContextMenuActions(Menu, Context);
 }
 
 #undef LOCTEXT_NAMESPACE

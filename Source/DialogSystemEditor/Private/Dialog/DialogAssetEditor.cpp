@@ -1,5 +1,7 @@
 #include "DialogSystemEditor.h"
 #include "DialogAssetEditor.h"
+
+#include "AssetEditorManager.h"
 #include "Editor.h"
 #include "DialogGraphSchema.h"
 #include "GenericCommands.h"
@@ -39,7 +41,9 @@ FName FDialogAssetEditor::GetEditorName() const
 
 void FDialogAssetEditor::InitDialogAssetEditor(const EToolkitMode::Type Mode, const TSharedPtr< class IToolkitHost >& InitToolkitHost, UDialogAsset* Object)
 {
-	FAssetEditorManager::Get().CloseOtherEditors(Object, this);
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+	AssetEditorSubsystem->CloseOtherEditors(Object, this);
+	
 	EditedAsset = Object;
 
 	if (EditedAsset->UpdateGraph == NULL)
@@ -72,7 +76,6 @@ void FDialogAssetEditor::BuildToolbar(FToolBarBuilder &builder)
 	auto iconExport = FSlateIcon(FEditorStyle::GetStyleSetName(), "DialogSystem.Export_48");
 	auto iconImport = FSlateIcon(FEditorStyle::GetStyleSetName(), "DialogSystem.Import_48");
 
-	builder.AddSeparator();
 	builder.AddToolBarButton(FDialogCommands::Get().Compile, NAME_None, FText::FromString("Compile"), FText::FromString("Compile this dialog"), iconCompile, NAME_None);
 	builder.AddSeparator(); 
 	//builder.AddToolBarButton(FDialogCommands::Get().Find, NAME_None, FText::FromString("Find"), FText::FromString("Open find dialog"), iconFind, NAME_None);
@@ -81,7 +84,8 @@ void FDialogAssetEditor::BuildToolbar(FToolBarBuilder &builder)
 	builder.AddToolBarButton(FDialogCommands::Get().Import, NAME_None, FText::FromString("Import"), FText::FromString("Imoprt graph from file"), iconExport, NAME_None);
 	builder.AddSeparator();
 
-	FPlayWorldCommands::BuildToolbar(builder);
+	//todo:: applay FPlayWorldCommands to this menu 
+	//FPlayWorldCommands::BuildToolbar(builder);
 }
 
 UDialogRootEdGraphNode* FDialogAssetEditor::GetRootNode()

@@ -290,7 +290,7 @@ bool FQuestStageCondition::CallCheckFunction(UObject* Executor, const TCHAR* Str
 		checkSlow(PropertyParam); // Fix static analysis warning
 		if (NumParamsEvaluated == 0 && Executor)
 		{
-			UObjectPropertyBase* Op = dynamic_cast<UObjectPropertyBase*>(*It);
+			FObjectPropertyBase* Op = CastField<FObjectPropertyBase>(*It);
 			if (Op && Executor->IsA(Op->PropertyClass))
 			{
 				// First parameter is implicit reference to object executing the command.

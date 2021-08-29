@@ -38,7 +38,9 @@ FName FQuestAssetEditor::GetEditorName() const
 
 void FQuestAssetEditor::InitQuestAssetEditor(const EToolkitMode::Type Mode, const TSharedPtr< class IToolkitHost >& InitToolkitHost, UQuestAsset* Object)
 {
-	FAssetEditorManager::Get().CloseOtherEditors(Object, this);
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+	AssetEditorSubsystem->CloseOtherEditors(Object, this);
+	
 	EditedAsset = Object;
 
 	if (EditedAsset->UpdateGraph == NULL)
@@ -80,7 +82,8 @@ void FQuestAssetEditor::BuildToolbar(FToolBarBuilder &builder)
 	builder.AddToolBarButton(FQuestCommands::Get().Import, NAME_None, FText::FromString("Import"), FText::FromString("Imoprt graph from file"), iconExport, NAME_None);
 	builder.AddSeparator();
 
-	FPlayWorldCommands::BuildToolbar(builder);
+	//todo:: applay FPlayWorldCommands to this menu 
+	//FPlayWorldCommands::BuildToolbar(builder);
 }
 
 UQuestRootEdGraphNode* FQuestAssetEditor::GetRootNode()

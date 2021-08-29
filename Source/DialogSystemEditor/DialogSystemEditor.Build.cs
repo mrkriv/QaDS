@@ -37,6 +37,7 @@ public class DialogSystemEditor : ModuleRules
                 "InputCore",
                 "UnrealEd",
                 "PropertyEditor",
+                "ToolMenus",
                 "LevelEditor",
                 "EditorStyle",
                 "GraphEditor",
