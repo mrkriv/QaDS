@@ -1,14 +1,9 @@
 #include "DialogSystemRuntime.h"
-#include "EdGraph/EdGraphPin.h"
-#include "Runtime/Engine/Classes/Engine/World.h"
-#include "Runtime/Engine/Public/TimerManager.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
-#include "StoryInformationManager.h"
 #include "DialogProcessor.h"
 #include "DialogNodes.h"
 #include "DialogAsset.h"
-#include "DialogScript.h"
 #include "DialogPhraseEvent.h"
 
 bool FDialogPhraseEvent::Compile(FString& ErrorMessage)

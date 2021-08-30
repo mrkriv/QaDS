@@ -1,7 +1,5 @@
-#include "DialogSystemEditor.h"
 #include "QuestAssetFactory.h"
 #include "QuestAsset.h"
-#include "QuestScript.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 

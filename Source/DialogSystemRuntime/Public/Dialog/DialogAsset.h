@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DialogScript.h"
 #include "Engine/DataAsset.h"
 #include "DialogAsset.generated.h"
 
@@ -18,7 +19,7 @@ public:
 	class UDialogNode* RootNode;
 
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "DialogScript"))
-	TAssetSubclassOf<class ADialogScript> DialogScriptClass;
+	TAssetSubclassOf<ADialogScript> DialogScriptClass;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY()

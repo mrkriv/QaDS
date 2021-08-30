@@ -1,7 +1,6 @@
 #pragma once
 
 
-#include "ModuleManager.h"
 #include "Developer/AssetTools/Public/AssetTypeCategories.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(DialogModuleLog, All, All)

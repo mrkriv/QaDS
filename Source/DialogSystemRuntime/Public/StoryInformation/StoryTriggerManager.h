@@ -1,6 +1,5 @@
 #pragma once
 
-#include "EngineUtils.h"
 #include "StoryTriggerManager.generated.h"
 
 USTRUCT(BlueprintType)

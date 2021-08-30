@@ -1,8 +1,6 @@
-#include "DialogSystemEditor.h"
 #include "StoryKeyWindow.h"
 #include "StoryInformationManager.h"
 
-#include "FileManager.h"
 #include "FileHelper.h"
 #include "DesktopPlatformModule.h"
 #include "Framework/Application/SlateApplication.h"
@@ -13,7 +11,6 @@
 #include "SlateOptMacros.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Text/STextBlock.h"
-#include "Widgets/Layout/SBox.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/STextComboBox.h"
 #include "Widgets/Input/SSearchBox.h"

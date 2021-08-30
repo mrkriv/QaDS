@@ -1,12 +1,7 @@
-#include "DialogSystemEditor.h"
 #include "QaDSGraphSchema.h"
 #include "EdGraph/EdGraph.h"
 #include "EdGraph/EdGraphPin.h"
 #include "GraphEditorSettings.h"
-#include "GenericCommands.h"
-#include "GraphEditorActions.h"
-#include "RectConnectionDrawingPolicy.h"
-#include "Runtime/Slate/Public/Framework/MultiBox/MultiBoxBuilder.h"
 
 UEdGraphNode* FQaDSSchemaAction_NewNode::PerformAction(class UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2D Location, bool bSelectNewNode/* = true*/)
 {

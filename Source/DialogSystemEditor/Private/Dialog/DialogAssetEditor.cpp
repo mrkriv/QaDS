@@ -1,4 +1,3 @@
-#include "DialogSystemEditor.h"
 #include "DialogAssetEditor.h"
 
 #include "AssetEditorManager.h"
@@ -7,18 +6,11 @@
 #include "GenericCommands.h"
 #include "BlueprintEditorUtils.h"
 #include "EdGraphUtilities.h"
-#include "SDockTab.h"
 #include "SNodePanel.h"
-#include "SGraphPanel.h"
-#include "Widgets/Text/STextBlock.h"
-#include "Widgets/Input/SButton.h"
-#include "Widgets/Views/SListView.h"
 #include "DialogNodes.h"
 #include "DialogEditorNodes.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Kismet2/DebuggerCommands.h"
-#include "ScopedTransaction.h"
-#include "DialogGraphSchema.h"
 #include "BrushSet.h"
 #include "QaDSGraphSchema.h"
 

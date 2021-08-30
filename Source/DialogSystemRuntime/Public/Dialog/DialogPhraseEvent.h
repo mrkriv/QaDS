@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine.h"
-#include "Engine/EngineTypes.h"
 #include "UObject/NoExportTypes.h"
 #include "DialogPhraseEvent.generated.h"
 

@@ -1,8 +1,6 @@
-#include "DialogSystemEditor.h"
 #include "QuestAssetTypeActions.h"
 #include "QuestAsset.h"
 #include "QuestAssetEditor.h"
-#include "QuestScript.h"
 
 FQuestAssetTypeActions::FQuestAssetTypeActions(EAssetTypeCategories::Type InAssetCategory)
 	: AssetCategory(InAssetCategory)

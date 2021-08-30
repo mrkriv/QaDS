@@ -1,7 +1,4 @@
-#include "DialogSystemEditor.h"
 #include "BrushSet.h"
-#include "Engine/Texture2D.h"
-#include "CanvasTypes.h"
 #include "IPluginManager.h"
 #include "Runtime/Core/Public/Misc/Paths.h"
 #include "SlateGameResources.h" 

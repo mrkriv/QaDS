@@ -1,6 +1,5 @@
 #pragma once
 
-#include "QuestNode.h"
 #include "Editor/PropertyEditor/Public/IPropertyTypeCustomization.h"
 
 class DIALOGSYSTEMEDITOR_API FQuestStageEventCustomization : public IPropertyTypeCustomization

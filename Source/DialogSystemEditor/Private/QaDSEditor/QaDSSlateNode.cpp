@@ -1,13 +1,9 @@
-#include "DialogSystemEditor.h"
 #include "QaDSSlateNode.h"
-#include "EdGraph/EdGraph.h"
 #include "EdGraph/EdGraphPin.h"
 #include "GraphEditorSettings.h"
-#include "GenericCommands.h"
 #include "GraphEditorActions.h"
 #include "RectConnectionDrawingPolicy.h"
 #include "DialogGraphSchema.h"
-#include "Runtime/Slate/Public/Framework/MultiBox/MultiBoxBuilder.h"
 
 #define LOCTEXT_NAMESPACE "FQaDSSystemModule"
 

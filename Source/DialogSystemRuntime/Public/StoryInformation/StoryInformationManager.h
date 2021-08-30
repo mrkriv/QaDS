@@ -1,7 +1,5 @@
 #pragma once
 
-#include "EngineUtils.h"
-#include "Components/ActorComponent.h"
 #include "StoryInformationManager.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FStoryKeyChangeSignature, const FName&);

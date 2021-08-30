@@ -1,9 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/ObjectMacros.h"
 #include "SlateBasics.h"
-#include "SlateExtras.h"
 
 class FCanvas;
 class FRenderTarget;

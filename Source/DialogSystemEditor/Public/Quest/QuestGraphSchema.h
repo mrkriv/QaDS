@@ -1,6 +1,5 @@
 #pragma once
 
-#include "EdGraph/EdGraphSchema.h"
 #include "DialogGraphSchema.h"
 #include "QuestGraphSchema.generated.h"
 

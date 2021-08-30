@@ -2,7 +2,6 @@
 
 
 #include "IDetailCustomization.h"
-#include "Editor/PropertyEditor/Public/IPropertyTypeCustomization.h"
 
 class DIALOGSYSTEMEDITOR_API FPhraseNodeDetails : public IDetailCustomization
 {

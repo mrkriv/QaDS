@@ -4,7 +4,6 @@
 #include "StoryTriggerManager.h"
 #include "QuestProcessor.h"
 #include "QuestAsset.h"
-#include "GameFramework/Pawn.h"
 
 bool AStrotyVolume::CanActivate(AActor* Other)
 {

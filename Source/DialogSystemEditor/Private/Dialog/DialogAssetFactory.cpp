@@ -1,8 +1,6 @@
-#include "DialogSystemEditor.h"
 #include "DialogAssetFactory.h"
 #include "DialogEditorNodes.h"
 #include "DialogAsset.h"
-#include "DialogScript.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 

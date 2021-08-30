@@ -1,11 +1,5 @@
-#include "DialogSystemEditor.h"
-#include "EdGraph/EdGraphPin.h"
-#include "Runtime/Engine/Classes/Engine/World.h"
-#include "StoryInformationManager.h"
-#include "EdGraph/EdGraph.h"
 #include "QuestEditorNodes.h"
 #include "QuestAsset.h"
-#include "XmlFile.h"
 
 //UQuestStageEdGraphNode...........................................................................................
 void UQuestStageEdGraphNode::AllocateDefaultPins()

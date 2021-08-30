@@ -1,10 +1,8 @@
 #include "DialogSystemEditor.h"
-#include "Developer/AssetTools/Public/AssetTypeCategories.h"
 #include "Editor/PropertyEditor/Public/PropertyEditorModule.h"
 #include "Editor/WorkspaceMenuStructure/Public/WorkspaceMenuStructure.h"
 #include "Editor/WorkspaceMenuStructure/Public/WorkspaceMenuStructureModule.h"
 #include "ISettingsModule.h"
-#include "ThumbnailRendering/ThumbnailManager.h"
 #include "BrushSet.h"
 
 #include "StoryKeyWindow.h"

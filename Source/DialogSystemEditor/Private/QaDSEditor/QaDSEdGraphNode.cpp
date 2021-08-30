@@ -1,8 +1,6 @@
-#include "DialogSystemEditor.h"
 #include "QaDSEdGraphNode.h"
 #include "EdGraph/EdGraphPin.h"
 #include "XmlSerealizeHelper.h"
-#include "XmlFile.h"
 
 TArray<UQaDSEdGraphNode*> UQaDSEdGraphNode::GetChildNodes() const
 {

@@ -1,12 +1,6 @@
-#include "DialogSystemEditor.h"
 #include "DialogEditorNodes.h"
-#include "EdGraph/EdGraphPin.h"
-#include "Runtime/Engine/Classes/Engine/World.h"
-#include "StoryInformationManager.h"
 #include "EdGraph/EdGraph.h"
-#include "QaDSSettings.h"
 #include "DialogAsset.h"
-#include "XmlFile.h"
 
 //PhraseNode..........................................................................................................
 UDialogPhraseEdGraphNode::UDialogPhraseEdGraphNode()

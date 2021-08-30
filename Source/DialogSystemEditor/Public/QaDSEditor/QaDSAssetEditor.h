@@ -3,16 +3,12 @@
 #include "Editor/UnrealEd/Public/Toolkits/AssetEditorToolkit.h"
 #include "Editor/UnrealEd/Public/Kismet2/CompilerResultsLog.h"
 #include "Developer/MessageLog/Public/IMessageLogListing.h"
-#include "Developer/MessageLog/Public/MessageLogModule.h"
 #include "Runtime/CoreUObject/Public/Misc/NotifyHook.h"
 #include "GraphEditor.h"
 #include "IDetailsView.h"
 #include "SlateBasics.h"
-#include "Commands.h"
 #include "EditorStyle.h"
 #include "Runtime/Core/Public/Logging/TokenizedMessage.h"
-#include "Widgets/Views/STableViewBase.h"
-#include "Widgets/Views/STableRow.h"
 
 class UEdGraph;
 class UEdGraphNode;

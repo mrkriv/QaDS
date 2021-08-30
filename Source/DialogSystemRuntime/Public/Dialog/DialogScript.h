@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameFramework/Info.h"
 #include "DialogScript.generated.h"
 
 UCLASS(Blueprintable)

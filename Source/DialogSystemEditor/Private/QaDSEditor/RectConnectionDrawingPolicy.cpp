@@ -1,5 +1,3 @@
-#include "DialogSystemEditor.h"
-#include "GraphEditor.h"
 #include "SGraphNode.h"
 #include "Runtime/SlateCore/Public/Rendering/DrawElements.h"
 #include "RectConnectionDrawingPolicy.h"

@@ -1,4 +1,3 @@
-#include "DialogSystemEditor.h"
 #include "QuestEditorNodeFactory.h"
 #include "QuestSGraphNodes.h"
 #include "QuestEditorNodes.h"

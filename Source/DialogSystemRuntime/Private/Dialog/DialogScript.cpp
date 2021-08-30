@@ -1,4 +1,3 @@
-#include "DialogSystemRuntime.h"
 #include "DialogProcessor.h"
 #include "DialogScript.h"
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "UObject/NoExportTypes.h"
 #include "QaDSSettings.generated.h"
 
 UCLASS(config = Engine, defaultconfig)

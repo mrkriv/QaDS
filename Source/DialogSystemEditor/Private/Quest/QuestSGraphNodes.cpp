@@ -1,12 +1,4 @@
-#include "DialogSystemEditor.h"
-#include "GraphEditor.h"
-#include "SInlineEditableTextBlock.h"
-#include "AssetThumbnail.h"
-#include "AssetRegistryModule.h"
 #include "SNumericEntryBox.h"
-#include "GraphEditor.h"
-#include "BrushSet.h"
-#include "Runtime/Slate/Public/Widgets/Layout/SBox.h"
 #include "QuestSGraphNodes.h"
 #include "QuestEditorNodes.h"
 

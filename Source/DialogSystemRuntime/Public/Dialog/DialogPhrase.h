@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Engine.h"
-#include "Engine/EngineTypes.h"
-#include "UObject/NoExportTypes.h"
 #include "Runtime/Engine/Classes/Sound/SoundBase.h"
 #include "DialogPhraseEvent.h"
 #include "DialogPhrase.generated.h"

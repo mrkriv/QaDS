@@ -1,17 +1,13 @@
-#include "DialogSystemEditor.h"
 #include "QuestEditorNodes.h"
 #include "EdGraph/EdGraph.h"
 #include "EdGraph/EdGraphPin.h"
-#include "GraphEditorSettings.h"
 #include "GenericCommands.h"
 #include "GraphEditorActions.h"
-#include "RectConnectionDrawingPolicy.h"
 #include "QuestGraphSchema.h"
 
 #include "DialogEditorNodes.h"
 #include "QaDSGraphSchema.h"
 #include "Developer/ToolMenus/Public/ToolMenuSection.h"
-#include "QuestEditorNodes.h"
 #include "ToolMenu.h"
 
 #define LOCTEXT_NAMESPACE "FQuestSystemModule"

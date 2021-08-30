@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SGraphNode.h"
-#include "AssetThumbnail.h"
 #include "SGraphPin.h"
 
 //PineNode....................................................................................
